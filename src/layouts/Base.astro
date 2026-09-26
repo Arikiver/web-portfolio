@@ -3,6 +3,7 @@ import '@fontsource-variable/inter';
 import '@fontsource/space-grotesk/500.css';
 import '@fontsource/space-grotesk/700.css';
 import '../styles/global.css';
+import AmbientField from '../components/AmbientField.astro';
 import { getImage } from 'astro:assets';
 import { profile } from '../data/portfolio';
 import { image, isGif } from '../lib/images';
@@ -61,6 +62,10 @@ const year = new Date().getFullYear();
     </script>
   </head>
   <body>
+    <!-- Player 1, press: ↑ ↑ ↓ ↓ ← → ← → B A -->
+    <div class="crt-frame">
+    <div class="screen">
+    <AmbientField />
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="container header-inner">
@@ -71,6 +76,10 @@ const year = new Date().getFullYear();
           </ul>
           <a class="btn btn-primary btn-sm" href={resumeHref} download>Résumé</a>
         </nav>
+        <button type="button" class="sfx-toggle" aria-pressed="false" aria-label="Sound effects" title="Sound effects" data-sfx-silent>
+          <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="sfx-label" aria-hidden="true">SFX</span>
+        </button>
         <details class="nav-mobile">
           <summary aria-label="Menu">
             <span class="burger" aria-hidden="true"></span>
@@ -97,11 +106,65 @@ const year = new Date().getFullYear();
           <li><a href={resumeHref} download>Résumé</a></li>
         </ul>
         <p class="muted">© {year} {profile.name}</p>
+        <p class="insert-coin">
+          <span class="coin" aria-hidden="true"></span>
+          <span class="blink">INSERT COIN</span>
+          <span class="code code-keys">↑↑↓↓←→←→ B A</span>
+          <span class="code code-touch">swipe ↑↑↓↓←→←→ · tap tap</span>
+        </p>
       </div>
     </footer>
+    </div>
+    <div class="crt-glass" aria-hidden="true"></div>
+    </div>
+    <canvas class="crt-lines" aria-hidden="true"></canvas>
+
+    <svg class="crt-defs" aria-hidden="true" focusable="false" width="0" height="0">
+      <filter id="crt-lens" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+        <feImage x="0" y="0" width="100" height="100" preserveAspectRatio="none" result="map"></feImage>
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="0" xChannelSelector="R" yChannelSelector="G" result="dr"></feDisplacementMap>
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="0" xChannelSelector="R" yChannelSelector="G" result="dg"></feDisplacementMap>
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="0" xChannelSelector="R" yChannelSelector="G" result="db"></feDisplacementMap>
+        <feColorMatrix in="dr" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"></feColorMatrix>
+        <feColorMatrix in="dg" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"></feColorMatrix>
+        <feColorMatrix in="db" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"></feColorMatrix>
+        <feBlend in="r" in2="g" mode="screen" result="rg"></feBlend>
+        <feBlend in="rg" in2="b" mode="screen" result="rgb"></feBlend>
+        <feGaussianBlur in="rgb" stdDeviation="2.5" result="glow"></feGaussianBlur>
+        <feComposite in="rgb" in2="glow" operator="arithmetic" k1="0" k2="1" k3="0.4" k4="0"></feComposite>
+      </filter>
+      <!-- Lighter fallback when the device can't keep up: one displacement, fixed channel offsets. -->
+      <filter id="crt-lens-lite" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+        <feImage x="0" y="0" width="100" height="100" preserveAspectRatio="none" result="map"></feImage>
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="0" xChannelSelector="R" yChannelSelector="G" result="d"></feDisplacementMap>
+        <feOffset in="d" dx="1.5" result="dr"></feOffset>
+        <feOffset in="d" dx="-1.5" result="db"></feOffset>
+        <feColorMatrix in="dr" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"></feColorMatrix>
+        <feColorMatrix in="d" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"></feColorMatrix>
+        <feColorMatrix in="db" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"></feColorMatrix>
+        <feBlend in="r" in2="g" mode="screen" result="rg"></feBlend>
+        <feBlend in="rg" in2="b" mode="screen"></feBlend>
+      </filter>
+    </svg>
+
+    <div class="konami-hud" aria-hidden="true">
+      <span>↑</span><span>↑</span><span>↓</span><span>↓</span><span>←</span><span>→</span><span>←</span><span>→</span><span>B</span><span>A</span>
+    </div>
+    <button type="button" class="crt-exit" hidden>⏻ Exit CRT <kbd>Esc</kbd></button>
 
     <script>
       import '../scripts/fx';
+      import '../scripts/crt';
+      import { play, setSfx, sfxEnabled } from '../scripts/sfx';
+
+      const sfxBtn = document.querySelector<HTMLButtonElement>('.sfx-toggle')!;
+      const syncSfx = () => sfxBtn.setAttribute('aria-pressed', String(sfxEnabled()));
+      sfxBtn.addEventListener('click', () => {
+        setSfx(!sfxEnabled());
+        syncSfx();
+        play('toggle');
+      });
+      syncSfx();
     </script>
     <script>
       // Close the mobile menu after choosing a link (same-page anchors don't reload).
@@ -153,7 +216,7 @@ const year = new Date().getFullYear();
       transform-origin: 0 50%;
       animation: read-progress linear both;
       animation-duration: auto;
-      animation-timeline: scroll(root);
+      animation-timeline: scroll(nearest);
     }
 
     @keyframes read-progress {
@@ -169,12 +232,12 @@ const year = new Date().getFullYear();
   .header-inner {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    gap: 0.75rem;
     min-height: 64px;
   }
 
   .brand {
+    margin-right: auto;
     font-family: var(--font-head);
     font-weight: 700;
     font-size: 1.1rem;
@@ -193,6 +256,36 @@ const year = new Date().getFullYear();
     background: var(--accent);
     box-shadow: 0 0 10px rgb(245 165 36 / 0.8);
     transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+    animation: pixel-glitch 9s steps(1) infinite;
+  }
+
+  /* A stuck pixel that glitches now and then: a nudge towards the CRT easter egg. */
+  @keyframes pixel-glitch {
+    0%,
+    95%,
+    100% {
+      translate: 0 0;
+      opacity: 1;
+    }
+    95.6% {
+      translate: 3px -2px;
+      opacity: 0.35;
+      background: #3de0ff;
+    }
+    96.2% {
+      translate: -2px 1px;
+      background: #ff3d6e;
+    }
+    96.8% {
+      translate: 1px 0;
+      opacity: 0.6;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brand::before {
+      animation: none;
+    }
   }
 
   .brand:hover::before {
@@ -247,6 +340,7 @@ const year = new Date().getFullYear();
     display: none;
     align-items: center;
     gap: 1.75rem;
+    margin-right: 0.25rem;
   }
 
   .nav-desktop ul {

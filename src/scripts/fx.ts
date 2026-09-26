@@ -1,5 +1,6 @@
 // Page-wide motion: scroll reveals, eyebrow text decode, card tilt + spotlight, header state and a
-// small easter egg. Everything is progressive: without JS (or with reduced motion) content is static.
+// few hints for the CRT easter egg (see crt.ts). Everything is progressive: without JS (or with
+// reduced motion) content is static.
 
 const root = document.documentElement;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -48,7 +49,8 @@ if (reduced || !('IntersectionObserver' in window)) {
 
 /* ---------- Eyebrow decode (text scrambles into place) ---------- */
 
-const GLYPHS = '█▓▒░<>/\\_#*+=ABCDEFGHJKLMNPRSTUVWXYZ0123456789';
+// Arrows, B and A turn up more often than chance would suggest.
+const GLYPHS = '█▓▒░<>/_#*+=↑↑↓↓←→←→BABABAKLMNPRSTUVWXYZ0123456789';
 
 function decode(el: HTMLElement) {
   if (el.dataset.decoded) return;
@@ -107,23 +109,9 @@ if (!reduced && matchMedia('(hover: hover) and (pointer: fine)').matches) {
 /* ---------- Header state ---------- */
 
 const header = document.querySelector('.site-header');
-const onScroll = () => header?.classList.toggle('is-scrolled', scrollY > 8);
+const tube = document.querySelector<HTMLElement>('.screen');
+// In CRT mode the page scrolls inside .screen instead of the window.
+const onScroll = () => header?.classList.toggle('is-scrolled', Math.max(scrollY, tube?.scrollTop ?? 0) > 8);
 addEventListener('scroll', onScroll, { passive: true });
+tube?.addEventListener('scroll', onScroll, { passive: true });
 onScroll();
-
-/* ---------- ↑↑↓↓←→←→BA: CRT mode ---------- */
-
-const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-let step = 0;
-addEventListener('keydown', (e) => {
-  step = e.key.toLowerCase() === KONAMI[step].toLowerCase() ? step + 1 : e.key === KONAMI[0] ? 1 : 0;
-  if (step < KONAMI.length) return;
-  step = 0;
-  const on = root.classList.toggle('crt');
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.setAttribute('role', 'status');
-  toast.textContent = on ? 'CRT mode: ON' : 'CRT mode: OFF';
-  document.body.append(toast);
-  setTimeout(() => toast.remove(), 2200);
-});
