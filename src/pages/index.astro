@@ -281,19 +281,18 @@ const otherImages = new Map(
 
   .grid-more {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+  }
+
+  @media (min-width: 560px) {
+    .grid-more {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   @media (min-width: 720px) {
     .grid-more {
       grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  @media (max-width: 400px) {
-    .grid-more {
-      gap: 0.6rem;
     }
   }
 
@@ -457,6 +456,10 @@ const otherImages = new Map(
 
   .skill-group .chip {
     color: var(--text);
+  }
+
+  .other-grid {
+    align-items: start;
   }
 
   .other {

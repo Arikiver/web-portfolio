@@ -13,7 +13,7 @@ const chips = project.meta.slice(0, size === 'large' ? 3 : 2);
 const sizes =
   size === 'large'
     ? '(min-width: 1184px) 552px, (min-width: 720px) calc(50vw - 44px), calc(100vw - 32px)'
-    : '(min-width: 1184px) 264px, (min-width: 720px) calc(25vw - 40px), calc(50vw - 24px)';
+    : '(min-width: 1184px) 264px, (min-width: 720px) calc(25vw - 40px), (min-width: 560px) calc(50vw - 40px), 112px';
 ---
 
 <article class:list={['card', 'card-link', 'project-card', `project-card-${size}`]}>
@@ -76,5 +76,18 @@ const sizes =
 
   .project-card-small .chip {
     font-size: 0.72rem;
+  }
+
+  /* Phones: small cards become compact rows (art left, text right). */
+  @media (max-width: 559px) {
+    .project-card-small {
+      flex-direction: row;
+    }
+
+    .project-card-small :global(.cover) {
+      flex: 0 0 112px;
+      aspect-ratio: auto;
+      min-height: 112px;
+    }
   }
 </style>
