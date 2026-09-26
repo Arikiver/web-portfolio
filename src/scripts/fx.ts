@@ -43,7 +43,11 @@ if (reduced || !('IntersectionObserver' in window)) {
     { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
   );
   document.querySelectorAll(REVEAL).forEach((el) => io.observe(el));
-  document.querySelectorAll<HTMLElement>('[data-decode]').forEach((el) => setTimeout(() => decode(el), 250));
+  // Hero labels decode once the page is on screen (after the boot screen, if one is showing).
+  const decodeHero = () =>
+    document.querySelectorAll<HTMLElement>('[data-decode]').forEach((el) => setTimeout(() => decode(el), 250));
+  if (root.classList.contains('booting')) document.addEventListener('boot:done', decodeHero, { once: true });
+  else decodeHero();
   root.classList.add('fx-ready');
 }
 

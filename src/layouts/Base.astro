@@ -4,6 +4,7 @@ import '@fontsource/space-grotesk/500.css';
 import '@fontsource/space-grotesk/700.css';
 import '../styles/global.css';
 import AmbientField from '../components/AmbientField.astro';
+import BootSequence from '../components/BootSequence.astro';
 import { getImage } from 'astro:assets';
 import { profile } from '../data/portfolio';
 import { image, isGif } from '../lib/images';
@@ -58,11 +59,21 @@ const year = new Date().getFullYear();
         const r = document.documentElement;
         r.classList.add('fx');
         setTimeout(() => r.classList.contains('fx-ready') || r.classList.remove('fx'), 2500);
+        // First visit this session: show the boot screen (BootSequence.astro). Fail open after 6 s.
+        let booted = true;
+        try {
+          booted = sessionStorage.getItem('booted') === '1';
+        } catch {}
+        if (!booted) {
+          r.classList.add('booting');
+          setTimeout(() => r.classList.remove('booting'), 6000);
+        }
       }
     </script>
   </head>
   <body>
     <!-- Player 1, press: ↑ ↑ ↓ ↓ ← → ← → B A -->
+    <BootSequence />
     <div class="crt-frame">
     <div class="screen">
     <AmbientField />
