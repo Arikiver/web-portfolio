@@ -35,7 +35,7 @@ const shots = await Promise.all(
   }
 </ul>
 
-<dialog class="lightbox" aria-label="Screenshot viewer">
+<dialog class="lightbox" aria-label="Screenshot viewer" data-sfx-silent>
   <img src="" alt="" />
   <div class="controls">
     <button type="button" class="btn" data-step="-1" aria-label="Previous screenshot">←</button>
@@ -46,6 +46,8 @@ const shots = await Promise.all(
 </dialog>
 
 <script>
+  import { play } from '../scripts/sfx';
+
   const dialog = document.querySelector<HTMLDialogElement>('dialog.lightbox');
   const thumbs = [...document.querySelectorAll<HTMLButtonElement>('.gallery .thumb')];
   if (dialog && thumbs.length) {
@@ -66,10 +68,14 @@ const shots = await Promise.all(
       t.addEventListener('click', () => {
         show(i);
         dialog.showModal();
+        play('open');
       }),
     );
     dialog.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
-      b.addEventListener('click', () => show(current + Number(b.dataset.step))),
+      b.addEventListener('click', () => {
+        show(current + Number(b.dataset.step));
+        play('step');
+      }),
     );
     dialog.querySelector('.close')!.addEventListener('click', () => dialog.close());
     // Click on the backdrop closes.
@@ -77,10 +83,16 @@ const shots = await Promise.all(
       if (e.target === dialog) dialog.close();
     });
     dialog.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') show(current - 1);
-      if (e.key === 'ArrowRight') show(current + 1);
+      const step = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0;
+      if (step) {
+        show(current + step);
+        play('step');
+      }
     });
-    dialog.addEventListener('close', () => thumbs[current].focus());
+    dialog.addEventListener('close', () => {
+      play('close');
+      thumbs[current].focus();
+    });
   }
 </script>
 

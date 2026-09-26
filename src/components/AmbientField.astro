@@ -1,0 +1,151 @@
+---
+// Page-wide background below the hero: an fbm fog field quantised through a 4x4 Bayer matrix into
+// chunky pixels (ordered dithering, as on old hardware). It drifts, parallaxes with scroll, and a
+// soft amber "flashlight" under the pointer reveals more of it. Very low intensity by design.
+---
+
+<canvas class="ambient-field" aria-hidden="true"></canvas>
+
+<script>
+  import { NOISE_GLSL, fullscreenProgram } from '../scripts/gl';
+
+  const PIXEL = 3; // CSS px per dither pixel
+
+  const FRAG = `
+precision mediump float;
+uniform vec2 u_res;
+uniform float u_time;
+uniform float u_scroll;
+uniform vec2 u_light;
+uniform float u_lightOn;
+
+${NOISE_GLSL}
+
+float bayer2(vec2 a) {
+  a = floor(a);
+  return fract(a.x / 2.0 + a.y * a.y * 0.75);
+}
+float bayer4(vec2 a) { return bayer2(0.5 * a) * 0.25 + bayer2(a); }
+
+void main() {
+  vec2 px = gl_FragCoord.xy;
+  // World position: content scrolls up, the field follows at 35% for depth.
+  vec2 world = vec2(px.x, px.y - u_scroll * 0.35);
+  float t = u_time * 0.025;
+
+  vec2 p = world / 110.0;
+  vec2 warp = vec2(fbm(p + vec2(t, -t * 0.6)), fbm(p + vec2(4.1, 2.3) - t));
+  float field = fbm(p * 0.9 + warp * 1.4 + vec2(0.0, t * 0.5));
+  field = smoothstep(0.42, 0.92, field);
+
+  float d = length(px - u_light);
+  float light = exp(-d / 70.0) * u_lightOn;
+
+  float level = field * 0.32 + light * 0.55;
+  float dot = step(bayer4(px), level);
+
+  vec3 cool = vec3(0.42, 0.4, 0.62);
+  vec3 warm = vec3(0.96, 0.64, 0.14);
+  vec3 col = mix(cool, warm, clamp(light * 1.6 + field * 0.15, 0.0, 1.0));
+  float alpha = dot * (0.1 + light * 0.45);
+  gl_FragColor = vec4(col * alpha, alpha); // premultiplied
+}
+`;
+
+  const canvas = document.querySelector<HTMLCanvasElement>('canvas.ambient-field');
+  const gl = canvas?.getContext('webgl', { antialias: false, premultipliedAlpha: true, powerPreference: 'low-power' });
+
+  if (canvas && gl) {
+    const fx = fullscreenProgram(gl, FRAG);
+    const u = {
+      res: fx.uniform('u_res'),
+      time: fx.uniform('u_time'),
+      scroll: fx.uniform('u_scroll'),
+      light: fx.uniform('u_light'),
+      lightOn: fx.uniform('u_lightOn'),
+    };
+    gl.clearColor(0, 0, 0, 0);
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    const root = document.documentElement;
+    const screen = document.querySelector<HTMLElement>('.screen');
+    const scrollPos = () => (root.classList.contains('crt') && screen ? screen.scrollTop : scrollY);
+
+    const resize = () => {
+      canvas.width = Math.ceil(innerWidth / PIXEL);
+      canvas.height = Math.ceil(innerHeight / PIXEL);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      draw();
+    };
+
+    let time = 20;
+    let pointer: { x: number; y: number } | null = null;
+    let light = { x: innerWidth * 0.7, y: innerHeight * 0.4 };
+    let lightOn = 0;
+    addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'mouse') pointer = { x: e.clientX, y: e.clientY };
+    });
+    document.addEventListener('pointerleave', () => (pointer = null));
+
+    function draw() {
+      gl!.clear(gl!.COLOR_BUFFER_BIT);
+      gl!.uniform2f(u.res, canvas!.width, canvas!.height);
+      gl!.uniform1f(u.time, time);
+      gl!.uniform1f(u.scroll, reduced.matches ? 0 : scrollPos() / PIXEL);
+      gl!.uniform2f(u.light, light.x / PIXEL, (innerHeight - light.y) / PIXEL);
+      gl!.uniform1f(u.lightOn, lightOn);
+      fx.draw();
+    }
+
+    let last = performance.now();
+    let raf = 0;
+    let odd = false;
+    const frame = (now: number) => {
+      raf = requestAnimationFrame(frame);
+      odd = !odd;
+      if (odd) return; // ~30 fps is plenty for a slow field
+      // Inside the CRT lens every repaint re-runs the SVG filter, so drop to ~12 fps there.
+      if (root.classList.contains('crt') && now - last < 80) return;
+      const dt = Math.min((now - last) / 1000, 0.1);
+      last = now;
+      time += dt;
+      const k = 1 - Math.pow(0.001, dt);
+      if (pointer) light = { x: light.x + (pointer.x - light.x) * k, y: light.y + (pointer.y - light.y) * k };
+      else light = { x: innerWidth * (0.5 + 0.35 * Math.sin(time * 0.11)), y: innerHeight * (0.5 + 0.3 * Math.cos(time * 0.07)) };
+      lightOn += ((pointer ? 1 : 0.55) - lightOn) * k;
+      draw();
+    };
+
+    const update = () => {
+      cancelAnimationFrame(raf);
+      if (!reduced.matches && !document.hidden) {
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      } else draw();
+    };
+    document.addEventListener('visibilitychange', update);
+    reduced.addEventListener('change', update);
+    addEventListener('resize', resize);
+    resize();
+    update();
+    canvas.classList.add('is-live');
+  }
+</script>
+
+<style>
+  .ambient-field {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    image-rendering: pixelated;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+  }
+
+  .ambient-field.is-live {
+    opacity: 1;
+  }
+</style>

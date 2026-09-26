@@ -427,62 +427,474 @@ body::after {
   }
 }
 
-/* ---------- Toast + CRT easter egg ---------- */
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: 1.5rem;
-  z-index: 200;
-  translate: -50% 0;
-  padding: 0.6rem 1rem;
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  color: var(--accent);
-  font: 0.85rem var(--font-mono);
-  animation: toast 2.2s ease both;
+/* ---------- CRT mode (see scripts/crt.ts) ---------- */
+.crt-lines,
+.crt-glass,
+.crt-defs {
+  display: none;
 }
 
-@keyframes toast {
-  0% {
+.crt-defs {
+  position: absolute;
+}
+
+html.crt,
+html.crt body {
+  overflow: hidden;
+  background: #000;
+}
+
+.crt .crt-frame {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+  filter: url(#crt-lens);
+}
+
+.crt.crt-lite .crt-frame {
+  filter: url(#crt-lens-lite);
+}
+
+.crt.crt-flat .crt-frame {
+  filter: none;
+}
+
+.crt .screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  outline: none;
+}
+
+.crt .screen::-webkit-scrollbar {
+  display: none;
+}
+
+.crt .crt-glass {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+/* Scanlines sit above the lens, outside the filter, so animating them costs nothing extra. */
+.crt .crt-lines {
+  display: block;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 70;
+  pointer-events: none;
+}
+
+.crt-booting .crt-lines {
+  animation: lines-in 1s both;
+}
+
+@keyframes lines-in {
+  0%,
+  30% {
     opacity: 0;
-    translate: -50% 12px;
   }
-  12%,
-  85% {
+  45% {
     opacity: 1;
-    translate: -50% 0;
+  }
+}
+
+.crt-shutdown .crt-lines {
+  opacity: 0;
+}
+
+/* Anything that animates inside the lens forces the filter to re-run, so idle loops pause. */
+.crt :is(.caret, .fx-dot, .coin, .blink, .bars i),
+.crt .play::before,
+.crt .brand::before,
+.crt .ambient::before {
+  animation: none !important;
+}
+
+/* Tube glass: vignette, curved bezel shadow and a soft reflection. */
+.crt .crt-glass {
+  border-radius: 34px / 26px;
+  background:
+    radial-gradient(ellipse 70% 45% at 28% 14%, rgb(255 255 255 / 0.06), transparent 70%),
+    radial-gradient(ellipse 115% 95% at 50% 50%, transparent 58%, rgb(0 0 0 / 0.6) 100%);
+  box-shadow:
+    inset 0 0 0 2px rgb(0 0 0 / 0.9),
+    inset 0 0 70px 12px rgb(0 0 0 / 0.75);
+}
+
+.crt .crt-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+
+/* Power on: dot → horizontal line → picture, with an over-bright flash. */
+.crt-booting .crt-frame {
+  animation: crt-on 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.crt-booting .crt-glass::after {
+  animation: crt-flash-on 1s ease-out both;
+}
+
+@keyframes crt-on {
+  0% {
+    transform: scale(0.01, 0.003);
+  }
+  18% {
+    transform: scale(1, 0.003);
+  }
+  40% {
+    transform: scale(1, 1.06);
+  }
+  55% {
+    transform: scale(1, 0.97);
+  }
+  70%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes crt-flash-on {
+  0%,
+  22% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
   }
   100% {
     opacity: 0;
   }
 }
 
-.crt body::before {
-  content: '';
+/* Power off: picture collapses to a line, then a dot. */
+.crt-shutdown .crt-frame {
+  animation: crt-off 0.5s cubic-bezier(0.6, 0, 0.9, 0.4) both;
+}
+
+.crt-shutdown .crt-glass::after {
+  animation: crt-flash-off 0.5s ease-in both;
+}
+
+@keyframes crt-off {
+  0% {
+    transform: none;
+  }
+  45% {
+    transform: scale(1, 0.004);
+  }
+  80% {
+    transform: scale(0.004, 0.004);
+  }
+  100% {
+    transform: scale(0, 0);
+  }
+}
+
+@keyframes crt-flash-off {
+  0% {
+    opacity: 0;
+  }
+  40%,
+  100% {
+    opacity: 1;
+  }
+}
+
+.crt-returning .screen {
+  animation: crt-return 0.6s ease both;
+}
+
+@keyframes crt-return {
+  from {
+    opacity: 0;
+  }
+}
+
+.crt-exit:not([hidden]) {
   position: fixed;
-  inset: 0;
-  z-index: 95;
+  left: 16px;
+  bottom: 16px;
+  z-index: 150;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: rgb(11 11 15 / 0.85);
+  color: var(--accent);
+  font: 600 0.75rem var(--font-mono);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.crt-exit kbd {
+  font: inherit;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+}
+
+/* Cheat-code progress: appears after two correct inputs. */
+.konami-hud {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 150;
+  display: flex;
+  gap: 2px;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgb(11 11 15 / 0.88);
+  backdrop-filter: blur(6px);
+  font: 700 0.85rem var(--font-mono);
+  color: var(--muted);
+  opacity: 0;
+  translate: 0 12px;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.55)),
-    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.3) 0 1px, transparent 1px 3px);
-  animation: crt-flicker 0.12s steps(2) infinite;
+  transition:
+    opacity 0.3s ease,
+    translate 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-.crt body {
-  text-shadow:
-    0.7px 0 rgb(255 40 80 / 0.55),
-    -0.7px 0 rgb(40 200 255 / 0.55);
+.konami-hud.show {
+  opacity: 1;
+  translate: 0 0;
 }
 
-.crt main img {
-  filter: saturate(1.25) contrast(1.08);
+.konami-hud span {
+  width: 1.3em;
+  text-align: center;
+  opacity: 0.3;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease;
 }
 
-@keyframes crt-flicker {
+.konami-hud span.lit {
+  opacity: 1;
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent);
+}
+
+.konami-hud[data-state='done'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 30px -6px rgb(245 165 36 / 0.8);
+}
+
+.konami-hud[data-state='fail'] {
+  animation: hud-shake 0.3s ease;
+}
+
+@keyframes hud-shake {
+  25% {
+    translate: -4px 0;
+  }
+  75% {
+    translate: 4px 0;
+  }
+}
+
+/* Footer hint */
+.insert-coin {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+  margin: 0.5rem 0 0;
+  font: 0.72rem var(--font-mono);
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+}
+
+.insert-coin:hover {
+  opacity: 1;
+}
+
+.coin {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffd27a, var(--accent) 55%, #a86400);
+  box-shadow: 0 0 8px rgb(245 165 36 / 0.6);
+  animation: coin-flip 2.4s ease-in-out infinite;
+}
+
+@keyframes coin-flip {
+  0%,
+  60%,
+  100% {
+    scale: 1 1;
+  }
+  75% {
+    scale: 0.1 1;
+  }
+}
+
+.insert-coin .blink {
+  animation: blink 1.2s steps(2, jump-none) infinite;
+}
+
+@keyframes blink {
   50% {
-    opacity: 0.88;
+    opacity: 0.2;
+  }
+}
+
+.insert-coin .code {
+  display: none;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+}
+
+@media (hover: hover) {
+  .insert-coin .code-keys {
+    display: inline;
+    opacity: 0;
+    translate: -6px 0;
+    transition:
+      opacity 0.3s ease,
+      translate 0.3s ease;
+  }
+
+  .insert-coin:hover .code-keys {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (hover: none) {
+  .insert-coin .code-touch {
+    display: inline;
+  }
+}
+
+/* Sound toggle */
+.sfx-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 0.68rem var(--font-mono);
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.sfx-toggle:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.sfx-toggle[aria-pressed='true'] {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.sfx-toggle .bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.sfx-toggle .bars {
+  position: relative;
+}
+
+.sfx-toggle .bars i {
+  width: 2px;
+  height: 5px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.sfx-toggle .bars i:nth-child(2) {
+  height: 9px;
+}
+
+.sfx-toggle .bars i:nth-child(3) {
+  height: 12px;
+}
+
+.sfx-toggle .bars i:nth-child(4) {
+  height: 7px;
+}
+
+/* Muted: struck through. */
+.sfx-toggle[aria-pressed='false'] .bars::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 50%;
+  height: 1.5px;
+  background: currentColor;
+  rotate: -40deg;
+}
+
+.sfx-toggle[aria-pressed='true'] .bars i {
+  animation: eq 0.9s ease-in-out infinite alternate;
+}
+
+.sfx-toggle .bars i:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.sfx-toggle .bars i:nth-child(3) {
+  animation-delay: -0.6s;
+}
+
+.sfx-toggle .bars i:nth-child(4) {
+  animation-delay: -0.15s;
+}
+
+@keyframes eq {
+  from {
+    height: 3px;
+  }
+  to {
+    height: 12px;
+  }
+}
+
+@media (max-width: 859px) {
+  .sfx-toggle {
+    padding: 0;
+  }
+
+  .sfx-toggle .sfx-label {
+    display: none;
   }
 }
 
@@ -510,5 +922,11 @@ body::after {
 
   .card-link:hover .cover img {
     transform: none;
+  }
+
+  .coin,
+  .insert-coin .blink,
+  .sfx-toggle[aria-pressed='true'] .bars i {
+    animation: none;
   }
 }
