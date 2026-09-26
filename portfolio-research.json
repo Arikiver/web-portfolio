@@ -499,7 +499,7 @@
       "name": "Lucius: The Endless Maze Runner",
       "type": "Personal project (3D game)",
       "dates": "2024 - 2025 (resume date range shared with SlenderAR)",
-      "status": "Unverified — resume says launched on Itch.io, but it is not among the published projects on arikiver.itch.io",
+      "status": "Not released (confirmed by owner)",
       "engine": "Unity (implied by resume context; not explicitly stated for Lucius)",
       "description_resume": "A 3D horror maze runner using a backtracking algorithm for procedural level generation, with enemy AI pathfinding that adapts dynamically to player position through generated mazes.",
       "technical_details": [
@@ -523,11 +523,12 @@
         "resume_gamedev",
         "itch_ref",
         "drive_listing"
-      ]
+      ],
+      "display_note": "Do not describe Lucius as launched or published. The GameDev resume's 'Both launched on Itch.io' applies only to SlenderAR."
     },
     {
       "id": "toniztoz-game",
-      "name": "The Gods They Burried (TONIZTOZ)",
+      "name": "The God They Buried (TONIZTOZ)",
       "type": "Studio/team project",
       "dates": "Mar 2025 - Present",
       "status": "Active development",
@@ -562,7 +563,6 @@
         "owner_instructions",
         "drive_listing"
       ],
-      "name_note": "Title taken from the demo video's filename 'The Gods They Burried Demo'. Confirm the spelling ('Burried' vs 'Buried') and whether this is the official title.",
       "videos": [
         "drive-toniztoz-demo"
       ]
@@ -599,13 +599,16 @@
       "links": [
         {
           "label": "Visual fidelity showcase (Google Drive)",
-          "url": "https://drive.google.com/drive/folders/12yyYrVSGrrs2wPI7EzFRCTH2OgBWxQSk?usp=sharing",
-          "note": "Resume link; a Drive folder. Contents not visible to the research account, so link out rather than embed unless a direct file link is provided."
+          "url": "https://drive.google.com/file/d/1gIUUimRCxfSjxRWRU8nEoRExLu8O3LdW/view?usp=sharing",
+          "note": "Owner-approved public video 'Boop visuals Demo.mp4'."
         },
         {
           "label": "Boop",
           "url": "https://heyboop.ai/"
         }
+      ],
+      "videos": [
+        "drive-boop-visuals"
       ]
     },
     {
@@ -715,14 +718,30 @@
             "GraphQL"
           ],
           "source": "resume_kreo"
+        },
+        {
+          "name": "Himeji Castle - Blender environment",
+          "dates": "Semester 4 of B.Tech (dated files: Nov 2023 - Sep 2024)",
+          "summary": "A creative interpretation of Himeji Castle in front of Mount Fuji, with emitters and wind physics animating sakura petals and camera work for a bokeh effect. Built as a semester-4 project for the Graphics and Gaming degree.",
+          "tech": [
+            "Blender",
+            "Particle emitters",
+            "Wind physics",
+            "Camera depth of field"
+          ],
+          "media": [
+            "img-himeji-render"
+          ],
+          "links": [
+            {
+              "label": "Render and video showcase (Google Drive)",
+              "url": "https://drive.google.com/drive/folders/10Iq7DFO_q4Xh09AojgfRaRQKPMe-KS5c"
+            }
+          ],
+          "source": "owner_instructions; Himeji_Readme.txt in Drive"
         }
       ],
       "candidate_links_pending_owner": [
-        {
-          "label": "Blender: 'japanese fortress Blend' folder",
-          "drive_id": "1ZN10CI_YYrZKU-aC02TMnTXya0QOccVT",
-          "note": "Raw .blend files from 2023-24, no renders. Many material files have UUID-suffixed names typical of downloaded asset-library presets, so they may be third-party. Link only if the owner confirms and ideally adds renders."
-        },
         {
           "label": "GitHub repositories",
           "url": "https://github.com/Arikiver",
@@ -958,6 +977,18 @@
       "planned_path": "images/slenderar-screenshot-05.png",
       "downloaded": false,
       "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "img-himeji-render",
+      "type": "image",
+      "role": "render",
+      "project": "other-work",
+      "path": "images/himeji-castle-render.png",
+      "resolution": "1138x640",
+      "source_url": "https://drive.google.com/file/d/1tUXQs8AXc508KaS0hdqjYsEQ5SJjmakK/view",
+      "downloaded": true,
+      "ownership": "Own work (owner's Drive, owner-supplied folder)",
+      "note": "A larger 'Castle.png' (8 MB, file 19fRjS1-DrJs2DUlLGGoNhTEKCKi-Be6p) also exists; not downloaded."
     }
   ],
   "videos": [
@@ -1015,11 +1046,23 @@
       "id": "drive-toniztoz-demo",
       "project": "toniztoz-game",
       "platform": "Google Drive",
-      "title": "The Gods They Burried Demo",
+      "title": "The God They Buried - Demo",
       "size": "24.8 MB",
       "view_url": "https://drive.google.com/file/d/126qnavgo7vb0iNE021qdISF64UULAAeX/view?usp=sharing",
       "embed_url": "https://drive.google.com/file/d/126qnavgo7vb0iNE021qdISF64UULAAeX/preview",
-      "source": "owner_instructions; file is in the 'My Portfolio' Drive"
+      "source": "owner_instructions; file is in the 'My Portfolio' Drive",
+      "note": "Drive filename reads 'The Gods They Burried Demo'; official title confirmed by owner as 'The God They Buried'."
+    },
+    {
+      "id": "drive-boop-visuals",
+      "project": "boop-client",
+      "platform": "Google Drive",
+      "title": "Boop visuals Demo.mp4",
+      "size": "90 MB",
+      "view_url": "https://drive.google.com/file/d/1gIUUimRCxfSjxRWRU8nEoRExLu8O3LdW/view?usp=sharing",
+      "embed_url": "https://drive.google.com/file/d/1gIUUimRCxfSjxRWRU8nEoRExLu8O3LdW/preview",
+      "source": "owner_instructions",
+      "note": "The only Boop video approved for public use. Showcases visual fidelity work."
     }
   ],
   "external_sources": [
@@ -1073,14 +1116,12 @@
     }
   ],
   "unverified_information": [
-    "Lucius: resume says 'Both launched on Itch.io', but arikiver.itch.io lists only Chalo Yaar! and SlenderAR.",
-    "TONIZTOZ game title and spelling ('The Gods They Burried', from the demo filename); platform not stated anywhere.",
     "TONIZTOZ start: Drive has 'Toniztoz_COC_SummerInternship_page-0001.jpg'; its relation to the 'Mar 2025 - Present' lead role is unclear.",
-    "Boop showcase link is a Drive folder whose contents the research account cannot see; it is unknown whether it holds one video or several files.",
     "2MinWin: which 17+ mini-games were built; 2min.win not inspected.",
     "'3+ years' of experience (GameDev summary): earliest dated professional entry is 2024.",
     "GitHub repositories: none inspected.",
-    "Chalo Yaar team: GDD names a partner (Swarnima) for art; resume and itch page do not."
+    "Chalo Yaar team: GDD names a partner (Swarnima) for art; resume and itch page do not.",
+    "TONIZTOZ game platform is not stated in any source."
   ],
   "conflicts": [
     {
@@ -1135,13 +1176,6 @@
       "note": "GDD is a plan; itch reflects the published build. Use itch/resume for shipped claims."
     },
     {
-      "topic": "Lucius on Itch.io",
-      "versions": {
-        "resume_gamedev": "'Both launched on Itch.io' (Lucius and SlenderAR)",
-        "itch_ref": "Only Chalo Yaar! and SlenderAR are published"
-      }
-    },
-    {
       "topic": "SlenderAR dates",
       "versions": {
         "resume_gamedev": "2024 - 2025 (shared with Lucius)",
@@ -1170,6 +1204,13 @@
     "Removed the project priority ranking (the owner asked not to rank projects).",
     "Added AssistSense and Questify from the Kreo resume, the Chalo Yaar itch page and YouTube trailer, the SlenderAR YouTube video, and the itch download details.",
     "Replaced 'no conflicts' with the conflicts listed above.",
-    "Applied owner decisions: Boop limited to showcase link + heyboop.ai; AR pooled with VR as 'AR & VR Work' with the showreel as cover; casino platform set to web (Unity HTML5 in client site); AssistSense/Questify pooled under 'Other Work'; TONIZTOZ demo video added."
+    "Applied owner decisions: Boop limited to showcase link + heyboop.ai; AR pooled with VR as 'AR & VR Work' with the showreel as cover; casino platform set to web (Unity HTML5 in client site); AssistSense/Questify pooled under 'Other Work'; TONIZTOZ demo video added.",
+    "Added the Boop visuals demo video, confirmed the title 'The God They Buried', marked Lucius as unreleased, and added the Himeji Castle Blender project and render under Other Work."
+  ],
+  "resolved_conflicts": [
+    {
+      "topic": "Lucius on Itch.io",
+      "resolution": "Owner confirmed Lucius was never released. Portfolio treats it as unreleased; the resume sentence 'Both launched on Itch.io' should be reworded."
+    }
   ]
 }
