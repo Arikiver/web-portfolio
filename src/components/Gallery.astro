@@ -1,0 +1,156 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { image } from '../lib/images';
+
+interface Props {
+  items: { file: string; alt: string }[];
+}
+
+const { items } = Astro.props;
+const shots = await Promise.all(
+  items.map(async (item) => {
+    const src = await image(item.file);
+    const full = await getImage({ src, width: Math.min(src.width, 1600), format: 'webp' });
+    return { ...item, src, full: full.src };
+  }),
+);
+---
+
+<ul class="gallery">
+  {
+    shots.map((shot, i) => (
+      <li>
+        <button type="button" class="thumb" data-full={shot.full} data-alt={shot.alt} data-index={i} aria-label={`Enlarge: ${shot.alt}`}>
+          <Image
+            src={shot.src}
+            alt={shot.alt}
+            widths={[400, 700].filter((w) => w <= shot.src.width)}
+            sizes="(min-width: 1184px) 368px, (min-width: 720px) calc(33vw - 32px), calc(100vw - 32px)"
+            format="webp"
+            loading="lazy"
+          />
+        </button>
+      </li>
+    ))
+  }
+</ul>
+
+<dialog class="lightbox" aria-label="Screenshot viewer">
+  <img src="" alt="" />
+  <div class="controls">
+    <button type="button" class="btn" data-step="-1" aria-label="Previous screenshot">←</button>
+    <span class="count" aria-live="polite"></span>
+    <button type="button" class="btn" data-step="1" aria-label="Next screenshot">→</button>
+    <button type="button" class="btn close" aria-label="Close">Close ✕</button>
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.lightbox');
+  const thumbs = [...document.querySelectorAll<HTMLButtonElement>('.gallery .thumb')];
+  if (dialog && thumbs.length) {
+    const img = dialog.querySelector('img')!;
+    const count = dialog.querySelector('.count')!;
+    let current = 0;
+    const show = (i: number) => {
+      current = (i + thumbs.length) % thumbs.length;
+      img.src = thumbs[current].dataset.full!;
+      img.alt = thumbs[current].dataset.alt!;
+      count.textContent = `${current + 1} / ${thumbs.length}`;
+    };
+    thumbs.forEach((t, i) =>
+      t.addEventListener('click', () => {
+        show(i);
+        dialog.showModal();
+      }),
+    );
+    dialog.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
+      b.addEventListener('click', () => show(current + Number(b.dataset.step))),
+    );
+    dialog.querySelector('.close')!.addEventListener('click', () => dialog.close());
+    // Click on the backdrop closes.
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(current - 1);
+      if (e.key === 'ArrowRight') show(current + 1);
+    });
+    dialog.addEventListener('close', () => thumbs[current].focus());
+  }
+</script>
+
+<style>
+  .gallery {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: 0.75rem;
+  }
+
+  .thumb {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--surface-2);
+    cursor: zoom-in;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .thumb:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .thumb img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .lightbox {
+    width: min(1400px, calc(100vw - 2 * var(--gutter)));
+    max-width: none;
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  .lightbox::backdrop {
+    background: rgb(0 0 0 / 0.85);
+  }
+
+  .lightbox img {
+    width: 100%;
+    max-height: calc(100dvh - 7rem);
+    object-fit: contain;
+    background: #000;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .count {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    padding-inline: 0.5rem;
+  }
+
+  .close {
+    margin-left: auto;
+  }
+</style>

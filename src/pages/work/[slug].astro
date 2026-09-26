@@ -1,0 +1,370 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Cover from '../../components/Cover.astro';
+import Gallery from '../../components/Gallery.astro';
+import VideoEmbed from '../../components/VideoEmbed.astro';
+import { profile, projects, type Project } from '../../data/portfolio';
+import { url } from '../../lib/url';
+
+export const getStaticPaths = (() =>
+  projects.map((project, i) => ({
+    params: { slug: project.slug },
+    props: {
+      project,
+      prev: projects[(i - 1 + projects.length) % projects.length],
+      next: projects[(i + 1) % projects.length],
+    },
+  }))) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+  prev: Project;
+  next: Project;
+}
+
+const { project, prev, next } = Astro.props;
+---
+
+<Base title={`${project.title} — ${profile.name}`} description={project.pitch} ogImage={project.cover}>
+  <article class="container project">
+    <a class="back" href={`${url('/')}#work`}>← All work</a>
+
+    <header class="head">
+      <div class="head-text">
+        {project.status && <p class="status">{project.status}</p>}
+        <h1>{project.title}</h1>
+        <p class="pitch">{project.pitch}</p>
+        <dl class="meta">
+          {
+            project.meta.map((m) => (
+              <div class="chip">
+                <dt>{m.label}</dt>
+                <dd>{m.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+      <Cover
+        class="head-cover"
+        file={project.cover}
+        alt={`${project.title} cover art`}
+        sizes="320px"
+        widths={[320, 640]}
+      />
+    </header>
+
+    {
+      project.video && (
+        <section class="block" aria-label="Video">
+          <VideoEmbed video={project.video} poster={project.cover} />
+        </section>
+      )
+    }
+
+    <div class="layout">
+      <div class="main-col">
+        <section class="block">
+          <h2>Overview</h2>
+          {project.overview.map((p) => <p>{p}</p>)}
+        </section>
+
+        {
+          project.role && (
+            <section class="block">
+              <h2>My role</h2>
+              <p>{project.role}</p>
+            </section>
+          )
+        }
+
+        {
+          project.sections.map((s) => (
+            <section class="block">
+              <h2>{s.heading}</h2>
+              <ul class="points">
+                {s.points.map((pt) => (
+                  <li>{pt}</li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+
+      <aside class="side-col">
+        <div class="card side-card">
+          <h2 class="side-title">Stack</h2>
+          <ul class="chips">
+            {project.stack.map((t) => <li class="chip">{t}</li>)}
+          </ul>
+        </div>
+        {
+          project.links.length > 0 && (
+            <div class="card side-card">
+              <h2 class="side-title">Links</h2>
+              <div class="links">
+                {project.links.map((l, i) => (
+                  <a class:list={['btn', { 'btn-primary': i === 0 }]} href={l.url} rel="noopener">
+                    {l.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )
+        }
+        {
+          project.note && (
+            <p class="note" role="note">
+              <span aria-hidden="true">ⓘ</span> {project.note}
+            </p>
+          )
+        }
+      </aside>
+    </div>
+
+    {
+      project.gallery && project.gallery.length > 0 && (
+        <section class="block">
+          <h2>Screenshots</h2>
+          <Gallery items={project.gallery} />
+        </section>
+      )
+    }
+
+    <nav class="pager" aria-label="More projects">
+      <a class="card card-link pager-link" href={url(`/work/${prev.slug}/`)}>
+        <span class="muted">← Previous</span>
+        <span class="pager-title">{prev.title}</span>
+      </a>
+      <a class="card card-link pager-link next" href={url(`/work/${next.slug}/`)}>
+        <span class="muted">Next →</span>
+        <span class="pager-title">{next.title}</span>
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .project {
+    padding-top: 2rem;
+  }
+
+  .back {
+    display: inline-block;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 2rem;
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  .head {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .head :global(.head-cover) {
+    display: none;
+  }
+
+  @media (min-width: 860px) {
+    .head {
+      grid-template-columns: 1fr 320px;
+      gap: 3rem;
+    }
+
+    .head :global(.head-cover) {
+      display: block;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+  }
+
+  .status {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    background: rgb(245 165 36 / 0.08);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 6vw, 3.75rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .pitch {
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    color: var(--muted);
+    max-width: 44rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .meta .chip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .meta dt {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .meta dd {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.82rem;
+  }
+
+  .block {
+    margin-bottom: 2.75rem;
+  }
+
+  .block h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .layout {
+    display: grid;
+    gap: 1rem 3rem;
+  }
+
+  @media (min-width: 860px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr) 320px;
+      align-items: start;
+    }
+
+    .side-col {
+      position: sticky;
+      top: 88px;
+    }
+  }
+
+  .main-col p {
+    max-width: 46rem;
+  }
+
+  .points {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.7rem;
+    max-width: 46rem;
+  }
+
+  .points li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .points li::before {
+    content: '';
+    position: absolute;
+    left: 0.15rem;
+    top: 0.62em;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    transform: rotate(45deg);
+  }
+
+  .side-col {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2.75rem;
+  }
+
+  .side-card {
+    padding: 1.25rem;
+  }
+
+  .side-title {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.9rem;
+  }
+
+  .links {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .links .btn {
+    text-align: center;
+    border-radius: var(--radius-sm);
+  }
+
+  .note {
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1.1rem 1.25rem;
+    text-decoration: none;
+    color: var(--text);
+    min-width: 0;
+  }
+
+  .pager-link.next {
+    text-align: right;
+  }
+
+  .pager-link .muted {
+    font-size: 0.85rem;
+  }
+
+  .pager-title {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    overflow-wrap: anywhere;
+  }
+
+  .pager-link:hover .pager-title {
+    color: var(--accent);
+  }
+</style>
