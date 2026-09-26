@@ -3,7 +3,8 @@
 // separate displacement scales per colour channel (radial chromatic aberration) and phosphor bloom.
 // A 2D canvas on top draws rolling scanlines, a refresh band, flicker and static.
 
-import { play } from './sfx';
+import { BARREL, syncInput } from './crt-input';
+import { play, setCrtHum } from './sfx';
 
 const root = document.documentElement;
 const screen = document.querySelector<HTMLElement>('.screen')!;
@@ -17,7 +18,6 @@ const exitBtn = document.querySelector<HTMLButtonElement>('.crt-exit')!;
 const hud = document.querySelector<HTMLElement>('.konami-hud')!;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const BARREL = 0.075; // lens strength
 const CA = [1.035, 1, 0.965]; // R, G, B displacement scale multipliers
 
 /* ---------- Lens map ---------- */
@@ -78,6 +78,7 @@ function setQuality(q: number) {
   bloomMix?.setAttribute('k3', q >= 1 ? '0' : '0.4');
   root.classList.toggle('crt-lite', q === 2);
   root.classList.toggle('crt-flat', q >= 3);
+  syncInput(); // no lens at level 3, so no input correction either
   try {
     sessionStorage.setItem('crt-q', String(q));
   } catch {
@@ -144,6 +145,8 @@ function drawLines(now: number) {
   lctx.globalAlpha = 0.03 + Math.random() * 0.04;
   lctx.fillRect(0, 0, w, h);
 
+  drawNoise(w, h, dt);
+
   // Static: a sprinkle normally, a storm while powering on.
   burst = Math.max(0, burst - dt * 1.4);
   const specks = 40 + burst * 2600;
@@ -151,6 +154,53 @@ function drawLines(now: number) {
   for (let s = 0; s < specks; s++) {
     lctx.globalAlpha = Math.random() * (0.08 + burst * 0.5);
     lctx.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 2, 1);
+  }
+  lctx.globalAlpha = 1;
+}
+
+/* ---------- Picture noise ----------
+ * Fine grain over the whole tube: a few pre-rendered noise tiles, one picked per frame at a random
+ * offset (cheap, never repeats visibly), plus a faint band of interference that drifts through. */
+
+const GRAIN_TILES = Array.from({ length: 4 }, () => {
+  const t = document.createElement('canvas');
+  t.width = t.height = 160;
+  const g = t.getContext('2d')!;
+  const img = g.createImageData(160, 160);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = Math.random() * 255;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    img.data[i + 3] = Math.random() < 0.5 ? 255 : 0;
+  }
+  g.putImageData(img, 0, 0);
+  return lctx.createPattern(t, 'repeat')!;
+});
+
+let interference = -1; // y position of the interference band, -1 when idle
+
+function drawNoise(w: number, h: number, dt: number) {
+  const pattern = GRAIN_TILES[(Math.random() * GRAIN_TILES.length) | 0];
+  lctx.save();
+  lctx.translate(Math.random() * 160, Math.random() * 160);
+  lctx.globalAlpha = 0.055;
+  lctx.fillStyle = pattern;
+  lctx.fillRect(-160, -160, w + 160, h + 160);
+  lctx.restore();
+
+  if (interference < 0 && Math.random() < dt / 7) interference = -60; // roughly every 7 s
+  if (interference >= -60) {
+    interference += dt * 260;
+    const bandH = 34;
+    lctx.save();
+    lctx.beginPath();
+    lctx.rect(0, interference, w, bandH);
+    lctx.clip();
+    lctx.translate(Math.random() * 160, Math.random() * 160);
+    lctx.globalAlpha = 0.09;
+    lctx.fillStyle = GRAIN_TILES[(Math.random() * GRAIN_TILES.length) | 0];
+    lctx.fillRect(-160, interference - 160, w + 160, bandH + 320);
+    lctx.restore();
+    if (interference > h) interference = -1;
   }
   lctx.globalAlpha = 1;
 }
@@ -172,6 +222,7 @@ function enter(animate: boolean) {
   setQuality(readQuality());
   probe = [];
   root.classList.add('crt');
+  syncInput();
   screen.scrollTop = y;
   screen.tabIndex = -1; // lets arrow keys / PageDown scroll the tube
   screen.focus({ preventScroll: true });
@@ -186,14 +237,17 @@ function enter(animate: boolean) {
     setTimeout(() => root.classList.remove('crt-booting'), 1100);
   }
   play('crtOn');
+  setCrtHum(true);
 }
 
 function exit() {
   play('crtOff');
+  setCrtHum(false);
   store(false);
   const finish = () => {
     const y = screen.scrollTop;
     root.classList.remove('crt', 'crt-shutdown');
+    syncInput();
     screen.removeAttribute('tabindex');
     cancelAnimationFrame(raf);
     exitBtn.hidden = true;
@@ -203,6 +257,7 @@ function exit() {
   };
   if (reduced) return finish();
   root.classList.add('crt-shutdown');
+  syncInput();
   setTimeout(finish, 520);
 }
 

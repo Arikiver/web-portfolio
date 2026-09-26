@@ -39,6 +39,7 @@ export function setSfx(on: boolean) {
   }
   if (on) ensure();
   document.documentElement.classList.toggle('sfx-on', on);
+  syncHum();
 }
 
 function ensure() {
@@ -146,6 +147,113 @@ export function play(sound: Sound, step = 0) {
       tone('square', 990, 990, 0.08, 0.03, 0.07);
       break;
   }
+}
+
+/* ---------- CRT ambience ----------
+ * A quiet looping bed while CRT mode is on: mains hum, a faint flyback whine, hiss that breathes,
+ * and the odd crackle. Runs only when both CRT mode and SFX are on. */
+
+let humWanted = false;
+let hum: { out: GainNode; stop: () => void } | null = null;
+
+export function setCrtHum(on: boolean) {
+  humWanted = on;
+  syncHum();
+}
+
+function syncHum() {
+  const want = humWanted && enabled && !document.hidden;
+  if (want && !hum && ensure()) hum = startHum();
+  else if (!want && hum) {
+    const h = hum;
+    hum = null;
+    const t = ctx!.currentTime;
+    h.out.gain.cancelScheduledValues(t);
+    h.out.gain.setValueAtTime(h.out.gain.value, t);
+    h.out.gain.linearRampToValueAtTime(0, t + 0.25);
+    setTimeout(h.stop, 350);
+  }
+}
+
+document.addEventListener('visibilitychange', syncHum);
+
+function startHum() {
+  const c = ctx!;
+  const t = c.currentTime;
+  const out = c.createGain();
+  out.gain.setValueAtTime(0, t);
+  out.gain.linearRampToValueAtTime(1, t + 1.5);
+  out.connect(master!);
+  const nodes: AudioScheduledSourceNode[] = [];
+
+  const osc = (type: OscillatorType, freq: number, gain: number, through?: AudioNode) => {
+    const o = c.createOscillator();
+    o.type = type;
+    o.frequency.value = freq;
+    const g = c.createGain();
+    g.gain.value = gain;
+    o.connect(g).connect(through ?? out);
+    o.start();
+    nodes.push(o);
+    return o;
+  };
+
+  // Mains hum: buzzy fundamental, softened, plus its second harmonic.
+  const humFilter = c.createBiquadFilter();
+  humFilter.type = 'lowpass';
+  humFilter.frequency.value = 320;
+  humFilter.connect(out);
+  osc('sawtooth', 50, 0.02, humFilter);
+  osc('sine', 100, 0.008);
+
+  // Flyback whine with a slow wobble.
+  const whine = osc('sine', 11500, 0.0022);
+  const lfo = c.createOscillator();
+  lfo.frequency.value = 0.3;
+  const lfoDepth = c.createGain();
+  lfoDepth.gain.value = 18; // ±18 Hz
+  lfo.connect(lfoDepth).connect(whine.frequency);
+  lfo.start();
+  nodes.push(lfo);
+
+  // Hiss: band-passed noise whose level slowly swells and fades.
+  const hiss = c.createBufferSource();
+  hiss.buffer = noiseBuf;
+  hiss.loop = true;
+  const band = c.createBiquadFilter();
+  band.type = 'bandpass';
+  band.frequency.value = 4200;
+  band.Q.value = 0.6;
+  const hissGain = c.createGain();
+  hissGain.gain.value = 0.009;
+  hiss.connect(band).connect(hissGain).connect(out);
+  hiss.start(t, Math.random());
+  nodes.push(hiss);
+  const breathe = c.createOscillator();
+  breathe.frequency.value = 0.13;
+  const breatheDepth = c.createGain();
+  breatheDepth.gain.value = 0.004;
+  breathe.connect(breatheDepth).connect(hissGain.gain);
+  breathe.start();
+  nodes.push(breathe);
+
+  // Occasional crackle.
+  let timer = 0;
+  const crackle = () => {
+    if (!hum) return;
+    noise(0.02 + Math.random() * 0.04, 0.01 + Math.random() * 0.025, 'highpass', 2500, 5000);
+    timer = window.setTimeout(crackle, 400 + Math.random() * 2600);
+  };
+  timer = window.setTimeout(crackle, 1500);
+
+  return {
+    out,
+    stop: () => {
+      clearTimeout(timer);
+      nodes.forEach((n) => n.stop());
+      out.disconnect();
+    },
+  };
 }
 
 /* Global hover/click sounds for interactive elements. */
