@@ -1,0 +1,608 @@
+{
+  "profile": {
+    "name": "Aaradhya Bhatiya",
+    "title": "Unity Developer | Technical Artist",
+    "location": "Indore, India",
+    "phone": "+91 73899 77836",
+    "email": "bhatiyaaaradhya@gmail.com",
+    "years_of_experience": "3+",
+    "graduation_year": 2026,
+    "specialization": "Gaming and Graphics"
+  },
+  "external_links": {
+    "linkedin": "https://linkedin.com/in/aaradhya-bhatiya",
+    "github": "https://github.com/Arikiver",
+    "itch_io": "https://itch.io/profile/arikiver",
+    "portfolio": "https://arikiver.dev"
+  },
+  "education": {
+    "degree": "B.Tech Computer Science and Engineering",
+    "specialization": "Gaming and Graphics",
+    "university": "UPES, Dehradun",
+    "cgpa": "7.78",
+    "graduation": "2026",
+    "relevant_coursework": [
+      "Data Structures and Algorithms",
+      "Operating Systems",
+      "Computer Networks",
+      "Object-Oriented Programming",
+      "Software Engineering",
+      "Computer Graphics",
+      "Android Development"
+    ]
+  },
+  "skills": {
+    "languages": [
+      "C#",
+      "C/C++",
+      "HLSL",
+      "GML",
+      "Python",
+      "JavaScript",
+      "SQL",
+      "HTML/CSS"
+    ],
+    "engines_graphics": [
+      "Unity 3D/2D (URP)",
+      "GameMaker Studio",
+      "Custom HLSL shaders",
+      "Shader Graph",
+      "OpenGL 3.3",
+      "WebGL",
+      "Real-time VFX",
+      "Planar reflections",
+      "Procedural generation",
+      "Profiling and optimization"
+    ],
+    "gameplay_systems": [
+      "Behaviour and state architecture",
+      "Animation systems and state machines",
+      "Character controllers",
+      "Rigidbody physics",
+      "AI pathfinding",
+      "Netcode for GameObjects",
+      "Custom editor tooling"
+    ],
+    "pipeline_tools": [
+      "Android and iOS builds",
+      "Play Store submission",
+      "IronSource ad mediation",
+      "Native plugins (Objective-C, Java/JNI)",
+      "Cross-device QA",
+      "Blender",
+      "Aseprite",
+      "Figma",
+      "Pixel art",
+      "Git/GitHub",
+      "JIRA",
+      "Asana"
+    ]
+  },
+  "experience": [
+    {
+      "title": "Unity Developer",
+      "company": "Boop",
+      "type": "Contract/Remote",
+      "start_date": "Jun 2026",
+      "end_date": "Sep 2026",
+      "status": "Completed",
+      "key_achievements": [
+        "Took over sole ownership of 3D companion product Unity client after other developers departed",
+        "Built data-driven behaviour system: 27 ScriptableObject behaviours with context-based selection and recency-weighted random selection",
+        "Implemented 20-step execution interpreter for composing performances from reusable steps",
+        "Created 11 custom editor tools for authoring behaviours without code",
+        "Solved animation positioning issues through visual rig displacement to interaction anchors",
+        "Refactored movement onto single-writer motor, fixing Rigidbody/transform desync",
+        "Built state-driven animation variant swapping and spring-bone secondary motion",
+        "Frame-accurate audio cue system locked to animator playhead",
+        "Shipped three URP quality tiers with automatic device-tier detection",
+        "Implemented zero-allocation CPU/GPU profiling overlay"
+      ],
+      "technologies": [
+        "Unity 3D",
+        "C#",
+        "URP",
+        "Animation Systems",
+        "ScriptableObjects",
+        "Performance Profiling"
+      ]
+    },
+    {
+      "title": "Lead Game Developer",
+      "company": "TONIZTOZ",
+      "type": "Remote",
+      "start_date": "Mar 2025",
+      "end_date": "Present",
+      "status": "Ongoing",
+      "team_size": 5,
+      "key_achievements": [
+        "Leading five-person cross-disciplinary team on original 2D pixel-art horror game rooted in Asian folklore",
+        "Owning technical direction from storyline through active development",
+        "Mentoring junior developers on Unity, Aseprite, and asset workflows",
+        "Architected full project groundwork and core systems end-to-end",
+        "Implemented player animation pipeline and player class architecture",
+        "Custom HLSL shader programming for visual development",
+        "2D volumetric fog implementation",
+        "Pixel-art horror lighting pipeline",
+        "Bespoke ghost/demon shaders with distortion and translucency"
+      ],
+      "technologies": [
+        "Unity 2D",
+        "C#",
+        "HLSL",
+        "Aseprite",
+        "Pixel Art",
+        "Shader Programming",
+        "Team Leadership"
+      ]
+    },
+    {
+      "title": "Unity Developer Intern",
+      "company": "Pythrust Technologies",
+      "location": "Gurugram, India",
+      "type": "Internship",
+      "start_date": "Oct 2025",
+      "end_date": "Jan 2026",
+      "status": "Completed",
+      "key_achievements": [
+        "Developed 17+ complete mini-games from scratch within 2MinWin by MINWIN Digital Studios",
+        "Part of five-person team implementing multiplayer, VFX, UI and SFX end-to-end",
+        "Collaborated with UI and sound design to maintain design feasibility",
+        "Integrated IronSource ad mediation SDK alongside analytics and backend services",
+        "Ran cross-device regression testing",
+        "Tracked delivery through Asana"
+      ],
+      "technologies": [
+        "Unity 3D",
+        "C#",
+        "Multiplayer Systems",
+        "VFX",
+        "UI/UX",
+        "IronSource SDK",
+        "QA Testing"
+      ]
+    },
+    {
+      "title": "Independent Contractor",
+      "type": "Freelance/Contract",
+      "start_date": "2024",
+      "end_date": "Present",
+      "status": "Ongoing",
+      "key_achievements": [
+        "Delivered 15+ AR Unity projects including real-time tracking systems",
+        "Indoor navigation using 3D spatial scans",
+        "Interactive AR environments",
+        "Built and shipped four real-time casual casino games (Mines, Roulette, Crash, Teen Patti)",
+        "Implemented backend API integration for casino games",
+        "RTP mathematical models and probability systems",
+        "Live wallet systems and retention-focused gameplay loops"
+      ],
+      "technologies": [
+        "Unity 3D",
+        "C#",
+        "AR Foundation",
+        "Real-time tracking",
+        "Backend Integration",
+        "Game Design"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Boop",
+      "type": "3D Companion Product",
+      "status": "Near-release build (Jun-Sep 2026)",
+      "description": "3D character-driven mobile product with complex behaviour systems, animation, rendering and tooling",
+      "my_role": "Sole Unity Developer",
+      "technologies": [
+        "Unity 3D",
+        "C#",
+        "URP",
+        "Animation Systems",
+        "Custom Editor Tools",
+        "Performance Optimization",
+        "Shader programming"
+      ],
+      "platforms": "Mobile (iOS/Android)",
+      "key_features": [
+        "Data-driven behaviour system with 27 ScriptableObject behaviours",
+        "20-step execution interpreter for animation playback",
+        "11 custom editor tools",
+        "Spring-bone secondary motion",
+        "State-driven animation variant swapping",
+        "Frame-accurate audio cue system",
+        "Three URP quality tiers",
+        "Zero-allocation profiling overlay"
+      ],
+      "notable_achievements": [
+        "Took over complete client after previous developers departed",
+        "Fixed critical Rigidbody/transform desync causing drift",
+        "Implemented zero-allocation CPU/GPU profiling system"
+      ],
+      "images": ["boop.png"],
+      "google_drive": "16W8gAZnmYGtKfnAtIkhHYPACv5fJO1FY"
+    },
+    {
+      "name": "TONIZTOZ",
+      "type": "2D Pixel-Art Horror Game",
+      "status": "Active Development (Mar 2025 - Present)",
+      "description": "Original 2D pixel-art horror game rooted in Asian folklore with custom shader work and professional art direction",
+      "my_role": "Lead Game Developer / Technical Lead",
+      "technologies": [
+        "Unity 2D",
+        "C#",
+        "HLSL",
+        "Aseprite",
+        "Pixel Art",
+        "Shader Graph",
+        "Team Leadership"
+      ],
+      "platforms": "PC/Web",
+      "team_composition": {
+        "total_members": 5,
+        "role": "Technical lead mentoring juniors"
+      },
+      "key_features": [
+        "2D volumetric fog using 3D noise",
+        "Pixel-art horror lighting pipeline",
+        "Custom ghost and demon shaders",
+        "Distortion and translucency effects",
+        "Player animation pipeline",
+        "Player class architecture",
+        "Aseprite asset workflow"
+      ],
+      "technical_highlights": [
+        "Custom HLSL shader programming for 2D effects",
+        "Professional game pipeline architecture",
+        "Technical mentorship of junior developers"
+      ],
+      "images": ["toniztoz.gif"],
+      "google_drive": "N/A - Collaborative project"
+    },
+    {
+      "name": "Chalo Yaar! - 3D Multiplayer Travel Survival Game",
+      "type": "3D Multiplayer Survival Adventure",
+      "status": "Prototype (Jan-May 2026)",
+      "description": "Cozy multiplayer road trip adventure with first-person exploration, survival systems, and vehicle hub mechanics",
+      "my_role": "Lead Developer - Systems, Networking, Architecture, Physics, Optimization",
+      "technologies": [
+        "Unity 3D",
+        "C#",
+        "Netcode for GameObjects",
+        "Custom HLSL shaders",
+        "Procedural generation",
+        "Performance optimization",
+        "Multiplayer architecture"
+      ],
+      "platforms": "PC",
+      "features": {
+        "gameplay": [
+          "First-person exploration",
+          "Drivable campervan hub",
+          "Wildlife photography progression",
+          "Inventory and survival stat systems",
+          "Modular multiplayer architecture",
+          "Cooperative gameplay for 4 players"
+        ],
+        "technical": [
+          "Procedural water shader with Worley Noise caustics",
+          "Volumetric fog from 3D noise",
+          "GPU foliage wind simulation via vertex displacement",
+          "Performance optimization: 130k+ draw calls reduced to 30k, 15fps to 50+fps",
+          "Shadow caster reduction",
+          "LOD tuning",
+          "Volumetric fog masking for foliage culling"
+        ]
+      },
+      "key_achievements": [
+        "4x performance improvement through optimization",
+        "Custom procedural shader systems",
+        "Multiplayer architecture on Netcode for GameObjects"
+      ],
+      "images": ["chaloYaar.png"],
+      "design_document": "1ZVr-2gINh1e_5iv9jiDb6A91wIohIXg7LqpiLgisJ8I"
+    },
+    {
+      "name": "2MinWin",
+      "type": "Mobile Multiplayer Mini-Game Collection",
+      "status": "Released (Internship Oct 2025-Jan 2026)",
+      "description": "Collection of 17+ mini-games inside multiplayer casual game by MINWIN Digital Studios",
+      "my_role": "Unity Developer Intern",
+      "technologies": [
+        "Unity 3D",
+        "C#",
+        "Multiplayer Systems",
+        "VFX",
+        "UI/UX",
+        "IronSource SDK"
+      ],
+      "platforms": "Mobile (Android/iOS)",
+      "scope": {
+        "mini_games_shipped": "17+",
+        "team_size": 5
+      },
+      "features": [
+        "Complete mini-game implementations",
+        "Multiplayer game modes",
+        "VFX systems",
+        "UI implementation",
+        "SFX integration",
+        "Ad mediation (IronSource)",
+        "Analytics integration",
+        "Backend service integration"
+      ],
+      "images": ["2minwin.jpg"],
+      "company_link": "https://www.pythrusttech.com/"
+    },
+    {
+      "name": "Lucius: The Endless Maze Runner",
+      "type": "3D Horror Maze Game",
+      "status": "Released on Itch.io (2024-2025)",
+      "description": "3D horror maze runner with procedural level generation and dynamic enemy AI",
+      "my_role": "Solo Developer",
+      "technologies": [
+        "Unity 3D",
+        "C#",
+        "Procedural generation",
+        "AI pathfinding",
+        "Algorithm design"
+      ],
+      "platforms": "PC",
+      "features": [
+        "Backtracking algorithm for procedural maze generation",
+        "Enemy AI that adapts dynamically to player position",
+        "Playable maze runner gameplay"
+      ],
+      "itch_io_link": "https://arikiver.itch.io/lucius-the-endless-maze-runner",
+      "images": ["lucius.png"]
+    },
+    {
+      "name": "SlenderAR: AR Horror Survival",
+      "type": "AR Multiplayer Horror Game",
+      "status": "Released on Itch.io (2024-2025)",
+      "description": "Recreation of Slenderman experience in augmented reality with portal-based entry and dynamic audio",
+      "my_role": "Solo Developer",
+      "technologies": [
+        "Unity 3D",
+        "C#",
+        "AR Foundation",
+        "Audio systems",
+        "AI tracking"
+      ],
+      "platforms": "Mobile AR (iOS/Android)",
+      "features": [
+        "Portal-based AR entry system",
+        "Player-tracking AI",
+        "Dynamic audio adaptation",
+        "Horror ambiance"
+      ],
+      "itch_io_link": "https://arikiver.itch.io/slenderar",
+      "images": ["slenderAR.png"]
+    },
+    {
+      "name": "Casino Games Suite",
+      "type": "Real-time Casual Casino Games",
+      "status": "Shipped (2024-Present)",
+      "description": "Collection of four real-time casual casino games with backend integration and RTP models",
+      "my_role": "Solo Developer",
+      "technologies": [
+        "Unity 3D",
+        "C#",
+        "Backend API Integration",
+        "Real-time systems",
+        "Probability systems",
+        "Wallet systems"
+      ],
+      "platforms": "Mobile (Android/iOS)",
+      "games": [
+        "Mines",
+        "Roulette",
+        "Crash",
+        "Teen Patti"
+      ],
+      "features": [
+        "Backend API integration",
+        "RTP mathematical models",
+        "Live wallet systems",
+        "Balance synchronisation",
+        "Currency switching",
+        "Retention-focused gameplay loops"
+      ],
+      "images": ["casino.png"],
+      "video": "1z-a7FEdexifu57A-EBr27j9TohTP_SBw"
+    },
+    {
+      "name": "AR Projects (15+ Completed)",
+      "type": "Augmented Reality Applications",
+      "status": "Completed (2024-Present)",
+      "description": "Collection of 15+ AR projects including tracking, navigation, and interactive environments",
+      "my_role": "Solo Contractor",
+      "technologies": [
+        "Unity 3D",
+        "C#",
+        "AR Foundation",
+        "Real-time tracking",
+        "3D spatial mapping",
+        "Interactive systems"
+      ],
+      "platforms": "Mobile AR (iOS/Android)",
+      "feature_areas": [
+        "Real-time tracking systems",
+        "Indoor navigation using 3D spatial scans",
+        "Interactive AR environments",
+        "Desktop and mobile implementations"
+      ],
+      "images": ["ar.png"],
+      "video": "1iMk_JXJmiUd9uYt55lHy2tGyB1OgJUSP"
+    }
+  ],
+  "media_assets": {
+    "local_assets": {
+      "images": [
+        {
+          "filename": "profile.jpeg",
+          "size_kb": 171,
+          "type": "JPEG",
+          "purpose": "Professional profile picture",
+          "project": "General portfolio"
+        },
+        {
+          "filename": "boop.png",
+          "size_kb": 63,
+          "type": "PNG",
+          "purpose": "Boop project showcase image",
+          "project": "Boop"
+        },
+        {
+          "filename": "toniztoz.gif",
+          "size_kb": 22,
+          "type": "GIF",
+          "purpose": "TONIZTOZ game showcase/animation",
+          "project": "TONIZTOZ"
+        },
+        {
+          "filename": "chaloYaar.png",
+          "size_kb": 20,
+          "type": "PNG",
+          "purpose": "Chalo Yaar project showcase",
+          "project": "Chalo Yaar"
+        },
+        {
+          "filename": "2minwin.jpg",
+          "size_kb": 46,
+          "type": "JPEG",
+          "purpose": "2MinWin gameplay screenshot",
+          "project": "2MinWin"
+        },
+        {
+          "filename": "lucius.png",
+          "size_kb": 1600,
+          "type": "PNG",
+          "purpose": "Lucius maze runner screenshot",
+          "project": "Lucius"
+        },
+        {
+          "filename": "slenderAR.png",
+          "size_kb": 43,
+          "type": "PNG",
+          "purpose": "SlenderAR AR horror game screenshot",
+          "project": "SlenderAR"
+        },
+        {
+          "filename": "ar.png",
+          "size_kb": 1900,
+          "type": "PNG",
+          "purpose": "AR projects showcase/compilation",
+          "project": "AR Projects"
+        },
+        {
+          "filename": "casino.png",
+          "size_kb": 1700,
+          "type": "PNG",
+          "purpose": "Casino games showcase",
+          "project": "Casino Games"
+        }
+      ],
+      "videos": [
+        {
+          "filename": "CasinoGamesShowcase.mp4",
+          "size_mb": 185,
+          "source": "Google Drive (1z-a7FEdexifu57A-EBr27j9TohTP_SBw)",
+          "project": "Casino Games",
+          "content": "Gameplay showcase of casino games suite"
+        },
+        {
+          "filename": "AR_VR Showreel.mp4",
+          "size_mb": 1299,
+          "source": "Google Drive (1iMk_JXJmiUd9uYt55lHy2tGyB1OgJUSP)",
+          "project": "AR Projects",
+          "content": "Compilation of AR/VR project demonstrations"
+        },
+        {
+          "filename": "Lucius Gameplay - compressed.mp4",
+          "size_mb": 3.7,
+          "source": "Google Drive (1mu2ZT26Vfk42WS5KUoU2iJ8OhXhLIaPG)",
+          "project": "Lucius",
+          "content": "Lucius maze runner gameplay video"
+        }
+      ]
+    },
+    "external_resources": {
+      "google_drive_folders": [
+        {
+          "name": "Boop",
+          "id": "16W8gAZnmYGtKfnAtIkhHYPACv5fJO1FY",
+          "contains": "Project-specific assets, rigs, animations"
+        },
+        {
+          "name": "Boop Rig",
+          "id": "1AyaUihr-oNJ1jAyVT1qJdfYUwvZvqCs3",
+          "contains": "3D character rig files"
+        },
+        {
+          "name": "Boop Assets",
+          "id": "11c9r1tM0Ck4xnqsIfchtPA3rXxXPUQXC",
+          "contains": "Compiled Boop project assets"
+        },
+        {
+          "name": "Animation Files for Boop",
+          "id": "1ngO5GLf1UJVplhKhVPChrwdQkw8Pfywd",
+          "contains": "Animation file collection"
+        },
+        {
+          "name": "TONIZTOZ GameArt Candidates",
+          "id": "1ZYCtymAqs8cAHTj-bcGpawk2DO7llbWU",
+          "contains": "Art submissions and candidates"
+        },
+        {
+          "name": "Main Portfolio Folder",
+          "id": "1IPBCjdRn0tulM7xojXfIyYjYkTnx51yU",
+          "contains": "Primary portfolio organization"
+        }
+      ]
+    }
+  },
+  "external_project_links": {
+    "itch_io": [
+      {
+        "name": "Lucius: The Endless Maze Runner",
+        "url": "https://arikiver.itch.io/lucius-the-endless-maze-runner",
+        "status": "Published"
+      },
+      {
+        "name": "SlenderAR: AR Horror Survival",
+        "url": "https://arikiver.itch.io/slenderar",
+        "status": "Published"
+      }
+    ],
+    "github": {
+      "profile": "https://github.com/Arikiver",
+      "note": "Profile exists but specific project repositories need verification"
+    }
+  },
+  "technical_documentation": {
+    "boop_animation_system": {
+      "source": "Google Doc (1py0yKTeoiXs0XFTxPWKEkPGqLYFHaVjUC3mw-mAxtrQ)",
+      "type": "Architecture documentation",
+      "content": "Behaviour system architecture with ScriptableObject definitions and animation interpreter patterns"
+    },
+    "chalo_yaar_gdd": {
+      "source": "Google Doc (1ZVr-2gINh1e_5iv9jiDb6A91wIohIXg7LqpiLgisJ8I)",
+      "type": "Game Design Document",
+      "pages": "Comprehensive GDD with gameplay systems, multiplayer architecture, survival mechanics"
+    }
+  },
+  "unverified_information": [
+    "Specific URLs for all projects on GitHub (need to verify Arikiver account)",
+    "Current status of Chalo Yaar project (GDD exists but completion status unclear)",
+    "Exact release dates for casino games",
+    "Complete list of 15+ AR projects (descriptions available but portfolio links need verification)"
+  ],
+  "conflicts": [],
+  "additional_notes": {
+    "resume_versions": "Two versions maintained: GameDev-focused and General Software Developer",
+    "active_projects": "TONIZTOZ ongoing, Boop recently completed",
+    "skill_depth": "Strong in shader programming, multiplayer networking, animation systems, performance optimization",
+    "portfolio_organization": "Well-documented Google Drive with technical specs, design docs, and asset collections"
+  }
+}
