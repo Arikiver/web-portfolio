@@ -1,0 +1,370 @@
+---
+// First-visit boot screen (once per browser session). Each log line reports something real (WebGL,
+// shader compile, fonts, above-the-fold images), so the progress bar tracks actual loading. Minimum
+// ~2 s, capped at ~4 s. Any key/click/tap skips. Shown only when html.booting was set before first
+// paint by the inline script in Base.astro: never with reduced motion, never without JS.
+import { profile } from '../data/portfolio';
+---
+
+<div class="boot" aria-hidden="true">
+  <div class="boot-inner">
+    <p class="boot-title"><span class="boot-mark"></span>{profile.name.toUpperCase().replace(' ', '.')}</p>
+    <p class="boot-sub">RT_BIOS 26.09 · real-time portfolio</p>
+    <ol class="boot-log"></ol>
+    <div class="boot-bar"><i></i></div>
+    <p class="boot-foot"><span class="boot-pct">0%</span><span class="boot-skip">press any key to skip</span></p>
+  </div>
+</div>
+
+<script>
+  import { play } from '../scripts/sfx';
+
+  const root = document.documentElement;
+  const boot = document.querySelector<HTMLElement>('.boot');
+
+  if (boot && root.classList.contains('booting')) {
+    const log = boot.querySelector('.boot-log')!;
+    const bar = boot.querySelector<HTMLElement>('.boot-bar i')!;
+    const pct = boot.querySelector('.boot-pct')!;
+    const start = performance.now();
+    const MIN = 1600;
+    const MAX = 4000;
+    let finished = false;
+
+    const line = (label: string) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="p">&gt;</span> <span class="l"></span><span class="d"></span><span class="s"></span>`;
+      li.querySelector('.l')!.textContent = label;
+      log.append(li);
+      play('step');
+      const s = li.querySelector('.s')!;
+      const done = (status: string, tone: 'ok' | 'warn' = 'ok') => {
+        s.textContent = status;
+        li.classList.add('done', tone);
+      };
+      return Object.assign(done, { set: (text: string) => (s.textContent = text) });
+    };
+
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const until = (test: () => boolean, timeout: number) =>
+      new Promise<boolean>((resolve) => {
+        const t0 = performance.now();
+        const tick = () => (test() ? resolve(true) : performance.now() - t0 > timeout ? resolve(false) : requestAnimationFrame(tick));
+        tick();
+      });
+
+    // Real work, reported as it completes.
+    let tasksDone = 0;
+    const TASKS = 5;
+    const step = () => tasksDone++;
+
+    const images = [...document.images].filter((img) => {
+      const r = img.getBoundingClientRect();
+      return r.top < innerHeight && r.bottom > 0 && img.loading !== 'lazy';
+    });
+
+    const run = async () => {
+      const gpu = line('probing gpu');
+      await wait(260);
+      const gl = document.createElement('canvas').getContext('webgl');
+      gpu(gl ? 'WEBGL OK' : 'SOFTWARE', gl ? 'ok' : 'warn');
+      step();
+
+      const sh = line('compiling shaders');
+      const shader = document.querySelector('canvas.hero-fx, canvas.ambient-field');
+      const [ok] = await Promise.all([until(() => !!document.querySelector('canvas.is-live'), 1500), wait(300)]);
+      sh(shader ? (ok ? 'OK' : 'SKIPPED') : 'OK', ok || !shader ? 'ok' : 'warn');
+      step();
+
+      const fonts = line('loading fonts');
+      await Promise.all([Promise.race([document.fonts.ready, wait(1500)]), wait(280)]);
+      fonts('OK');
+      step();
+
+      const assets = line('streaming assets');
+      const assetsStart = performance.now();
+      let loaded = 0;
+      const total = images.length;
+      const render = () => assets.set(`${loaded}/${total}`);
+      render();
+      await Promise.race([
+        Promise.all(
+          images.map((img) =>
+            (img.complete ? Promise.resolve() : img.decode().catch(() => {})).then(() => {
+              loaded++;
+              render();
+            }),
+          ),
+        ),
+        wait(2500),
+      ]);
+      await wait(Math.max(0, 300 - (performance.now() - assetsStart)));
+      assets(`${loaded}/${total}`, loaded === total ? 'ok' : 'warn');
+      step();
+
+      const audio = line('audio');
+      await wait(200);
+      audio(root.classList.contains('sfx-on') ? 'ONLINE' : 'STANDBY');
+      step();
+    };
+
+    // Progress = the slower of real work and the minimum runtime, so it never finishes early.
+    const progress = () => {
+      const t = Math.min(1, (performance.now() - start) / MIN);
+      return Math.min(t, tasksDone / TASKS);
+    };
+
+    const frame = () => {
+      if (finished) return;
+      const p = progress();
+      bar.style.transform = `scaleX(${p})`;
+      pct.textContent = `${Math.round(p * 100)}%`;
+      if ((p >= 1 && tasksDone >= TASKS) || performance.now() - start > MAX) finish();
+      else requestAnimationFrame(frame);
+    };
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      bar.style.transform = 'scaleX(1)';
+      pct.textContent = '100%';
+      const ready = document.createElement('li');
+      ready.className = 'ready';
+      ready.textContent = 'READY';
+      log.append(ready);
+      play('success');
+      try {
+        sessionStorage.setItem('booted', '1');
+      } catch {
+        /* ignore */
+      }
+      setTimeout(() => {
+        boot.classList.add('boot-exit');
+        // Release the page (hero entrance, decode, etc.) as the screen opens.
+        setTimeout(() => {
+          root.classList.remove('booting');
+          document.dispatchEvent(new Event('boot:done'));
+        }, 180);
+        setTimeout(() => boot.remove(), 700);
+      }, 200);
+    };
+
+    const skip = () => finish();
+    addEventListener('keydown', skip, { once: true });
+    boot.addEventListener('pointerdown', skip, { once: true });
+
+    void run();
+    requestAnimationFrame(frame);
+  } else {
+    boot?.remove();
+  }
+</script>
+
+<style>
+  .boot {
+    display: none;
+  }
+
+  :global(.booting) .boot,
+  .boot.boot-exit {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: grid;
+    place-items: center;
+    padding: var(--gutter);
+    background:
+      repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.025) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at center, #111118, #050507 75%);
+    color: var(--muted);
+    font: 0.82rem/1.7 var(--font-mono);
+    cursor: default;
+  }
+
+  /* While booting, hold the hero entrance so it plays after the screen opens. */
+  :global(.booting) :global(:is(.letter, .hero-in, .caret)) {
+    animation-play-state: paused !important;
+  }
+
+  :global(html.booting),
+  :global(html.booting body) {
+    overflow: hidden;
+  }
+
+  .boot-inner {
+    width: min(100%, 520px);
+    min-width: 0;
+  }
+
+  .boot-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    color: var(--text);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+  }
+
+  .boot-mark {
+    width: 9px;
+    height: 9px;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    animation: boot-blink 0.8s steps(2, jump-none) infinite;
+  }
+
+  .boot-sub {
+    margin: 0 0 1.25rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+  }
+
+  .boot-log {
+    list-style: none;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    min-height: calc(6 * 1.7em);
+  }
+
+  .boot-log :global(li) {
+    display: flex;
+    min-width: 0;
+    white-space: nowrap;
+    animation: boot-line 0.18s steps(3) both;
+  }
+
+  .boot-log :global(.p) {
+    color: var(--accent);
+    margin-right: 0.5ch;
+  }
+
+  /* Dot leader fills the gap between label and status. */
+  .boot-log :global(.d) {
+    flex: 1 1 0;
+    min-width: 2ch;
+    margin: 0 1ch;
+    overflow: hidden;
+    opacity: 0.35;
+  }
+
+  .boot-log :global(.d)::before {
+    content: '................................................................';
+  }
+
+  .boot-log :global(li:not(.done) .s)::after {
+    content: '▍';
+    animation: boot-blink 0.5s steps(2, jump-none) infinite;
+  }
+
+  .boot-log :global(li.done.ok .s) {
+    color: var(--accent);
+  }
+
+  .boot-log :global(li.done.warn .s) {
+    color: #ff8a5c;
+  }
+
+  .boot-log :global(li.ready) {
+    color: var(--text);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+  }
+
+  .boot-log :global(li.ready)::after {
+    content: '_';
+    color: var(--accent);
+    animation: boot-blink 0.5s steps(2, jump-none) infinite;
+  }
+
+  .boot-bar {
+    height: 6px;
+    border: 1px solid var(--border);
+    padding: 1px;
+  }
+
+  .boot-bar i {
+    display: block;
+    height: 100%;
+    background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 8px); /* segmented */
+    box-shadow: 0 0 10px rgb(245 165 36 / 0.5);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .boot-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.6rem 0 0;
+    font-size: 0.7rem;
+  }
+
+  .boot-pct {
+    color: var(--text);
+  }
+
+  .boot-skip {
+    opacity: 0.5;
+  }
+
+  /* Exit: the screen opens from a bright centre line, like a tube warming up. */
+  .boot.boot-exit {
+    animation: boot-open 0.5s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+    pointer-events: none;
+  }
+
+  .boot.boot-exit::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    background: #fff;
+    box-shadow:
+      0 0 20px 4px var(--accent),
+      0 0 60px 10px rgb(245 165 36 / 0.5);
+    animation: boot-line-flash 0.5s ease-out forwards;
+  }
+
+  @keyframes boot-open {
+    0% {
+      clip-path: inset(0 0 0 0);
+    }
+    30% {
+      clip-path: inset(0 0 0 0);
+      filter: brightness(1.6);
+    }
+    100% {
+      clip-path: inset(50% 0 50% 0);
+    }
+  }
+
+  @keyframes boot-line-flash {
+    0%,
+    30% {
+      opacity: 0;
+    }
+    45% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: scaleX(1.2);
+    }
+  }
+
+  @keyframes boot-line {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes boot-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+</style>
