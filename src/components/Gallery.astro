@@ -54,8 +54,12 @@ const shots = await Promise.all(
     let current = 0;
     const show = (i: number) => {
       current = (i + thumbs.length) % thumbs.length;
-      img.src = thumbs[current].dataset.full!;
-      img.alt = thumbs[current].dataset.alt!;
+      const next = thumbs[current];
+      img.classList.add('is-loading');
+      img.onload = () => img.classList.remove('is-loading');
+      img.src = next.dataset.full!;
+      img.alt = next.dataset.alt!;
+      if (img.complete) img.classList.remove('is-loading');
       count.textContent = `${current + 1} / ${thumbs.length}`;
     };
     thumbs.forEach((t, i) =>
@@ -111,6 +115,14 @@ const shots = await Promise.all(
     width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.4s ease;
+    filter: saturate(0.85) brightness(0.9);
+  }
+
+  .thumb:hover img,
+  .thumb:focus-visible img {
+    transform: scale(1.06);
+    filter: none;
   }
 
   .lightbox {
@@ -123,10 +135,47 @@ const shots = await Promise.all(
     background: var(--bg);
     color: var(--text);
     overflow: hidden;
+    opacity: 0;
+    scale: 0.94;
+    transition:
+      opacity 0.3s ease,
+      scale 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      overlay 0.4s allow-discrete,
+      display 0.4s allow-discrete;
+  }
+
+  .lightbox[open] {
+    opacity: 1;
+    scale: 1;
+  }
+
+  @starting-style {
+    .lightbox[open] {
+      opacity: 0;
+      scale: 0.94;
+    }
   }
 
   .lightbox::backdrop {
+    background: rgb(0 0 0 / 0);
+    backdrop-filter: blur(0);
+    transition:
+      background-color 0.3s ease,
+      backdrop-filter 0.3s ease,
+      overlay 0.4s allow-discrete,
+      display 0.4s allow-discrete;
+  }
+
+  .lightbox[open]::backdrop {
     background: rgb(0 0 0 / 0.85);
+    backdrop-filter: blur(6px);
+  }
+
+  @starting-style {
+    .lightbox[open]::backdrop {
+      background: rgb(0 0 0 / 0);
+      backdrop-filter: blur(0);
+    }
   }
 
   .lightbox img {
@@ -134,6 +183,11 @@ const shots = await Promise.all(
     max-height: calc(100dvh - 7rem);
     object-fit: contain;
     background: #000;
+    transition: opacity 0.25s ease;
+  }
+
+  .lightbox img.is-loading {
+    opacity: 0;
   }
 
   .controls {
