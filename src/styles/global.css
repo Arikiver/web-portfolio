@@ -460,6 +460,11 @@ html.crt body {
   filter: none;
 }
 
+/* Input correction (crt-input.ts) sets the cursor from the element under the *visual* pointer. */
+.crt-remap .screen * {
+  cursor: inherit !important;
+}
+
 .crt .screen {
   position: absolute;
   inset: 0;

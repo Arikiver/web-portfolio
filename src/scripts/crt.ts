@@ -3,6 +3,7 @@
 // separate displacement scales per colour channel (radial chromatic aberration) and phosphor bloom.
 // A 2D canvas on top draws rolling scanlines, a refresh band, flicker and static.
 
+import { BARREL, syncInput } from './crt-input';
 import { play } from './sfx';
 
 const root = document.documentElement;
@@ -17,7 +18,6 @@ const exitBtn = document.querySelector<HTMLButtonElement>('.crt-exit')!;
 const hud = document.querySelector<HTMLElement>('.konami-hud')!;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const BARREL = 0.075; // lens strength
 const CA = [1.035, 1, 0.965]; // R, G, B displacement scale multipliers
 
 /* ---------- Lens map ---------- */
@@ -78,6 +78,7 @@ function setQuality(q: number) {
   bloomMix?.setAttribute('k3', q >= 1 ? '0' : '0.4');
   root.classList.toggle('crt-lite', q === 2);
   root.classList.toggle('crt-flat', q >= 3);
+  syncInput(); // no lens at level 3, so no input correction either
   try {
     sessionStorage.setItem('crt-q', String(q));
   } catch {
@@ -172,6 +173,7 @@ function enter(animate: boolean) {
   setQuality(readQuality());
   probe = [];
   root.classList.add('crt');
+  syncInput();
   screen.scrollTop = y;
   screen.tabIndex = -1; // lets arrow keys / PageDown scroll the tube
   screen.focus({ preventScroll: true });
@@ -194,6 +196,7 @@ function exit() {
   const finish = () => {
     const y = screen.scrollTop;
     root.classList.remove('crt', 'crt-shutdown');
+    syncInput();
     screen.removeAttribute('tabindex');
     cancelAnimationFrame(raf);
     exitBtn.hidden = true;
@@ -203,6 +206,7 @@ function exit() {
   };
   if (reduced) return finish();
   root.classList.add('crt-shutdown');
+  syncInput();
   setTimeout(finish, 520);
 }
 
