@@ -9,15 +9,20 @@ interface Props {
   widths?: number[];
   eager?: boolean;
   class?: string;
+  /** view-transition-name, so the art morphs between pages. */
+  vt?: string;
 }
 
-const { file, alt, sizes, widths = [360, 560, 800, 1100], eager = false, class: className } = Astro.props;
+const { file, alt, sizes, widths = [360, 560, 800, 1100], eager = false, class: className, vt } = Astro.props;
 const src = await image(file);
-const { fit, bg } = coverPresentation(file);
+const { fit, bg, radius } = coverPresentation(file);
 const loading = eager ? 'eager' : 'lazy';
 ---
 
-<div class:list={['cover', `cover-${fit}`, className]} style={bg ? `--cover-bg: ${bg}` : undefined}>
+<div
+  class:list={['cover', `cover-${fit}`, className]}
+  style={[bg && `--cover-bg: ${bg}`, radius && `--logo-radius: ${radius}`, vt && `view-transition-name: ${vt}`].filter(Boolean).join('; ') || undefined}
+>
   {
     isGif(file) ? (
       // Served untouched so the animation survives; scaled up with nearest-neighbour.
@@ -49,8 +54,12 @@ const loading = eager ? 'eager' : 'lazy';
     object-fit: cover;
   }
 
+  .cover-contain {
+    padding: 14%;
+  }
+
   .cover-contain img {
     object-fit: contain;
-    padding: 12%;
+    border-radius: var(--logo-radius, 0);
   }
 </style>

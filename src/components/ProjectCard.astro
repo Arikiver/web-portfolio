@@ -16,10 +16,10 @@ const sizes =
     : '(min-width: 1184px) 264px, (min-width: 720px) calc(25vw - 40px), (min-width: 560px) calc(50vw - 40px), 112px';
 ---
 
-<article class:list={['card', 'card-link', 'project-card', `project-card-${size}`]}>
-  <Cover file={project.cover} alt={`${project.title} cover art`} sizes={sizes} />
+<article class:list={['card', 'card-link', 'project-card', `project-card-${size}`]} data-tilt={size === 'large' ? 6 : 8}>
+  <Cover file={project.cover} alt={`${project.title} cover art`} sizes={sizes} vt={`cover-${project.slug}`} />
   <div class="body">
-    <h3><a class="stretched" href={url(`/work/${project.slug}/`)}>{project.title}</a></h3>
+    <h3><a class="stretched" href={url(`/work/${project.slug}/`)} style={`view-transition-name: title-${project.slug}`}>{project.title}</a></h3>
     <p class="pitch">{project.pitch}</p>
     <ul class="chips">
       {chips.map((m) => <li class="chip">{m.value}</li>)}

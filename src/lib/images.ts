@@ -12,13 +12,18 @@ export async function image(file: string): Promise<ImageMetadata> {
 
 export const isGif = (file: string) => file.toLowerCase().endsWith('.gif');
 
-/** Logos are shown whole on their own background colour instead of being cropped. */
-const logoBackgrounds: Record<string, string> = {
-  'boop.png': '#fdf6ec',
-  '2minwin.jpg': '#c30006',
+/**
+ * Logos are shown whole on their own background colour instead of being cropped.
+ * `radius` clips baked-in corners (boop.png is an app icon with opaque black corners).
+ */
+const logos: Record<string, { bg: string; radius: string }> = {
+  'boop.png': { bg: '#fdf6ec', radius: '22%' },
+  '2minwin.jpg': { bg: '#c30006', radius: '0' },
 };
 
 export function coverPresentation(file: string) {
-  const bg = logoBackgrounds[file];
-  return bg ? { fit: 'contain' as const, bg } : { fit: 'cover' as const, bg: undefined };
+  const logo = logos[file];
+  return logo
+    ? { fit: 'contain' as const, bg: logo.bg, radius: logo.radius }
+    : { fit: 'cover' as const, bg: undefined, radius: undefined };
 }

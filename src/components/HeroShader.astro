@@ -1,0 +1,289 @@
+---
+// Live WebGL background for the hero: domain-warped volumetric fog, lit in-scattering from a
+// lantern that follows the pointer, and pixel-art embers. Falls back to a CSS glow without WebGL,
+// renders a single still frame under prefers-reduced-motion, and pauses when off-screen.
+---
+
+<canvas class="hero-fx" aria-hidden="true"></canvas>
+<button type="button" class="fx-toggle" aria-pressed="false" hidden>
+  <span class="fx-dot" aria-hidden="true"></span><span class="fx-label">Pause background</span>
+</button>
+
+<script>
+  const VERT = `
+attribute vec2 a_pos;
+void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
+`;
+
+  const FRAG = `
+precision highp float;
+uniform vec2 u_res;
+uniform float u_time;
+uniform vec2 u_light;
+uniform float u_intro;
+
+const vec3 BG = vec3(0.043, 0.043, 0.059);
+const vec3 HAZE = vec3(0.2, 0.18, 0.32);
+const vec3 AMBER = vec3(0.96, 0.62, 0.13);
+const vec3 COOL = vec3(0.26, 0.32, 0.6);
+
+float hash(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
+float fbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
+  for (int i = 0; i < 5; i++) {
+    v += a * noise(p);
+    p = m * p;
+    a *= 0.5;
+  }
+  return v;
+}
+
+// One layer of square, flickering embers drifting upwards on a jittered grid.
+float embers(vec2 p, float scale, float speed, float seed) {
+  vec2 g = p * scale;
+  g.y -= u_time * speed;
+  g.x += sin(g.y * 0.35 + seed) * 0.5;
+  vec2 id = floor(g);
+  vec2 f = fract(g);
+  float h = hash(id + seed);
+  if (h < 0.9) return 0.0;
+  vec2 pos = vec2(hash(id + seed + 1.3), hash(id + seed + 7.1)) * 0.6 + 0.2;
+  float size = 0.05 + 0.05 * hash(id + seed + 3.7);
+  vec2 d = abs(f - pos);
+  float sq = step(max(d.x, d.y), size);
+  float flicker = 0.55 + 0.45 * sin(u_time * (2.0 + h * 6.0) + h * 40.0);
+  return sq * flicker;
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_res;
+  float aspect = u_res.x / u_res.y;
+  vec2 p = vec2(uv.x * aspect, uv.y);
+  float t = u_time * 0.035;
+
+  // Domain-warped fbm: two warp passes give the rolling, folding look of volumetric fog.
+  vec2 q = vec2(fbm(p * 1.5 + vec2(0.0, t * 2.0)), fbm(p * 1.5 + vec2(5.2, 1.3) - t));
+  vec2 r = vec2(fbm(p * 1.5 + 3.5 * q + vec2(1.7, 9.2) + t * 1.5),
+                fbm(p * 1.5 + 3.5 * q + vec2(8.3, 2.8) - t));
+  float density = smoothstep(0.2, 0.88, fbm(p * 1.5 + 3.0 * r));
+  density *= mix(1.0, 0.4, uv.y); // fog pools near the ground
+
+  vec2 lightPos = vec2(u_light.x * aspect, u_light.y);
+  float dist = length(p - lightPos);
+  float lamp = exp(-dist * 2.4);
+  float core = exp(-dist * 16.0);
+
+  vec3 col = BG;
+  col += HAZE * density * 0.95;
+  col += AMBER * (density * 1.5 + 0.08) * lamp;   // lit fog: in-scattering around the lantern
+  col += AMBER * core * 0.12;
+  col += COOL * density * exp(-length(p - vec2(0.05 * aspect, 1.1)) * 2.2) * 0.4; // cold moonlight
+
+  float glow = 0.3 + lamp * 1.6;
+  float fade = smoothstep(1.0, 0.15, uv.y);
+  col += AMBER * embers(p, 26.0, 0.55, 0.0) * glow * fade * 0.8;
+  col += AMBER * embers(p, 44.0, 0.32, 17.0) * glow * fade * 0.35;
+
+  float vig = smoothstep(1.35, 0.25, length((uv - 0.5) * vec2(aspect * 0.75, 1.0)));
+  col *= mix(0.55, 1.0, vig);
+
+  col += (hash(gl_FragCoord.xy + fract(u_time)) - 0.5) / 255.0; // dither away banding
+  gl_FragColor = vec4(mix(BG, col, u_intro), 1.0);
+}
+`;
+
+  const canvas = document.querySelector<HTMLCanvasElement>('canvas.hero-fx');
+  const toggle = document.querySelector<HTMLButtonElement>('.fx-toggle');
+  const gl = canvas?.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
+
+  if (canvas && toggle && gl) {
+    const compile = (type: number, src: string) => {
+      const s = gl.createShader(type)!;
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? 'shader');
+      return s;
+    };
+    const prog = gl.createProgram()!;
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    // Single full-screen triangle.
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const aPos = gl.getAttribLocation(prog, 'a_pos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes = gl.getUniformLocation(prog, 'u_res');
+    const uTime = gl.getUniformLocation(prog, 'u_time');
+    const uLight = gl.getUniformLocation(prog, 'u_light');
+    const uIntro = gl.getUniformLocation(prog, 'u_intro');
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    const host = canvas.parentElement!;
+
+    // The fog is soft, so rendering at half resolution is invisible and saves a lot of fill rate.
+    const resize = () => {
+      const scale = Math.min(devicePixelRatio, 2) * 0.5;
+      canvas.width = Math.max(1, Math.round(canvas.clientWidth * scale));
+      canvas.height = Math.max(1, Math.round(canvas.clientHeight * scale));
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      if (!running) draw();
+    };
+
+    // Lantern rests near the portrait; follows the pointer while it is over the hero.
+    const rest = () => (innerWidth >= 720 ? { x: 0.6, y: 0.3 } : { x: 0.7, y: 0.62 });
+    let light = rest();
+    let target: { x: number; y: number } | null = null;
+    host.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const r = canvas.getBoundingClientRect();
+      target = { x: (e.clientX - r.left) / r.width, y: 1 - (e.clientY - r.top) / r.height };
+    });
+    host.addEventListener('pointerleave', () => (target = null));
+
+    let time = 8;
+    let intro = 0;
+    let last = 0;
+    let running = false;
+    let visible = true;
+    let paused = false;
+    let raf = 0;
+
+    const draw = () => {
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uTime, time);
+      gl.uniform2f(uLight, light.x, light.y);
+      gl.uniform1f(uIntro, reduced.matches ? 1 : intro);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    };
+
+    const frame = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      time = (time + dt) % 1000;
+      intro = Math.min(1, intro + dt / 1.6);
+      const base = rest();
+      const goal = target ?? { x: base.x + Math.sin(time * 0.3) * 0.06, y: base.y + Math.cos(time * 0.23) * 0.05 };
+      const k = 1 - Math.pow(0.02, dt); // frame-rate independent easing
+      light = { x: light.x + (goal.x - light.x) * k, y: light.y + (goal.y - light.y) * k };
+      draw();
+      raf = requestAnimationFrame(frame);
+    };
+
+    const update = () => {
+      const should = visible && !paused && !reduced.matches && !document.hidden;
+      if (should && !running) {
+        running = true;
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      } else if (!should && running) {
+        running = false;
+        cancelAnimationFrame(raf);
+      }
+      if (!running) draw();
+    };
+
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      update();
+    }).observe(canvas);
+    document.addEventListener('visibilitychange', update);
+    reduced.addEventListener('change', () => {
+      toggle.hidden = reduced.matches;
+      update();
+    });
+
+    toggle.hidden = reduced.matches;
+    toggle.addEventListener('click', () => {
+      paused = !paused;
+      toggle.setAttribute('aria-pressed', String(paused));
+      toggle.querySelector('.fx-label')!.textContent = paused ? 'Play background' : 'Pause background';
+      update();
+    });
+
+    new ResizeObserver(resize).observe(canvas);
+    resize();
+    canvas.classList.add('is-live');
+    update();
+  }
+</script>
+
+<style>
+  .hero-fx {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent);
+    mask-image: linear-gradient(to bottom, #000 70%, transparent);
+  }
+
+  .hero-fx.is-live {
+    opacity: 1;
+  }
+
+  .fx-toggle {
+    position: absolute;
+    right: var(--gutter);
+    bottom: 1.25rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgb(11 11 15 / 0.6);
+    backdrop-filter: blur(6px);
+    color: var(--muted);
+    font: 0.72rem/1 var(--font-mono);
+    cursor: pointer;
+  }
+
+  .fx-toggle:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  .fx-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: fx-blink 1.6s steps(2, jump-none) infinite;
+  }
+
+  .fx-toggle[aria-pressed='true'] .fx-dot {
+    animation: none;
+    background: var(--muted);
+    box-shadow: none;
+  }
+
+  @keyframes fx-blink {
+    50% {
+      opacity: 0.25;
+    }
+  }
+</style>

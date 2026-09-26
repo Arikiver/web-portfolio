@@ -1,10 +1,12 @@
 ---
 import type { GetStaticPaths } from 'astro';
+import { getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Cover from '../../components/Cover.astro';
 import Gallery from '../../components/Gallery.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
 import { profile, projects, type Project } from '../../data/portfolio';
+import { coverPresentation, image, isGif } from '../../lib/images';
 import { url } from '../../lib/url';
 
 export const getStaticPaths = (() =>
@@ -24,16 +26,22 @@ interface Props {
 }
 
 const { project, prev, next } = Astro.props;
+
+// A tiny copy of the cover, blurred into an ambient glow behind the header.
+const coverMeta = await image(project.cover);
+const ambient = isGif(project.cover) ? coverMeta.src : (await getImage({ src: coverMeta, width: 96, format: 'webp' })).src;
+const isLogo = coverPresentation(project.cover).fit === 'contain';
 ---
 
 <Base title={`${project.title} — ${profile.name}`} description={project.pitch} ogImage={project.cover}>
+  <div class:list={['ambient', { 'ambient-logo': isLogo }]} style={`--ambient: url("${ambient}")`} aria-hidden="true"></div>
   <article class="container project">
     <a class="back" href={`${url('/')}#work`}>← All work</a>
 
     <header class="head">
       <div class="head-text">
-        {project.status && <p class="status">{project.status}</p>}
-        <h1>{project.title}</h1>
+        {project.status && <p class="status" data-decode>{project.status}</p>}
+        <h1 style={`view-transition-name: title-${project.slug}`}>{project.title}</h1>
         <p class="pitch">{project.pitch}</p>
         <dl class="meta">
           {
@@ -46,13 +54,17 @@ const { project, prev, next } = Astro.props;
           }
         </dl>
       </div>
-      <Cover
-        class="head-cover"
-        file={project.cover}
-        alt={`${project.title} cover art`}
-        sizes="320px"
-        widths={[320, 640]}
-      />
+      <div class="head-art" data-tilt="10">
+        <Cover
+          class="head-cover"
+          file={project.cover}
+          alt={`${project.title} cover art`}
+          sizes="(min-width: 860px) 320px, 104px"
+          widths={[240, 320, 640]}
+          vt={`cover-${project.slug}`}
+          eager
+        />
+      </div>
     </header>
 
     {
@@ -134,11 +146,11 @@ const { project, prev, next } = Astro.props;
     }
 
     <nav class="pager" aria-label="More projects">
-      <a class="card card-link pager-link" href={url(`/work/${prev.slug}/`)}>
+      <a class="card card-link pager-link" data-tilt="4" href={url(`/work/${prev.slug}/`)}>
         <span class="muted">← Previous</span>
         <span class="pager-title">{prev.title}</span>
       </a>
-      <a class="card card-link pager-link next" href={url(`/work/${next.slug}/`)}>
+      <a class="card card-link pager-link next" data-tilt="4" href={url(`/work/${next.slug}/`)}>
         <span class="muted">Next →</span>
         <span class="pager-title">{next.title}</span>
       </a>
@@ -147,7 +159,47 @@ const { project, prev, next } = Astro.props;
 </Base>
 
 <style>
+  .ambient {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 820px;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent);
+    mask-image: linear-gradient(to bottom, #000 30%, transparent);
+  }
+
+  .ambient::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background: var(--ambient) center / cover no-repeat;
+    filter: blur(70px) saturate(1.35);
+    opacity: 0.32;
+    animation: ambient-drift 18s ease-in-out infinite alternate;
+  }
+
+  .ambient-logo::before {
+    opacity: 0.16;
+  }
+
+  @keyframes ambient-drift {
+    to {
+      transform: scale(1.15) translate(3%, -2%) rotate(3deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ambient::before {
+      animation: none;
+    }
+  }
+
   .project {
+    position: relative;
     padding-top: 2rem;
   }
 
@@ -165,13 +217,22 @@ const { project, prev, next } = Astro.props;
 
   .head {
     display: grid;
-    gap: 2rem;
+    gap: 1.25rem;
     align-items: center;
     margin-bottom: 2.5rem;
   }
 
-  .head :global(.head-cover) {
-    display: none;
+  .head-art {
+    order: -1;
+    width: 104px;
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .head-art :global(.head-cover) {
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.9);
   }
 
   @media (min-width: 860px) {
@@ -180,10 +241,13 @@ const { project, prev, next } = Astro.props;
       gap: 3rem;
     }
 
-    .head :global(.head-cover) {
-      display: block;
+    .head-art {
+      order: 0;
+      width: auto;
+    }
+
+    .head-art :global(.head-cover) {
       border-radius: var(--radius);
-      border: 1px solid var(--border);
     }
   }
 
@@ -279,6 +343,18 @@ const { project, prev, next } = Astro.props;
   .points li {
     position: relative;
     padding-left: 1.5rem;
+  }
+
+  .points li {
+    transition: translate 0.25s ease;
+  }
+
+  .points li:hover {
+    translate: 4px 0;
+  }
+
+  .points li:hover::before {
+    box-shadow: 0 0 10px var(--accent);
   }
 
   .points li::before {

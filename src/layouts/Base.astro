@@ -51,6 +51,14 @@ const year = new Date().getFullYear();
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogUrl} />
     <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      // Hide reveal targets before first paint; fx.ts reveals them. Fail open if it never runs.
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const r = document.documentElement;
+        r.classList.add('fx');
+        setTimeout(() => r.classList.contains('fx-ready') || r.classList.remove('fx'), 2500);
+      }
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -93,6 +101,9 @@ const year = new Date().getFullYear();
     </footer>
 
     <script>
+      import '../scripts/fx';
+    </script>
+    <script>
       // Close the mobile menu after choosing a link (same-page anchors don't reload).
       const menu = document.querySelector<HTMLDetailsElement>('.nav-mobile');
       menu?.addEventListener('click', (e) => {
@@ -113,9 +124,46 @@ const year = new Date().getFullYear();
     position: sticky;
     top: 0;
     z-index: 50;
-    background: rgb(11 11 15 / 0.85);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
+    background: rgb(11 11 15 / 0.55);
+    backdrop-filter: blur(14px) saturate(1.4);
+    border-bottom: 1px solid transparent;
+    view-transition-name: site-header;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  .site-header.is-scrolled {
+    background: rgb(11 11 15 / 0.82);
+    border-bottom-color: var(--border);
+    box-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.8);
+  }
+
+  /* Reading progress, driven by scroll position with no JS. */
+  @supports (animation-timeline: scroll()) {
+    .site-header::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), #ff7a3d);
+      transform-origin: 0 50%;
+      animation: read-progress linear both;
+      animation-duration: auto;
+      animation-timeline: scroll(root);
+    }
+
+    @keyframes read-progress {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
   }
 
   .header-inner {
@@ -133,6 +181,22 @@ const year = new Date().getFullYear();
     color: var(--text);
     text-decoration: none;
     white-space: nowrap;
+  }
+
+  .brand::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 0.55rem;
+    vertical-align: 0.12em;
+    background: var(--accent);
+    box-shadow: 0 0 10px rgb(245 165 36 / 0.8);
+    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .brand:hover::before {
+    transform: rotate(135deg);
   }
 
   .brand:hover {
@@ -155,6 +219,28 @@ const year = new Date().getFullYear();
 
   nav a:not(.btn):hover {
     color: var(--text);
+  }
+
+  .nav-desktop li a {
+    position: relative;
+  }
+
+  .nav-desktop li a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .nav-desktop li a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
   }
 
   .nav-desktop {
@@ -225,6 +311,17 @@ const year = new Date().getFullYear();
 
   .nav-mobile[open] .burger::after {
     transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .nav-mobile[open] nav {
+    animation: menu-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      translate: 0 -8px;
+    }
   }
 
   .nav-mobile nav {
