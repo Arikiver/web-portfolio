@@ -1,0 +1,538 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { education, experience, focusAreas, otherWork, profile, projects, skills } from '../data/portfolio';
+import { image } from '../lib/images';
+import { url } from '../lib/url';
+
+const featured = projects.filter((p) => p.featured);
+const more = projects.filter((p) => !p.featured);
+const bySlug = new Map(projects.map((p) => [p.slug, p]));
+const projectLinks = (slugs: string[]) =>
+  slugs.map((slug) => {
+    const p = bySlug.get(slug);
+    if (!p) throw new Error(`Unknown project slug: ${slug}`);
+    return { href: url(`/work/${slug}/`), title: p.title };
+  });
+const itch = profile.links.find((l) => l.label === 'itch.io');
+const resumeHref = url(`/${profile.resume}`);
+const portrait = await image(profile.photo);
+const otherImages = new Map(
+  await Promise.all(otherWork.flatMap((w) => (w.image ? [image(w.image).then((m) => [w.image, m] as const)] : []))),
+);
+---
+
+<Base title={`${profile.name} — ${profile.title}`} description={profile.intro}>
+  <section class="hero container">
+    <div class="hero-text">
+      <p class="eyebrow">{profile.title}</p>
+      <h1>{profile.name}</h1>
+      <p class="intro">{profile.intro}</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="#work">View work</a>
+        <a class="btn" href={resumeHref} download>Résumé</a>
+        {itch && <a class="btn" href={itch.url} rel="noopener">itch.io</a>}
+      </div>
+    </div>
+    <div class="hero-photo">
+      <Image
+        src={portrait}
+        alt={`Portrait of ${profile.name}`}
+        widths={[320, 480, 720, 960]}
+        sizes="(min-width: 960px) 400px, (min-width: 720px) 36vw, 70vw"
+        format="webp"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </div>
+  </section>
+
+  <section id="work" class="section container">
+    <div class="section-head">
+      <p class="eyebrow">Selected projects</p>
+      <h2 class="section-title">Featured work</h2>
+    </div>
+    <div class="grid-featured">
+      {featured.map((p) => <ProjectCard project={p} />)}
+    </div>
+
+    <h3 class="sub-title">More work</h3>
+    <div class="grid-more">
+      {more.map((p) => <ProjectCard project={p} size="small" />)}
+    </div>
+  </section>
+
+  <section class="section container" aria-labelledby="focus-title">
+    <div class="section-head">
+      <p class="eyebrow">What I bring</p>
+      <h2 class="section-title" id="focus-title">Technical focus</h2>
+    </div>
+    <ul class="focus-grid">
+      {
+        focusAreas.map((area, i) => (
+          <li class="card focus">
+            <span class="focus-index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{area.title}</h3>
+            <p class="muted">{area.text}</p>
+            <p class="related">
+              {projectLinks(area.links).map((l) => (
+                <a href={l.href}>{l.title} →</a>
+              ))}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section id="experience" class="section container">
+    <div class="section-head">
+      <p class="eyebrow">Where I've worked</p>
+      <h2 class="section-title">Experience</h2>
+    </div>
+    <ol class="timeline">
+      {
+        experience.map((job) => (
+          <li>
+            <div class="when">
+              <span class="chip">{job.dates}</span>
+            </div>
+            <div class="what">
+              <h3>
+                {job.role} <span class="org">· {job.org}</span>
+              </h3>
+              <p class="mode">{job.mode}</p>
+              <p class="muted">{job.summary}</p>
+              <p class="related">
+                {projectLinks(job.projects).map((l) => (
+                  <a href={l.href}>{l.title} →</a>
+                ))}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section id="skills" class="section container">
+    <div class="section-head">
+      <p class="eyebrow">Toolbox</p>
+      <h2 class="section-title">Skills</h2>
+    </div>
+    <div class="skills-grid">
+      {
+        skills.map((group) => (
+          <div class="card skill-group">
+            <h3>{group.group}</h3>
+            <ul class="chips">
+              {group.items.map((item) => (
+                <li class="chip">{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section container" aria-labelledby="other-title">
+    <div class="section-head">
+      <p class="eyebrow">Beyond games</p>
+      <h2 class="section-title" id="other-title">Other work</h2>
+    </div>
+    <ul class="other-grid">
+      {
+        otherWork.map((item) => (
+          <li class="card other">
+            {item.image && (
+              <Image
+                src={otherImages.get(item.image)!}
+                alt={`${item.title} render`}
+                widths={[400, 700, 1100]}
+                sizes="(min-width: 1184px) 368px, (min-width: 720px) calc(33vw - 32px), calc(100vw - 32px)"
+                format="webp"
+                loading="lazy"
+              />
+            )}
+            <div class="other-body">
+              <p class="chip other-kind">{item.kind}</p>
+              <h3>{item.title}</h3>
+              <p class="muted">{item.text}</p>
+              {item.link && (
+                <a href={item.link.url} rel="noopener">
+                  {item.link.label} ↗
+                </a>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section id="about" class="section container">
+    <div class="about">
+      <div>
+        <p class="eyebrow">About</p>
+        <h2 class="section-title">About me</h2>
+      </div>
+      <div>
+        {profile.about.map((para) => <p class="about-text">{para}</p>)}
+        <div class="card education">
+          <p class="eyebrow">Education</p>
+          <h3>{education.degree}</h3>
+          <p class="muted">
+            {education.school} · {education.dates} · CGPA {education.cgpa}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="section container">
+    <div class="card contact">
+      <p class="eyebrow">Contact</p>
+      <h2 class="section-title">Get in touch</h2>
+      <p class="muted">{profile.location}</p>
+      <p><a class="email" href={`mailto:${profile.email}`}>{profile.email}</a></p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href={`mailto:${profile.email}`}>Email</a>
+        {profile.links.map((l) => <a class="btn" href={l.url} rel="noopener">{l.label}</a>)}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+    padding-top: clamp(2.5rem, 7vw, 5.5rem);
+  }
+
+  .hero h1 {
+    font-size: clamp(2.6rem, 8vw, 4.75rem);
+    margin-bottom: 1.25rem;
+  }
+
+  .intro {
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    color: var(--muted);
+    max-width: 38rem;
+    margin-bottom: 2rem;
+  }
+
+  .hero-photo {
+    justify-self: center;
+    width: min(100%, 400px);
+    position: relative;
+  }
+
+  .hero-photo::before {
+    content: '';
+    position: absolute;
+    inset: 14px -14px -14px 14px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    opacity: 0.6;
+  }
+
+  .hero-photo img {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  @media (max-width: 719px) {
+    .hero-photo {
+      width: min(80%, 320px);
+      order: -1;
+    }
+  }
+
+  @media (min-width: 720px) {
+    .hero {
+      grid-template-columns: 1.4fr 1fr;
+    }
+  }
+
+  .grid-featured {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 720px) {
+    .grid-featured {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  .sub-title {
+    font-size: 1.4rem;
+    margin: 3.5rem 0 1.25rem;
+  }
+
+  .grid-more {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 560px) {
+    .grid-more {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 720px) {
+    .grid-more {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .focus-grid,
+  .other-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  }
+
+  .focus {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .focus p.muted {
+    flex: 1;
+  }
+
+  .focus-index {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .focus h3,
+  .skill-group h3,
+  .other h3 {
+    font-size: 1.2rem;
+  }
+
+  .related {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.1rem;
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+
+  .related a {
+    text-decoration: none;
+  }
+
+  .related a:hover {
+    text-decoration: underline;
+  }
+
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 2px solid var(--border);
+  }
+
+  .timeline li {
+    position: relative;
+    padding: 0 0 2.25rem 1.5rem;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .timeline li:last-child {
+    padding-bottom: 0;
+  }
+
+  .timeline li::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 0.45rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+  }
+
+  .when .chip {
+    display: inline-block;
+    color: var(--text);
+  }
+
+  .timeline h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .org {
+    color: var(--accent);
+  }
+
+  .mode {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .what p.muted {
+    margin-bottom: 0.6rem;
+  }
+
+  @media (min-width: 720px) {
+    .timeline {
+      border-left: 0;
+    }
+
+    .timeline li {
+      grid-template-columns: 200px 1fr;
+      gap: 2rem;
+      padding-left: 0;
+    }
+
+    .timeline li::before {
+      left: 208px;
+    }
+
+    .timeline li::after {
+      content: '';
+      position: absolute;
+      left: 213px;
+      top: 1.3rem;
+      bottom: -0.45rem;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline li:last-child::after {
+      display: none;
+    }
+
+    .when {
+      text-align: right;
+    }
+
+    .what {
+      padding-left: 1.5rem;
+    }
+  }
+
+  .skills-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 720px) {
+    .skills-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .skill-group {
+    padding: 1.5rem;
+  }
+
+  .skill-group .chip {
+    color: var(--text);
+  }
+
+  .other-grid {
+    align-items: start;
+  }
+
+  .other {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .other img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .other-body {
+    padding: 1.4rem 1.5rem 1.5rem;
+  }
+
+  .other-kind {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+  }
+
+  .about {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 860px) {
+    .about {
+      grid-template-columns: 1fr 2fr;
+      gap: 3rem;
+    }
+  }
+
+  .about-text {
+    font-size: 1.1rem;
+  }
+
+  .education {
+    padding: 1.4rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .education h3 {
+    font-size: 1.15rem;
+  }
+
+  .education p.muted {
+    margin: 0;
+  }
+
+  .contact {
+    padding: clamp(1.75rem, 5vw, 3.5rem);
+    text-align: center;
+    background:
+      radial-gradient(ellipse at top, rgb(245 165 36 / 0.12), transparent 60%),
+      var(--surface);
+  }
+
+  .contact .section-title {
+    margin-bottom: 0.5rem;
+  }
+
+  .email {
+    font-family: var(--font-head);
+    font-size: clamp(1.05rem, 4vw, 1.6rem);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .contact .btn-row {
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+</style>

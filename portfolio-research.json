@@ -1,0 +1,1216 @@
+{
+  "_meta": {
+    "purpose": "Source of truth for the portfolio website. Every fact carries a source key; see 'sources'.",
+    "last_updated": "2026-09-27",
+    "sources": {
+      "resume_gamedev": "Aaradhya_Bhatiya_Resume_GameDev.pdf / .docx (hyperlinks extracted from the docx relationships)",
+      "resume_kreo": "Aaradhya_Bhatiya_Resume_Kreo.pdf / .docx",
+      "itch_ref": "itch_portfolio_reference.txt (collected by owner from https://arikiver.itch.io/ on 27 Sep 2026)",
+      "drive_chalo_gdd": "Google Doc 'Chalo Yaar' (1ZVr-2gINh1e_5iv9jiDb6A91wIohIXg7LqpiLgisJ8I)",
+      "drive_boop_arch": "Google Doc 'Boop_Animation_System_Architecture.md' (1py0yKTeoiXs0XFTxPWKEkPGqLYFHaVjUC3mw-mAxtrQ)",
+      "drive_listing": "Google Drive file listing via the connected bhatiyaaaradhya@gmail.com account (metadata only)",
+      "owner_instructions": "Direct instructions from the portfolio owner in the research session (27 Sep 2026)"
+    },
+    "not_reachable_from_research_environment": [
+      "itch.io and img.itch.zone (covered instead by itch_ref)",
+      "youtube.com",
+      "github.com (profile and repositories not inspected)",
+      "linkedin.com",
+      "toniztoz.com",
+      "2min.win",
+      "Drive items owned by arikiver@gmail.com that were not shared with the connected account"
+    ],
+    "content_rules": [
+      "Only projects named in the resumes get their own entries. Other work is pooled into grouped entries, never separate project sections.",
+      "Boop: publish only the resume showcase link and https://heyboop.ai/. No other Boop videos, builds, rigs, internal docs or assets.",
+      "The 15+ AR client projects are text-only (local freelance clients, no public media)."
+    ]
+  },
+  "profile": {
+    "name": "Aaradhya Bhatiya",
+    "titles": {
+      "gamedev_resume": "Unity Developer | Technical Artist",
+      "kreo_resume": "Software Developer",
+      "website_target": "Unity Developer | Technical Artist"
+    },
+    "location": "Indore, India",
+    "phone": "+91 73899 77836",
+    "email": "bhatiyaaaradhya@gmail.com",
+    "handle": "Arikiver",
+    "summary_gamedev": "Unity developer and technical artist with 3+ years building shipped games and real-time applications across mobile, WebGL and AR, with depth in gameplay architecture, animation systems and custom HLSL shader programming. Production experience taking titles from GDD through Play Store release. Most recently owned the entire Unity client of a 3D character-driven mobile product, building its behaviour, animation, rendering and tooling systems end-to-end.",
+    "summary_kreo": "Software developer with production experience across mobile and web applications, working in C#, C/C++, Java, Python and JavaScript. Most recently took over and independently ran the entire client-side development of a production lifestyle application after the other developers on that side departed, owning feature implementation, cross-platform native integration, interop protocol design and release-blocking debugging. Final-year Computer Science student graduating 2026, comfortable moving between languages and technology stacks.",
+    "profile_image": "images/profile.jpeg",
+    "sources": [
+      "resume_gamedev",
+      "resume_kreo",
+      "itch_ref"
+    ]
+  },
+  "links": [
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/aaradhya-bhatiya-ab213124a/",
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo"
+      ],
+      "verified_reachable": false
+    },
+    {
+      "label": "GitHub",
+      "url": "https://github.com/Arikiver",
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo"
+      ],
+      "verified_reachable": false
+    },
+    {
+      "label": "Itch.io",
+      "url": "https://arikiver.itch.io/",
+      "sources": [
+        "resume_gamedev",
+        "itch_ref"
+      ],
+      "verified_reachable": true
+    },
+    {
+      "label": "Portfolio (Google Drive 'My Portfolio')",
+      "url": "https://drive.google.com/drive/folders/1IPBCjdRn0tulM7xojXfIyYjYkTnx51yU?usp=sharing",
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo"
+      ],
+      "verified_reachable": true
+    },
+    {
+      "label": "Email",
+      "url": "mailto:bhatiyaaaradhya@gmail.com",
+      "sources": [
+        "resume_gamedev"
+      ]
+    }
+  ],
+  "education": {
+    "degree": "B.Tech Computer Science and Engineering (spz. Gaming and Graphics)",
+    "institution": "UPES, Dehradun",
+    "cgpa": "7.78",
+    "dates": "2022 - 2026",
+    "relevant_coursework": [
+      "Data Structures and Algorithms",
+      "Operating Systems",
+      "Computer Networks",
+      "Object-Oriented Programming",
+      "Software Engineering",
+      "Computer Graphics",
+      "Android Development"
+    ],
+    "sources": [
+      "resume_gamedev",
+      "resume_kreo (coursework only in Kreo resume)"
+    ]
+  },
+  "skills": {
+    "languages": {
+      "gamedev_resume": [
+        "C#",
+        "C/C++",
+        "HLSL",
+        "GML",
+        "Python",
+        "JavaScript",
+        "SQL"
+      ],
+      "kreo_resume_additional": [
+        "Java",
+        "HTML/CSS"
+      ]
+    },
+    "engines_and_graphics": [
+      "Unity 3D/2D (URP)",
+      "GameMaker Studio",
+      "Custom HLSL shaders",
+      "Shader Graph",
+      "OpenGL 3.3",
+      "WebGL",
+      "Real-time VFX",
+      "Planar reflections",
+      "Procedural generation",
+      "Profiling and optimisation"
+    ],
+    "gameplay_systems": [
+      "Behaviour and state architecture",
+      "Animation systems and state machines",
+      "Character controllers",
+      "Rigidbody physics",
+      "AI pathfinding",
+      "Netcode for GameObjects",
+      "Custom editor tooling"
+    ],
+    "pipeline_and_tools": [
+      "Android and iOS builds",
+      "Play Store submission",
+      "IronSource ad mediation",
+      "Native plugins (Objective-C, Java/JNI)",
+      "Cross-device QA",
+      "Blender",
+      "Aseprite",
+      "Figma",
+      "Pixel art",
+      "Git/GitHub",
+      "JIRA",
+      "Asana"
+    ],
+    "engineering_kreo_resume": [
+      "Object-oriented design",
+      "Data-driven architecture",
+      "REST and GraphQL API integration",
+      "Real-time state synchronisation",
+      "Native interop (Objective-C, Java/JNI)",
+      "Performance profiling",
+      "Debugging",
+      "Test design and regression testing",
+      "PyQt6",
+      "SDK integration"
+    ],
+    "sources": [
+      "resume_gamedev",
+      "resume_kreo"
+    ]
+  },
+  "experience": [
+    {
+      "id": "boop",
+      "role": {
+        "gamedev_resume": "Unity Developer",
+        "kreo_resume": "Unity Developer"
+      },
+      "organization": "Boop",
+      "work_mode": {
+        "gamedev_resume": "Remote/Contract",
+        "kreo_resume": "Remote"
+      },
+      "dates": "Jun 2026 - Sep 2026",
+      "link": {
+        "url": "https://drive.google.com/drive/folders/12yyYrVSGrrs2wPI7EzFRCTH2OgBWxQSk?usp=sharing",
+        "note": "Drive folder 'Boop' owned by arikiver@gmail.com; contents not visible to the research account"
+      },
+      "bullets_gamedev": [
+        "Took over sole ownership of the Unity client for a 3D companion product after the other Unity developers departed, delivering all gameplay, animation, rendering and tooling work through to a near-release build.",
+        "Built a data-driven behaviour system: 27 ScriptableObject behaviours selected from live context by requirement matching and a priority ladder, with recency-weighted random selection so ambient behaviour reads as spontaneous, not looping.",
+        "Implemented a 20-step execution interpreter composing performances from reusable steps - anchor navigation, animation playback, gesture-scrubbed clips, rig displacement, camera control - so new behaviours could be authored in the Inspector without code, alongside 11 custom editor tools.",
+        "Solved animations authored flush against furniture by displacing the collider-free visual rig to an interaction anchor while the physics body held its legal position; refactored movement onto a single-writer motor, fixing a Rigidbody/transform desync causing drift.",
+        "Built state-driven animation variant swapping, spring-bone secondary motion and a frame-accurate audio cue system locked to the animator playhead; shipped three URP quality tiers with automatic device-tier detection and a zero-allocation CPU/GPU profiling overlay."
+      ],
+      "bullets_kreo": [
+        "Assumed sole responsibility for the Unity client of a production lifestyle application after the other Unity developers departed, independently owning all client-side development through to a near-release build.",
+        "Designed and documented the bi-directional message contract between the Unity runtime and the React Native host, adding an acknowledgement protocol that made a silently-failing interop layer diagnosable and a two-phase handshake that removed a startup deadlock between the runtimes.",
+        "Developed native platform plugins in Objective-C (iOS) and Java/JNI (Android) to reach device capabilities unavailable to the engine, with tiered degradation across hardware capability levels.",
+        "Built a data-driven architecture in which application behaviour is defined as editable configuration and interpreted at runtime, allowing new features to be authored without code changes.",
+        "Diagnosed a cross-runtime performance issue through on-device CPU and GPU profiling, establishing the engine consumed 6-11 ms against a 33 ms frame budget and redirecting investigation to main-thread contention."
+      ],
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo"
+      ]
+    },
+    {
+      "id": "toniztoz",
+      "role": {
+        "gamedev_resume": "Lead Game Developer",
+        "kreo_resume": "Lead Developer"
+      },
+      "organization": "TONIZTOZ",
+      "work_mode": "Remote",
+      "dates": "Mar 2025 - Present",
+      "link": {
+        "url": "https://www.toniztoz.com/",
+        "note": "Linked from GameDev resume; not inspected (blocked)"
+      },
+      "bullets_gamedev": [
+        "Sole senior developer leading a five-person cross-disciplinary team on an original 2D pixel-art horror game rooted in Asian folklore, owning it from storyline, storyboard and GDD through active development while mentoring juniors on Unity, Aseprite and asset workflows.",
+        "Architected the full project groundwork and core systems end-to-end, including the player animation pipeline and player class architecture.",
+        "Drove all visual development through custom HLSL shader programming: 2D volumetric fog, a pixel-art horror lighting pipeline, and bespoke ghost/demon shaders with distortion and translucency."
+      ],
+      "bullets_kreo": [
+        "Lead developer on a five-person cross-disciplinary team, owning technical direction and project architecture from specification through active development.",
+        "Architected core systems end-to-end including the animation pipeline and player class architecture, and wrote custom GPU shader programs in HLSL.",
+        "Maintained technical documentation, managed delivery timelines, and mentored junior developers on code structure and workflows."
+      ],
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo"
+      ]
+    },
+    {
+      "id": "pythrust",
+      "role": "Unity Developer Intern",
+      "organization": "Pythrust Technologies",
+      "location": "Gurugram, India",
+      "dates": "Oct 2025 - Jan 2026",
+      "product": "2MinWin by MINWIN Digital Studios",
+      "link": {
+        "url": "https://www.2min.win/",
+        "note": "Linked from GameDev resume on the Pythrust entry; not inspected (blocked)"
+      },
+      "bullets_gamedev": [
+        "Developed 17+ complete mini-games from scratch inside 2MinWin by MINWIN Digital Studios as part of a five-person team, implementing multiplayer, VFX, UI and SFX end-to-end for each and working with UI and sound design to keep proposed designs replicable in engine.",
+        "Integrated the IronSource ad mediation SDK alongside analytics and backend services; ran cross-device regression testing and tracked delivery through Asana."
+      ],
+      "bullets_kreo": [
+        "Delivered 17+ complete interactive modules from scratch within a live consumer product as part of a five-person team, implementing real-time multiplayer, UI and audio systems end-to-end.",
+        "Integrated the IronSource ad mediation SDK alongside analytics and backend services into a live production title.",
+        "Wrote and maintained test cases, ran cross-device regression testing, and tracked tasks and deadlines through Asana."
+      ],
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo"
+      ]
+    },
+    {
+      "id": "independent",
+      "role": {
+        "gamedev_resume": "Independent Contractor",
+        "kreo_resume": "Independent Developer (Contract)"
+      },
+      "work_mode": {
+        "gamedev_resume": "Remote/Contract",
+        "kreo_resume": "Remote"
+      },
+      "dates": "2024 - Present",
+      "bullets_gamedev": [
+        "Delivered 15+ AR Unity projects including real-time tracking systems, indoor navigation using 3D spatial scans, and interactive environments.",
+        "Built and shipped four real-time casual casino games (Mines, Roulette, Crash, Teen Patti) with backend API integration, RTP mathematical models, live wallet systems and retention-focused gameplay loops."
+      ],
+      "bullets_kreo": [
+        "Built and shipped four real-time casino applications with backend API integration, live wallet systems, balance synchronisation, currency switching, and mathematical probability and RTP models.",
+        "Delivered 15+ AR applications including real-time tracking systems and indoor navigation built on 3D spatial scans, across desktop and mobile."
+      ],
+      "sub_projects": [
+        "ar-portfolio",
+        "casino-games"
+      ],
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "chalo-yaar",
+      "name": "Chalo Yaar!",
+      "subtitle": {
+        "gamedev_resume": "3D Multiplayer Travel Survival Game",
+        "kreo_resume": "3D Multiplayer Survival Application",
+        "itch": "A cozy 3D travel simulator about road trips, exploration, photography, and vanlife."
+      },
+      "hero_tagline": "The roadtrip you and your friends always talked about.",
+      "type": "Personal project (3D game)",
+      "dates": "Jan 2026 - May 2026",
+      "itch_published": "May 24, 2026",
+      "status": "In development (itch)",
+      "engine": "Unity (URP)",
+      "platforms": [
+        "Windows"
+      ],
+      "genre": [
+        "Adventure",
+        "Simulation"
+      ],
+      "itch_tags": [
+        "3D",
+        "Cozy",
+        "Feel Good",
+        "First-Person",
+        "Indie",
+        "Multiplayer",
+        "No AI",
+        "Unity"
+      ],
+      "multiplayer": "Server-based networked multiplayer (itch); Netcode for GameObjects (resume)",
+      "inputs": [
+        "Keyboard",
+        "Mouse"
+      ],
+      "price": "Free",
+      "download": {
+        "page": "https://arikiver.itch.io/chalo-yaar",
+        "file": "ChaloYaar.zip",
+        "size": "553 MB",
+        "platform": "Windows",
+        "note": "itch download URLs are temporary; link the project page"
+      },
+      "my_role": {
+        "resume": "Not stated as a title; bullets describe building the prototype and its rendering systems",
+        "drive_chalo_gdd": "Lead Dev: Systems, Networking, Architecture, Core Logic, Physics, Optimization. Partner (Swarnima): Art, 3D Modeling (Blender), UI/UX, Content Creation, Basic Unity Implementation."
+      },
+      "technologies": [
+        "Unity (URP)",
+        "C#",
+        "HLSL",
+        "Netcode for GameObjects",
+        "Blender",
+        "Unity Profiler"
+      ],
+      "description_itch": [
+        "A cozy stylized 3D travel simulator inspired by late-night trip plans, long drives, beautiful landscapes, and the feeling of exploring the world with friends.",
+        "\"Chalo Yaar!\" is a cozy first-person travel experience where you explore peaceful environments, drive your campervan across beautiful landscapes, capture moments through photography, and simply enjoy the atmosphere of the journey.",
+        "The game was inspired by a very relatable feeling: that one late-night conversation where everyone suddenly decides, \"Chal yaar, Goa chalte hain.\" Plans get made. Everyone gets excited. And then life happens. Schedules clash, budgets fail, parents say no, and the trip never happens.",
+        "This project was created to capture that feeling digitally — the freedom of the road, the calmness of travel, and the warmth of shared adventures.",
+        "This is not a fast-paced action game or a hardcore survival experience. \"Chalo Yaar!\" is designed to feel relaxing, immersive, and atmospheric."
+      ],
+      "features_itch": [
+        "Drive your own campervan",
+        "Explore large stylized natural environments",
+        "Wildlife photography system",
+        "Interactive inventory and travel systems",
+        "Atmospheric volumetric fog",
+        "Custom stylized water shaders",
+        "Dynamic foliage and wind simulation",
+        "Immersive region-based ambient audio",
+        "Cozy exploration-focused gameplay",
+        "Dynamic cinematic environments"
+      ],
+      "technical_details_resume": [
+        "First-person exploration, drivable campervan hub, wildlife photography progression, inventory and survival stat systems, on a modular multiplayer architecture using Netcode for GameObjects.",
+        "Custom HLSL rendering systems: procedural water shader with Worley Noise caustics, volumetric fog from 3D noise, GPU foliage wind simulation via vertex displacement.",
+        "Reduced draw call batches from 130,000+ to under 30,000 and raised sustained framerate from 15 fps to 50+ fps through shadow caster reduction, LOD tuning and volumetric fog masking foliage culling."
+      ],
+      "design_doc_summary": "GDD describes a cozy co-op road trip (up to four players, first-person) from Dehradun to Goa in a camper van, with van systems (fuel, health, stove gas, trash, lavatory, water), player needs (hunger, thirst, stamina, drowsiness), consumables, budget, photography and delivery jobs, day/night cycle, and a 25-week, 6-phase roadmap. Design intent, not a statement of shipped features.",
+      "controls": {
+        "WASD": "Movement",
+        "Mouse": "Look around",
+        "Shift": "Sprint",
+        "Space": "Jump",
+        "E": "Interact",
+        "Hotbar": "Inventory"
+      },
+      "install": "Download and extract the ZIP, run ChaloYaar.exe. Windows only; headphones recommended.",
+      "closing_line": "Pack your bags. Start the engine. Hit the road.",
+      "videos": [
+        "yt-chalo-yaar"
+      ],
+      "media": [
+        "img-chaloyaar-local",
+        "itch-chalo-cover",
+        "itch-chalo-header",
+        "itch-chalo-bg",
+        "itch-chalo-ss-01",
+        "itch-chalo-ss-02",
+        "itch-chalo-ss-03",
+        "itch-chalo-ss-04",
+        "itch-chalo-ss-05",
+        "itch-chalo-ss-06"
+      ],
+      "thumbnail": "images/chaloYaar.png",
+      "links": [
+        {
+          "label": "Itch.io page",
+          "url": "https://arikiver.itch.io/chalo-yaar"
+        },
+        {
+          "label": "Trailer (YouTube)",
+          "url": "https://www.youtube.com/watch?v=oYaKnmNOppA"
+        }
+      ],
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo",
+        "itch_ref",
+        "drive_chalo_gdd"
+      ]
+    },
+    {
+      "id": "slenderar",
+      "name": "SlenderAR",
+      "subtitle": {
+        "gamedev_resume": "AR Horror Survival",
+        "itch": "Step into the portal where reality fades, the woods await."
+      },
+      "type": "Personal project (AR game)",
+      "dates": {
+        "gamedev_resume": "2024 - 2025 (shared date range with Lucius)",
+        "itch_published": "Oct 03, 2025"
+      },
+      "status": "In development (itch)",
+      "engine": "Unity 3D with AR Foundation",
+      "platforms": [
+        "Android"
+      ],
+      "genre": [
+        "Survival"
+      ],
+      "itch_tags": [
+        "Augmented Reality",
+        "Horror"
+      ],
+      "price": "Free",
+      "download": {
+        "page": "https://arikiver.itch.io/slenderar",
+        "file": "slenderAR.apk",
+        "size": "130 MB",
+        "platform": "Android"
+      },
+      "description_resume": "Recreated the Slenderman experience in AR with Unity and AR Foundation, with portal-based entry, player-tracking AI and dynamic audio.",
+      "description_itch": [
+        "SlenderAR is a Unity 3D horror experience that merges reality with nightmare. Step through a mysterious AR portal and find yourself lost in dark, ominous woods where the legendary Slenderman lurks in the shadows, always watching, always waiting.",
+        "Move by walking in the real world as your surroundings transform into a haunting forest filled with eerie sounds, flickering lights, and creeping dread. Experience the myth like never before — SlenderAR blurs the line between what's real and what's hunting you."
+      ],
+      "safety_note": "Be safe and make sure to play in an open environment.",
+      "technical_details": [
+        "AR portal entry",
+        "Real-world walking locomotion",
+        "Player-tracking AI (resume)",
+        "Dynamic audio (resume)",
+        "Android build"
+      ],
+      "videos": [
+        "yt-slenderar"
+      ],
+      "media": [
+        "img-slenderar-local",
+        "itch-slender-cover",
+        "itch-slender-bg",
+        "itch-slender-ss-01",
+        "itch-slender-ss-02",
+        "itch-slender-ss-03",
+        "itch-slender-ss-04",
+        "itch-slender-ss-05"
+      ],
+      "thumbnail": "images/slenderAR.png",
+      "links": [
+        {
+          "label": "Itch.io page",
+          "url": "https://arikiver.itch.io/slenderar"
+        },
+        {
+          "label": "Video (YouTube)",
+          "url": "https://www.youtube.com/watch?v=1bffKKCimHk"
+        }
+      ],
+      "sources": [
+        "resume_gamedev",
+        "itch_ref"
+      ]
+    },
+    {
+      "id": "lucius",
+      "name": "Lucius: The Endless Maze Runner",
+      "type": "Personal project (3D game)",
+      "dates": "2024 - 2025 (resume date range shared with SlenderAR)",
+      "status": "Not released (confirmed by owner)",
+      "engine": "Unity (implied by resume context; not explicitly stated for Lucius)",
+      "description_resume": "A 3D horror maze runner using a backtracking algorithm for procedural level generation, with enemy AI pathfinding that adapts dynamically to player position through generated mazes.",
+      "technical_details": [
+        "Backtracking-algorithm procedural maze generation",
+        "Enemy AI pathfinding adapting to player position"
+      ],
+      "videos": [
+        "drive-lucius-gameplay"
+      ],
+      "media": [
+        "img-lucius-local"
+      ],
+      "thumbnail": "images/lucius.png",
+      "links": [
+        {
+          "label": "Gameplay video (Google Drive)",
+          "url": "https://drive.google.com/file/d/1mu2ZT26Vfk42WS5KUoU2iJ8OhXhLIaPG/view?usp=sharing"
+        }
+      ],
+      "sources": [
+        "resume_gamedev",
+        "itch_ref",
+        "drive_listing"
+      ],
+      "display_note": "Do not describe Lucius as launched or published. The GameDev resume's 'Both launched on Itch.io' applies only to SlenderAR."
+    },
+    {
+      "id": "toniztoz-game",
+      "name": "The God They Buried (TONIZTOZ)",
+      "type": "Studio/team project",
+      "dates": "Mar 2025 - Present",
+      "status": "Active development",
+      "engine": "Unity (2D, inferred from resume: 'mentoring juniors on Unity')",
+      "platforms": "Not stated in any source",
+      "description_resume": "Original 2D pixel-art horror game rooted in Asian folklore, built by a five-person cross-disciplinary team.",
+      "technical_details": [
+        "2D volumetric fog (HLSL)",
+        "Pixel-art horror lighting pipeline",
+        "Ghost/demon shaders with distortion and translucency",
+        "Player animation pipeline",
+        "Player class architecture"
+      ],
+      "experience_ref": "toniztoz",
+      "media": [
+        "img-toniztoz-local"
+      ],
+      "thumbnail": "images/toniztoz.gif",
+      "links": [
+        {
+          "label": "Demo video (Google Drive)",
+          "url": "https://drive.google.com/file/d/126qnavgo7vb0iNE021qdISF64UULAAeX/view?usp=sharing"
+        },
+        {
+          "label": "TONIZTOZ",
+          "url": "https://www.toniztoz.com/"
+        }
+      ],
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo",
+        "owner_instructions",
+        "drive_listing"
+      ],
+      "videos": [
+        "drive-toniztoz-demo"
+      ]
+    },
+    {
+      "id": "boop-client",
+      "name": "Boop",
+      "type": "Contract work (3D character-driven mobile product)",
+      "dates": "Jun 2026 - Sep 2026",
+      "status": "Near-release build at end of engagement",
+      "engine": "Unity (URP)",
+      "platforms": "iOS and Android (inferred from native plugins in Objective-C and Java/JNI; React Native host app)",
+      "technical_details": [
+        "27 ScriptableObject behaviours, requirement matching, priority ladder, recency-weighted random selection",
+        "20-step execution interpreter; 11 custom editor tools",
+        "Visual rig displacement to interaction anchors; single-writer motor fixing Rigidbody/transform desync",
+        "Animation variant swapping, spring-bone secondary motion, frame-accurate audio cues",
+        "Three URP quality tiers with device-tier detection; zero-allocation CPU/GPU profiling overlay",
+        "Unity <-> React Native message contract with acknowledgement protocol and two-phase handshake (Kreo resume)",
+        "Profiling: engine at 6-11 ms against 33 ms frame budget (Kreo resume)"
+      ],
+      "experience_ref": "boop",
+      "media": [
+        "img-boop-local"
+      ],
+      "thumbnail": "images/boop.png",
+      "confidentiality_note": "Set by owner: publish only the showcase link and heyboop.ai.",
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo",
+        "owner_instructions"
+      ],
+      "public_media_policy": "Only the resume-linked showcase (visual fidelity work) and the company site may be shown. Everything else stays private.",
+      "links": [
+        {
+          "label": "Visual fidelity showcase (Google Drive)",
+          "url": "https://drive.google.com/file/d/1gIUUimRCxfSjxRWRU8nEoRExLu8O3LdW/view?usp=sharing",
+          "note": "Owner-approved public video 'Boop visuals Demo.mp4'."
+        },
+        {
+          "label": "Boop",
+          "url": "https://heyboop.ai/"
+        }
+      ],
+      "videos": [
+        "drive-boop-visuals"
+      ]
+    },
+    {
+      "id": "2minwin",
+      "name": "2MinWin (by MINWIN Digital Studios)",
+      "type": "Internship work (live mobile product)",
+      "dates": "Oct 2025 - Jan 2026",
+      "description_resume": "17+ mini-games built from scratch inside 2MinWin, implementing multiplayer, VFX, UI and SFX; IronSource, analytics and backend integration.",
+      "experience_ref": "pythrust",
+      "media": [
+        "img-2minwin-local"
+      ],
+      "thumbnail": "images/2minwin.jpg",
+      "links": [
+        {
+          "label": "2MinWin",
+          "url": "https://www.2min.win/"
+        }
+      ],
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo"
+      ]
+    },
+    {
+      "id": "casino-games",
+      "name": "Casino Games (Mines, Roulette, Crash, Teen Patti)",
+      "type": "Contract work",
+      "dates": "Within 2024 - Present (no specific dates)",
+      "description_resume": "Four real-time casual casino games with backend API integration, RTP mathematical models, live wallet systems, balance synchronisation, currency switching and retention-focused gameplay loops.",
+      "experience_ref": "independent",
+      "videos": [
+        "drive-casino-showcase"
+      ],
+      "media": [
+        "img-casino-local"
+      ],
+      "thumbnail": "images/casino.png",
+      "links": [
+        {
+          "label": "Showcase video (Google Drive)",
+          "url": "https://drive.google.com/file/d/1z-a7FEdexifu57A-EBr27j9TohTP_SBw/view?usp=sharing"
+        }
+      ],
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo",
+        "owner_instructions"
+      ],
+      "platforms": [
+        "Web (Unity WebGL / HTML5 build embedded in the client platform's website UI)"
+      ]
+    },
+    {
+      "id": "ar-vr-work",
+      "name": "AR & VR Work",
+      "type": "Pooled entry: freelance AR/VR client work",
+      "dates": "Within 2024 - Present",
+      "description_resume": "15+ AR Unity projects for local freelance clients, including real-time tracking systems, indoor navigation built on 3D spatial scans, and interactive environments, across desktop and mobile.",
+      "individual_projects": "Text only by owner decision; client projects have no public media.",
+      "experience_ref": "independent",
+      "videos": [
+        "drive-ar-showreel"
+      ],
+      "media": [
+        "img-ar-local"
+      ],
+      "thumbnail": "images/ar.png",
+      "links": [
+        {
+          "label": "AR/VR showreel (Google Drive)",
+          "url": "https://drive.google.com/file/d/1iMk_JXJmiUd9uYt55lHy2tGyB1OgJUSP/view"
+        }
+      ],
+      "sources": [
+        "resume_gamedev",
+        "resume_kreo",
+        "owner_instructions",
+        "drive_listing"
+      ],
+      "cover_video": "drive-ar-showreel",
+      "related_projects": [
+        "slenderar"
+      ]
+    },
+    {
+      "id": "other-work",
+      "name": "Other Work",
+      "type": "Pooled entry (not separate project sections)",
+      "items": [
+        {
+          "name": "AssistSense - Python Desktop Automation System",
+          "dates": "Oct 2025 - Dec 2025",
+          "summary": "Two-person team. Macro engine (timed input recording, IF/ELIF/ELSE playback, versioned JSON schema with screen-normalised coordinates), wake-word voice listener, multi-modal trigger dispatcher and PyQt6 UI.",
+          "tech": [
+            "Python",
+            "PyQt6"
+          ],
+          "source": "resume_kreo"
+        },
+        {
+          "name": "Questify - Gamified Task Manager",
+          "dates": "Jul 2024 - Nov 2024",
+          "summary": "Task manager in C# integrating a GraphQL API and GitHub activity tracking to verify real user productivity.",
+          "tech": [
+            "C#",
+            "GraphQL"
+          ],
+          "source": "resume_kreo"
+        },
+        {
+          "name": "Himeji Castle - Blender environment",
+          "dates": "Semester 4 of B.Tech (dated files: Nov 2023 - Sep 2024)",
+          "summary": "A creative interpretation of Himeji Castle in front of Mount Fuji, with emitters and wind physics animating sakura petals and camera work for a bokeh effect. Built as a semester-4 project for the Graphics and Gaming degree.",
+          "tech": [
+            "Blender",
+            "Particle emitters",
+            "Wind physics",
+            "Camera depth of field"
+          ],
+          "media": [
+            "img-himeji-render"
+          ],
+          "links": [
+            {
+              "label": "Render and video showcase (Google Drive)",
+              "url": "https://drive.google.com/drive/folders/10Iq7DFO_q4Xh09AojgfRaRQKPMe-KS5c"
+            }
+          ],
+          "source": "owner_instructions; Himeji_Readme.txt in Drive"
+        }
+      ],
+      "candidate_links_pending_owner": [
+        {
+          "label": "GitHub repositories",
+          "url": "https://github.com/Arikiver",
+          "note": "Not inspected (blocked). Owner to name repos worth linking."
+        }
+      ],
+      "sources": [
+        "resume_kreo",
+        "drive_listing"
+      ]
+    }
+  ],
+  "media": [
+    {
+      "id": "img-profile-local",
+      "type": "image",
+      "path": "images/profile.jpeg",
+      "project": "profile",
+      "origin": "existing curated asset"
+    },
+    {
+      "id": "img-boop-local",
+      "type": "image",
+      "path": "images/boop.png",
+      "project": "boop-client",
+      "origin": "existing curated asset"
+    },
+    {
+      "id": "img-toniztoz-local",
+      "type": "image/gif",
+      "path": "images/toniztoz.gif",
+      "project": "toniztoz-game",
+      "origin": "existing curated asset"
+    },
+    {
+      "id": "img-chaloyaar-local",
+      "type": "image",
+      "path": "images/chaloYaar.png",
+      "project": "chalo-yaar",
+      "origin": "existing curated asset"
+    },
+    {
+      "id": "img-2minwin-local",
+      "type": "image",
+      "path": "images/2minwin.jpg",
+      "project": "2minwin",
+      "origin": "existing curated asset"
+    },
+    {
+      "id": "img-lucius-local",
+      "type": "image",
+      "path": "images/lucius.png",
+      "project": "lucius",
+      "origin": "existing curated asset"
+    },
+    {
+      "id": "img-slenderar-local",
+      "type": "image",
+      "path": "images/slenderAR.png",
+      "project": "slenderar",
+      "origin": "existing curated asset"
+    },
+    {
+      "id": "img-ar-local",
+      "type": "image",
+      "path": "images/ar.png",
+      "project": "ar-vr-work",
+      "origin": "existing curated asset"
+    },
+    {
+      "id": "img-casino-local",
+      "type": "image",
+      "path": "images/casino.png",
+      "project": "casino-games",
+      "origin": "existing curated asset"
+    },
+    {
+      "id": "itch-chalo-cover",
+      "type": "image",
+      "role": "cover/thumbnail",
+      "project": "chalo-yaar",
+      "source_url": "https://img.itch.zone/aW1nLzI3NDU0ODY5LnBuZw==/original/jGq%2FFi.png",
+      "planned_path": "images/chaloyaar-itch-cover.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-chalo-header",
+      "type": "image",
+      "role": "page header/logo",
+      "project": "chalo-yaar",
+      "source_url": "https://img.itch.zone/aW1nLzI3NDU1NDA1LnBuZw==/original/audd0q.png",
+      "planned_path": "images/chaloyaar-itch-logo.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-chalo-bg",
+      "type": "image",
+      "role": "page background",
+      "project": "chalo-yaar",
+      "source_url": "https://img.itch.zone/aW1nLzI3NDU1NTcxLnBuZw==/original/IWoDLT.png",
+      "planned_path": "images/chaloyaar-itch-background.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-chalo-ss-01",
+      "type": "image",
+      "role": "screenshot",
+      "project": "chalo-yaar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTMwMS5wbmc=/original/11wuPA.png",
+      "planned_path": "images/chaloyaar-screenshot-01.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-chalo-ss-02",
+      "type": "image",
+      "role": "screenshot",
+      "project": "chalo-yaar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTMwMi5wbmc=/original/mKGdm8.png",
+      "planned_path": "images/chaloyaar-screenshot-02.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-chalo-ss-03",
+      "type": "image",
+      "role": "screenshot",
+      "project": "chalo-yaar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTI5OC5wbmc=/original/uF%2F3WS.png",
+      "planned_path": "images/chaloyaar-screenshot-03.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-chalo-ss-04",
+      "type": "image",
+      "role": "screenshot",
+      "project": "chalo-yaar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTMwMC5wbmc=/original/US7U0W.png",
+      "planned_path": "images/chaloyaar-screenshot-04.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-chalo-ss-05",
+      "type": "image",
+      "role": "screenshot",
+      "project": "chalo-yaar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTMwMy5wbmc=/original/xMCqSk.png",
+      "planned_path": "images/chaloyaar-screenshot-05.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-chalo-ss-06",
+      "type": "image",
+      "role": "screenshot",
+      "project": "chalo-yaar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTI5OS5wbmc=/original/oTI28P.png",
+      "planned_path": "images/chaloyaar-screenshot-06.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-slender-cover",
+      "type": "image",
+      "role": "cover/thumbnail",
+      "project": "slenderar",
+      "source_url": "https://img.itch.zone/aW1nLzIzNDI5NzM0LmpwZw==/original/GKIpSz.jpg",
+      "planned_path": "images/slenderar-itch-cover.jpg",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-slender-bg",
+      "type": "image",
+      "role": "page background",
+      "project": "slenderar",
+      "source_url": "https://img.itch.zone/aW1nLzIzNDI5ODA3LmpwZw==/original/dQbi7f.jpg",
+      "planned_path": "images/slenderar-itch-background.jpg",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-slender-ss-01",
+      "type": "image",
+      "role": "screenshot",
+      "project": "slenderar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvMzkyOTExOC8yMzQyOTcwMS5wbmc=/original/6jM4m7.png",
+      "planned_path": "images/slenderar-screenshot-01.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-slender-ss-02",
+      "type": "image",
+      "role": "screenshot",
+      "project": "slenderar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvMzkyOTExOC8yMzQyOTcwMC5wbmc=/original/ofnb9r.png",
+      "planned_path": "images/slenderar-screenshot-02.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-slender-ss-03",
+      "type": "image",
+      "role": "screenshot",
+      "project": "slenderar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvMzkyOTExOC8yMzQyOTcwMy5wbmc=/original/wJ%2FMT2.png",
+      "planned_path": "images/slenderar-screenshot-03.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-slender-ss-04",
+      "type": "image",
+      "role": "screenshot",
+      "project": "slenderar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvMzkyOTExOC8yMzQyOTcwMi5wbmc=/original/zHNmYI.png",
+      "planned_path": "images/slenderar-screenshot-04.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "itch-slender-ss-05",
+      "type": "image",
+      "role": "screenshot",
+      "project": "slenderar",
+      "source_url": "https://img.itch.zone/aW1hZ2UvMzkyOTExOC8yMzQyOTY5OS5wbmc=/original/0XKeTy.png",
+      "planned_path": "images/slenderar-screenshot-05.png",
+      "downloaded": false,
+      "ownership": "Own project page (Arikiver)"
+    },
+    {
+      "id": "img-himeji-render",
+      "type": "image",
+      "role": "render",
+      "project": "other-work",
+      "path": "images/Himeji castle.png",
+      "resolution": "1138x640",
+      "source_url": "https://drive.google.com/file/d/1tUXQs8AXc508KaS0hdqjYsEQ5SJjmakK/view",
+      "downloaded": true,
+      "ownership": "Own work (owner's Drive, owner-supplied folder)",
+      "note": "A larger 'Castle.png' (8 MB, file 19fRjS1-DrJs2DUlLGGoNhTEKCKi-Be6p) also exists; not downloaded."
+    }
+  ],
+  "videos": [
+    {
+      "id": "yt-chalo-yaar",
+      "project": "chalo-yaar",
+      "platform": "YouTube",
+      "watch_url": "https://www.youtube.com/watch?v=oYaKnmNOppA",
+      "embed_url": "https://www.youtube.com/embed/oYaKnmNOppA",
+      "source": "itch_ref (embedded on itch page)"
+    },
+    {
+      "id": "yt-slenderar",
+      "project": "slenderar",
+      "platform": "YouTube",
+      "watch_url": "https://www.youtube.com/watch?v=1bffKKCimHk",
+      "embed_url": "https://www.youtube.com/embed/1bffKKCimHk",
+      "source": "itch_ref (embedded on itch page)"
+    },
+    {
+      "id": "drive-lucius-gameplay",
+      "project": "lucius",
+      "platform": "Google Drive",
+      "title": "Lucius Gameplay - compressed.mp4",
+      "size": "3.7 MB",
+      "view_url": "https://drive.google.com/file/d/1mu2ZT26Vfk42WS5KUoU2iJ8OhXhLIaPG/view?usp=sharing",
+      "embed_url": "https://drive.google.com/file/d/1mu2ZT26Vfk42WS5KUoU2iJ8OhXhLIaPG/preview",
+      "source": "resume_gamedev hyperlink",
+      "note": "Small enough to self-host or upload to YouTube"
+    },
+    {
+      "id": "drive-casino-showcase",
+      "project": "casino-games",
+      "platform": "Google Drive",
+      "title": "CasinoGamesShowcase.mp4",
+      "size": "186 MB",
+      "view_url": "https://drive.google.com/file/d/1z-a7FEdexifu57A-EBr27j9TohTP_SBw/view?usp=sharing",
+      "embed_url": "https://drive.google.com/file/d/1z-a7FEdexifu57A-EBr27j9TohTP_SBw/preview",
+      "source": "resume_gamedev hyperlink",
+      "note": "Drive previews are slow and quota-limited; uploading to YouTube (unlisted) is recommended"
+    },
+    {
+      "id": "drive-ar-showreel",
+      "project": "ar-vr-work",
+      "platform": "Google Drive",
+      "title": "AR_VR Showreel.mp4",
+      "size": "1.3 GB",
+      "view_url": "https://drive.google.com/file/d/1iMk_JXJmiUd9uYt55lHy2tGyB1OgJUSP/view",
+      "embed_url": "https://drive.google.com/file/d/1iMk_JXJmiUd9uYt55lHy2tGyB1OgJUSP/preview",
+      "source": "drive_listing (inside the AR/VR folder linked from resume)",
+      "note": "Too large for reliable Drive embedding; upload to YouTube recommended",
+      "role": "Cover video for AR & VR Work"
+    },
+    {
+      "id": "drive-toniztoz-demo",
+      "project": "toniztoz-game",
+      "platform": "Google Drive",
+      "title": "The God They Buried - Demo",
+      "size": "24.8 MB",
+      "view_url": "https://drive.google.com/file/d/126qnavgo7vb0iNE021qdISF64UULAAeX/view?usp=sharing",
+      "embed_url": "https://drive.google.com/file/d/126qnavgo7vb0iNE021qdISF64UULAAeX/preview",
+      "source": "owner_instructions; file is in the 'My Portfolio' Drive",
+      "note": "Drive filename reads 'The Gods They Burried Demo'; official title confirmed by owner as 'The God They Buried'."
+    },
+    {
+      "id": "drive-boop-visuals",
+      "project": "boop-client",
+      "platform": "Google Drive",
+      "title": "Boop visuals Demo.mp4",
+      "size": "90 MB",
+      "view_url": "https://drive.google.com/file/d/1gIUUimRCxfSjxRWRU8nEoRExLu8O3LdW/view?usp=sharing",
+      "embed_url": "https://drive.google.com/file/d/1gIUUimRCxfSjxRWRU8nEoRExLu8O3LdW/preview",
+      "source": "owner_instructions",
+      "note": "The only Boop video approved for public use. Showcases visual fidelity work."
+    }
+  ],
+  "external_sources": [
+    {
+      "url": "https://arikiver.itch.io/",
+      "status": "Covered via itch_ref",
+      "findings": "2 published projects (Chalo Yaar!, SlenderAR). Collections 'COOOL' and 'hehe' contain other creators' assets and are excluded."
+    },
+    {
+      "url": "https://drive.google.com/drive/folders/1IPBCjdRn0tulM7xojXfIyYjYkTnx51yU",
+      "status": "Partially visible",
+      "findings": "'My Portfolio' > 'Projects' > 'AR/VR' (contains AR_VR Showreel.mp4). Other subfolders of 'Projects', if any, are not shared with the connected account."
+    },
+    {
+      "url": "https://drive.google.com/drive/folders/12yyYrVSGrrs2wPI7EzFRCTH2OgBWxQSk",
+      "status": "Folder visible, contents not visible",
+      "findings": "'Boop' folder (created 17 Sep 2026)."
+    },
+    {
+      "url": "https://www.toniztoz.com/",
+      "status": "Not inspected (network blocked)"
+    },
+    {
+      "url": "https://www.2min.win/",
+      "status": "Not inspected (network blocked)"
+    },
+    {
+      "url": "https://github.com/Arikiver",
+      "status": "Not inspected (network blocked; outside session repo scope)"
+    },
+    {
+      "url": "https://www.linkedin.com/in/aaradhya-bhatiya-ab213124a/",
+      "status": "Not inspected (network blocked)"
+    }
+  ],
+  "third_party_material_flagged": [
+    {
+      "item": "Boop rig files (RIG_BOOP.blend/.fbx/.rar), 'Boop Assets', 'Boop Rig', 'Animation Files for Boop', 'boop animations'",
+      "owners": "noe.douliere@, lutaigame.oficial@, thekreoapp@, artidery@",
+      "reason": "Client/collaborator-owned. Owner confirmed: do not publish."
+    },
+    {
+      "item": "TONIZTOZ art ('TONIZTOZ GameArt Candidates', 'Subarna_TONIZTOZ_Horrorscene.png')",
+      "owners": "laughingjack881@, subarnapalai53@",
+      "reason": "Created by team members/candidates. Credit and permission needed."
+    },
+    {
+      "item": "'Music for boop homepage and chat'",
+      "owners": "gmph786@",
+      "reason": "Third-party audio for a client product."
+    }
+  ],
+  "unverified_information": [
+    "TONIZTOZ start: Drive has 'Toniztoz_COC_SummerInternship_page-0001.jpg'; its relation to the 'Mar 2025 - Present' lead role is unclear.",
+    "2MinWin: which 17+ mini-games were built; 2min.win not inspected.",
+    "'3+ years' of experience (GameDev summary): earliest dated professional entry is 2024.",
+    "GitHub repositories: none inspected.",
+    "Chalo Yaar team: GDD names a partner (Swarnima) for art; resume and itch page do not.",
+    "TONIZTOZ game platform is not stated in any source."
+  ],
+  "conflicts": [
+    {
+      "topic": "TONIZTOZ job title",
+      "versions": {
+        "resume_gamedev": "Lead Game Developer",
+        "resume_kreo": "Lead Developer"
+      }
+    },
+    {
+      "topic": "Boop product description",
+      "versions": {
+        "resume_gamedev": "3D companion product / 3D character-driven mobile product",
+        "resume_kreo": "production lifestyle application"
+      }
+    },
+    {
+      "topic": "Boop work mode",
+      "versions": {
+        "resume_gamedev": "Remote/Contract",
+        "resume_kreo": "Remote"
+      }
+    },
+    {
+      "topic": "Independent work title",
+      "versions": {
+        "resume_gamedev": "Independent Contractor",
+        "resume_kreo": "Independent Developer (Contract)"
+      }
+    },
+    {
+      "topic": "Pythrust deliverables",
+      "versions": {
+        "resume_gamedev": "17+ complete mini-games ... multiplayer, VFX, UI and SFX",
+        "resume_kreo": "17+ complete interactive modules ... real-time multiplayer, UI and audio systems"
+      }
+    },
+    {
+      "topic": "Chalo Yaar genre",
+      "versions": {
+        "resume_gamedev": "3D Multiplayer Travel Survival Game (inventory and survival stat systems)",
+        "resume_kreo": "3D Multiplayer Survival Application",
+        "itch_ref": "Cozy 3D travel simulator; Adventure/Simulation; 'not ... a hardcore survival experience'"
+      }
+    },
+    {
+      "topic": "Chalo Yaar feature scope",
+      "versions": {
+        "drive_chalo_gdd": "Up to four co-op players, voice chat, van systems, NPC jobs, day/night",
+        "itch_ref": "Features list omits co-op details, van systems and NPCs; tagged Multiplayer"
+      },
+      "note": "GDD is a plan; itch reflects the published build. Use itch/resume for shipped claims."
+    },
+    {
+      "topic": "SlenderAR dates",
+      "versions": {
+        "resume_gamedev": "2024 - 2025 (shared with Lucius)",
+        "itch_ref": "Published Oct 03, 2025; status In development"
+      }
+    },
+    {
+      "topic": "AssistSense dates",
+      "versions": {
+        "resume_kreo": "Oct 2025 - Dec 2025",
+        "drive_listing": "AssistSense project report files created Aug–Sep 2025, last modified Oct 2025"
+      }
+    },
+    {
+      "topic": "Professional title",
+      "versions": {
+        "resume_gamedev": "Unity Developer | Technical Artist",
+        "resume_kreo": "Software Developer"
+      },
+      "note": "Likely intentional tailoring; website uses the GameDev title."
+    }
+  ],
+  "corrections_to_previous_version": [
+    "Removed invented URLs: itch.io/profile/arikiver, arikiver.itch.io/lucius-the-endless-maze-runner, arikiver.dev, pythrusttech.com, and the wrong LinkedIn slug.",
+    "Removed claims not in any source: SlenderAR 'multiplayer', TONIZTOZ platform 'PC/Web', '4x performance improvement', 'solo developer' labels on Lucius/SlenderAR/casino/AR work, and 2D fog 'using 3D noise' for TONIZTOZ.",
+    "Removed the project priority ranking (the owner asked not to rank projects).",
+    "Added AssistSense and Questify from the Kreo resume, the Chalo Yaar itch page and YouTube trailer, the SlenderAR YouTube video, and the itch download details.",
+    "Replaced 'no conflicts' with the conflicts listed above.",
+    "Applied owner decisions: Boop limited to showcase link + heyboop.ai; AR pooled with VR as 'AR & VR Work' with the showreel as cover; casino platform set to web (Unity HTML5 in client site); AssistSense/Questify pooled under 'Other Work'; TONIZTOZ demo video added.",
+    "Added the Boop visuals demo video, confirmed the title 'The God They Buried', marked Lucius as unreleased, and added the Himeji Castle Blender project and render under Other Work."
+  ],
+  "resolved_conflicts": [
+    {
+      "topic": "Lucius on Itch.io",
+      "resolution": "Owner confirmed Lucius was never released. Portfolio treats it as unreleased; the resume sentence 'Both launched on Itch.io' should be reworded."
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+---
+import type { Project } from '../data/portfolio';
+import { url } from '../lib/url';
+import Cover from './Cover.astro';
+
+interface Props {
+  project: Project;
+  size?: 'large' | 'small';
+}
+
+const { project, size = 'large' } = Astro.props;
+const chips = project.meta.slice(0, size === 'large' ? 3 : 2);
+const sizes =
+  size === 'large'
+    ? '(min-width: 1184px) 552px, (min-width: 720px) calc(50vw - 44px), calc(100vw - 32px)'
+    : '(min-width: 1184px) 264px, (min-width: 720px) calc(25vw - 40px), (min-width: 560px) calc(50vw - 40px), 112px';
+---
+
+<article class:list={['card', 'card-link', 'project-card', `project-card-${size}`]}>
+  <Cover file={project.cover} alt={`${project.title} cover art`} sizes={sizes} />
+  <div class="body">
+    <h3><a class="stretched" href={url(`/work/${project.slug}/`)}>{project.title}</a></h3>
+    <p class="pitch">{project.pitch}</p>
+    <ul class="chips">
+      {chips.map((m) => <li class="chip">{m.value}</li>)}
+    </ul>
+  </div>
+</article>
+
+<style>
+  .project-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .body {
+    padding: 1.25rem 1.25rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  h3 {
+    font-size: 1.45rem;
+    margin-bottom: 0.4rem;
+  }
+
+  h3 a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .card-link:hover h3 a {
+    color: var(--accent);
+  }
+
+  .pitch {
+    color: var(--muted);
+    margin-bottom: 1rem;
+    flex: 1;
+  }
+
+  .project-card-small .body {
+    padding: 0.9rem 0.9rem 1rem;
+  }
+
+  .project-card-small h3 {
+    font-size: 1.1rem;
+  }
+
+  .project-card-small .pitch {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+
+  .project-card-small .chip {
+    font-size: 0.72rem;
+  }
+
+  /* Phones: small cards become compact rows (art left, text right). */
+  @media (max-width: 559px) {
+    .project-card-small {
+      flex-direction: row;
+    }
+
+    .project-card-small :global(.cover) {
+      flex: 0 0 112px;
+      aspect-ratio: auto;
+      min-height: 112px;
+    }
+  }
+</style>

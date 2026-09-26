@@ -1,0 +1,174 @@
+---
+import { getImage } from 'astro:assets';
+import type { Video } from '../data/portfolio';
+import { coverPresentation, image, isGif } from '../lib/images';
+
+interface Props {
+  video: Video;
+  /** Cover file used as the poster for Drive videos. */
+  poster: string;
+}
+
+const { video, poster } = Astro.props;
+
+const embedSrc =
+  video.kind === 'youtube'
+    ? `https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1`
+    : `https://drive.google.com/file/d/${video.id}/preview`;
+const allow =
+  video.kind === 'youtube'
+    ? 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen'
+    : 'autoplay; fullscreen';
+const driveUrl = `https://drive.google.com/file/d/${video.id}/view`;
+
+let posterSrc: string;
+let pixelated = false;
+let contain = false;
+let bg: string | undefined;
+if (video.kind === 'youtube') {
+  posterSrc = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
+} else {
+  const meta = await image(poster);
+  pixelated = isGif(poster);
+  contain = true;
+  bg = coverPresentation(poster).bg;
+  posterSrc = pixelated ? meta.src : (await getImage({ src: meta, width: 960, format: 'webp' })).src;
+}
+---
+
+<figure class="video">
+  <div class="frame" data-embed-src={embedSrc} data-embed-allow={allow} data-embed-title={video.title} style={bg ? `--poster-bg: ${bg}` : undefined}>
+    <button type="button" class="facade" aria-label={`Play video: ${video.title}`}>
+      {contain && !bg && <img class:list={['backdrop', { pixelated }]} src={posterSrc} alt="" aria-hidden="true" loading="lazy" />}
+      <img class:list={['poster', { contain, pixelated }]} src={posterSrc} alt="" loading="lazy" decoding="async" />
+      <span class="play" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5.5v13l11-6.5z" fill="currentColor"></path></svg>
+      </span>
+    </button>
+  </div>
+  <figcaption>
+    <span>{video.title}</span>
+    {
+      video.kind === 'drive' && (
+        <a href={driveUrl} rel="noopener" target="_blank">
+          Open in Google Drive ↗
+        </a>
+      )
+    }
+  </figcaption>
+</figure>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-embed-src]').forEach((frame) => {
+    frame.querySelector('.facade')?.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = frame.dataset.embedSrc!;
+      iframe.allow = frame.dataset.embedAllow!;
+      iframe.title = frame.dataset.embedTitle!;
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      frame.replaceChildren(iframe);
+      iframe.focus();
+    });
+  });
+</script>
+
+<style>
+  .video {
+    margin: 0;
+  }
+
+  .frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--poster-bg, #000);
+  }
+
+  .frame :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .facade {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .facade:focus-visible {
+    outline-offset: -4px;
+  }
+
+  .poster,
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .backdrop {
+    filter: blur(28px) brightness(0.45);
+    transform: scale(1.2);
+  }
+
+  .poster.contain {
+    object-fit: contain;
+  }
+
+  .frame[style] .poster.contain {
+    padding: 8% 0;
+  }
+
+  .play {
+    position: relative;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.5);
+    transition: transform 0.2s ease;
+  }
+
+  @media (max-width: 559px) {
+    .play {
+      width: 56px;
+      height: 56px;
+    }
+  }
+
+  .play svg {
+    margin-left: 4px;
+  }
+
+  .facade:hover .play,
+  .facade:focus-visible .play {
+    transform: scale(1.08);
+  }
+
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+</style>
