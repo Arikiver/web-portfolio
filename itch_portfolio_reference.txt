@@ -1,0 +1,180 @@
+==========================================================================
+ ARIKIVER — ITCH.IO PORTFOLIO REFERENCE
+ Source: https://arikiver.itch.io/   (collected 27 Sep 2026)
+==========================================================================
+
+Profile URL : https://arikiver.itch.io/
+Published projects : 2  (Chalo Yaar!, SlenderAR)
+Note: The profile also shows two collections ("COOOL", "hehe") of other
+creators' assets (e.g. KayKit character packs by Kay Lousberg). These are
+not your projects and are excluded below.
+
+Note on download links: itch.io generates temporary, signed file URLs when
+someone clicks "Download", so there is no permanent direct file link. Link to
+the project page (or its download section) on your portfolio instead.
+
+
+--------------------------------------------------------------------------
+ 1. CHALO YAAR!
+--------------------------------------------------------------------------
+Page URL        : https://arikiver.itch.io/chalo-yaar
+Download        : https://arikiver.itch.io/chalo-yaar  (Download section)
+File            : ChaloYaar.zip — 553 MB (Windows)
+Price           : Free
+Tagline / short : A cozy 3D travel simulator about road trips, exploration,
+                  photography, and vanlife.
+Hero tagline    : The roadtrip you and your friends always talked about.
+
+METADATA
+  Published     : May 24, 2026
+  Status        : In development
+  Platforms     : Windows
+  Author        : Arikiver
+  Genre         : Adventure, Simulation
+  Tags          : 3D, Cozy, Feel Good, First-Person, Indie, Multiplayer,
+                  No AI, Unity
+  Avg. session  : A few hours
+  Languages     : English
+  Inputs        : Keyboard, Mouse
+  Multiplayer   : Server-based networked multiplayer
+  Content       : No generative AI was used
+
+VIDEO
+  YouTube embed : https://www.youtube.com/embed/oYaKnmNOppA
+  YouTube watch : https://www.youtube.com/watch?v=oYaKnmNOppA
+
+IMAGES
+  Cover / thumbnail : https://img.itch.zone/aW1nLzI3NDU0ODY5LnBuZw==/original/jGq%2FFi.png
+  Page header/logo  : https://img.itch.zone/aW1nLzI3NDU1NDA1LnBuZw==/original/audd0q.png
+  Page background   : https://img.itch.zone/aW1nLzI3NDU1NTcxLnBuZw==/original/IWoDLT.png
+  Screenshots:
+    1. https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTMwMS5wbmc=/original/11wuPA.png
+    2. https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTMwMi5wbmc=/original/mKGdm8.png
+    3. https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTI5OC5wbmc=/original/uF%2F3WS.png
+    4. https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTMwMC5wbmc=/original/US7U0W.png
+    5. https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTMwMy5wbmc=/original/xMCqSk.png
+    6. https://img.itch.zone/aW1hZ2UvNDYwODMzMy8yNzQ1NTI5OS5wbmc=/original/oTI28P.png
+
+DESCRIPTION
+  A cozy stylized 3D travel simulator inspired by late-night trip plans, long
+  drives, beautiful landscapes, and the feeling of exploring the world with
+  friends.
+
+  About the game:
+  "Chalo Yaar!" is a cozy first-person travel experience where you explore
+  peaceful environments, drive your campervan across beautiful landscapes,
+  capture moments through photography, and simply enjoy the atmosphere of the
+  journey.
+
+  The game was inspired by a very relatable feeling: that one late-night
+  conversation where everyone suddenly decides, "Chal yaar, Goa chalte hain."
+  Plans get made. Everyone gets excited. And then life happens. Schedules
+  clash, budgets fail, parents say no, and the trip never happens.
+
+  This project was created to capture that feeling digitally — the freedom of
+  the road, the calmness of travel, and the warmth of shared adventures.
+
+  Gameplay experience:
+  This is not a fast-paced action game or a hardcore survival experience.
+  "Chalo Yaar!" is designed to feel relaxing, immersive, and atmospheric. The
+  focus is on enjoying the journey itself — driving through nature, exploring
+  new places, listening to ambient sounds, and experiencing the calm feeling
+  of being on the road. Whether you're walking through forests, driving during
+  sunset, or stopping somewhere just to admire the environment, the game aims
+  to recreate the peaceful feeling of travel and freedom.
+
+FEATURES
+  - Drive your own campervan
+  - Explore large stylized natural environments
+  - Wildlife photography system
+  - Interactive inventory and travel systems
+  - Atmospheric volumetric fog
+  - Custom stylized water shaders
+  - Dynamic foliage and wind simulation
+  - Immersive region-based ambient audio
+  - Cozy exploration-focused gameplay
+  - Dynamic cinematic environments
+
+TECH / TOOLS
+  - Unity Engine (URP)
+  - C#
+  - HLSL shader development
+  - Blender
+
+DEVELOPER NOTES
+  Developed as a passion-driven project focused on atmosphere, immersion,
+  rendering, and exploration systems. A huge amount of work went into the
+  visuals, gameplay systems, shaders, audio atmosphere, and overall feel.
+  Closing line: "Pack your bags. Start the engine. Hit the road."
+
+INSTALL INSTRUCTIONS
+  1. Download and extract the ZIP file
+  2. Open the extracted folder
+  3. Run ChaloYaar.exe
+  4. Wait for the game to load
+  Notes: Windows only; first launch may take a few seconds; headphones
+  recommended; optimized for keyboard and mouse.
+
+CONTROLS
+  WASD   → Movement
+  Mouse  → Look around
+  Shift  → Sprint
+  Space  → Jump
+  E      → Interact
+  Hotbar → Inventory
+
+
+--------------------------------------------------------------------------
+ 2. SLENDERAR
+--------------------------------------------------------------------------
+Page URL        : https://arikiver.itch.io/slenderar
+Download        : https://arikiver.itch.io/slenderar  (Download section)
+File            : slenderAR.apk — 130 MB (Android)
+Price           : Free
+Tagline / short : Step into the portal where reality fades, the woods await.
+
+METADATA
+  Published     : Oct 03, 2025
+  Status        : In development
+  Platforms     : Android
+  Author        : Arikiver
+  Genre         : Survival
+  Tags          : Augmented Reality, Horror
+  Content       : No generative AI was used
+
+VIDEO
+  YouTube embed : https://www.youtube.com/embed/1bffKKCimHk
+  YouTube watch : https://www.youtube.com/watch?v=1bffKKCimHk
+
+IMAGES
+  Cover / thumbnail : https://img.itch.zone/aW1nLzIzNDI5NzM0LmpwZw==/original/GKIpSz.jpg
+  Page background   : https://img.itch.zone/aW1nLzIzNDI5ODA3LmpwZw==/original/dQbi7f.jpg
+  Screenshots:
+    1. https://img.itch.zone/aW1hZ2UvMzkyOTExOC8yMzQyOTcwMS5wbmc=/original/6jM4m7.png
+    2. https://img.itch.zone/aW1hZ2UvMzkyOTExOC8yMzQyOTcwMC5wbmc=/original/ofnb9r.png
+    3. https://img.itch.zone/aW1hZ2UvMzkyOTExOC8yMzQyOTcwMy5wbmc=/original/wJ%2FMT2.png
+    4. https://img.itch.zone/aW1hZ2UvMzkyOTExOC8yMzQyOTcwMi5wbmc=/original/zHNmYI.png
+    5. https://img.itch.zone/aW1hZ2UvMzkyOTExOC8yMzQyOTY5OS5wbmc=/original/0XKeTy.png
+
+DESCRIPTION
+  SlenderAR is a Unity 3D horror experience that merges reality with
+  nightmare. Step through a mysterious AR portal and find yourself lost in
+  dark, ominous woods where the legendary Slenderman lurks in the shadows,
+  always watching, always waiting.
+
+  Move by walking in the real world as your surroundings transform into a
+  haunting forest filled with eerie sounds, flickering lights, and creeping
+  dread. Experience the myth like never before — SlenderAR blurs the line
+  between what's real and what's hunting you.
+
+  Safety note: Be safe and make sure to play in an open environment.
+  © 2025 SlenderAR
+
+TECH / TOOLS (from page)
+  - Unity 3D
+  - Augmented Reality (AR portal, real-world walking locomotion)
+  - Android build
+
+==========================================================================
+ END
+==========================================================================
