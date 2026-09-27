@@ -2,6 +2,8 @@
 // few hints for the CRT easter egg (see crt.ts). Everything is progressive: without JS (or with
 // reduced motion) content is static.
 
+import { play } from './sfx';
+
 const root = document.documentElement;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -69,6 +71,7 @@ function decode(el: HTMLElement) {
   el.replaceChildren(sr, vis);
   const start = performance.now();
   const duration = 650;
+  let frames = 0;
   const tick = (now: number) => {
     const p = Math.min(1, (now - start) / duration);
     const solved = Math.floor(p * text.length);
@@ -77,6 +80,7 @@ function decode(el: HTMLElement) {
       out += text[i] === ' ' ? ' ' : GLYPHS[(Math.random() * GLYPHS.length) | 0];
     }
     vis.textContent = out;
+    if (++frames % 4 === 0 && p < 1) play('typeTick'); // soft teletype clicks while it decodes
     if (p < 1) requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);

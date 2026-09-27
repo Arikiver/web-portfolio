@@ -516,7 +516,7 @@ html.crt body {
 }
 
 /* Anything that animates inside the lens forces the filter to re-run, so idle loops pause. */
-.crt :is(.caret, .fx-dot, .coin, .blink, .bars i),
+.crt :is(.caret, .fx-dot, .coin, .blink),
 .crt .play::before,
 .crt .brand::before,
 .crt .ambient::before {
@@ -795,113 +795,6 @@ html.crt body {
   }
 }
 
-/* Sound toggle */
-.sfx-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  min-width: 44px;
-  height: 44px;
-  padding: 0 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--muted);
-  font: 600 0.68rem var(--font-mono);
-  letter-spacing: 0.12em;
-  cursor: pointer;
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.sfx-toggle:hover {
-  color: var(--text);
-  border-color: var(--accent);
-}
-
-.sfx-toggle[aria-pressed='true'] {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
-}
-
-.sfx-toggle .bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 12px;
-}
-
-.sfx-toggle .bars {
-  position: relative;
-}
-
-.sfx-toggle .bars i {
-  width: 2px;
-  height: 5px;
-  background: currentColor;
-  border-radius: 1px;
-}
-
-.sfx-toggle .bars i:nth-child(2) {
-  height: 9px;
-}
-
-.sfx-toggle .bars i:nth-child(3) {
-  height: 12px;
-}
-
-.sfx-toggle .bars i:nth-child(4) {
-  height: 7px;
-}
-
-/* Muted: struck through. */
-.sfx-toggle[aria-pressed='false'] .bars::after {
-  content: '';
-  position: absolute;
-  left: -2px;
-  right: -2px;
-  top: 50%;
-  height: 1.5px;
-  background: currentColor;
-  rotate: -40deg;
-}
-
-.sfx-toggle[aria-pressed='true'] .bars i {
-  animation: eq 0.9s ease-in-out infinite alternate;
-}
-
-.sfx-toggle .bars i:nth-child(2) {
-  animation-delay: -0.3s;
-}
-
-.sfx-toggle .bars i:nth-child(3) {
-  animation-delay: -0.6s;
-}
-
-.sfx-toggle .bars i:nth-child(4) {
-  animation-delay: -0.15s;
-}
-
-@keyframes eq {
-  from {
-    height: 3px;
-  }
-  to {
-    height: 12px;
-  }
-}
-
-@media (max-width: 859px) {
-  .sfx-toggle {
-    padding: 0;
-  }
-
-  .sfx-toggle .sfx-label {
-    display: none;
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   @view-transition {
@@ -930,8 +823,7 @@ html.crt body {
   }
 
   .coin,
-  .insert-coin .blink,
-  .sfx-toggle[aria-pressed='true'] .bars i {
+  .insert-coin .blink {
     animation: none;
   }
 }

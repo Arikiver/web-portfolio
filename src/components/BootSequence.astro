@@ -1,8 +1,10 @@
 ---
-// First-visit boot screen (once per browser session). Each log line reports something real (WebGL,
-// shader compile, fonts, above-the-fold images), so the progress bar tracks actual loading. Minimum
-// ~2 s, capped at ~4 s. Any key/click/tap skips. Shown only when html.booting was set before first
-// paint by the inline script in Base.astro: never with reduced motion, never without JS.
+// First-visit boot screen (once per browser session). Browsers lock audio until a gesture, so unless
+// audio is already allowed it opens on a "press any key" screen; that press unlocks the boot
+// soundtrack. Each log line then reports something real (WebGL, shader compile, fonts,
+// above-the-fold images), so the progress bar tracks actual loading: minimum ~1.6 s, capped at
+// ~4 s. Any key/click/tap skips. Shown only when html.booting was set before first paint by the
+// inline script in Base.astro: never with reduced motion, never without JS.
 import { profile } from '../data/portfolio';
 ---
 
@@ -10,6 +12,11 @@ import { profile } from '../data/portfolio';
   <div class="boot-inner">
     <p class="boot-title"><span class="boot-mark"></span>{profile.name.toUpperCase().replace(' ', '.')}</p>
     <p class="boot-sub">RT_BIOS 26.09 · real-time portfolio</p>
+    <p class="boot-gate">
+      <span class="gate-keys">▸ PRESS ANY KEY TO START</span>
+      <span class="gate-touch">▸ TAP TO START</span>
+      <span class="gate-note">sound on</span>
+    </p>
     <ol class="boot-log"></ol>
     <div class="boot-bar"><i></i></div>
     <p class="boot-foot"><span class="boot-pct">0%</span><span class="boot-skip">press any key to skip</span></p>
@@ -17,33 +24,21 @@ import { profile } from '../data/portfolio';
 </div>
 
 <script>
-  import { play } from '../scripts/sfx';
+  import { play, running, startCharge, unlockAudio } from '../scripts/sfx';
 
   const root = document.documentElement;
   const boot = document.querySelector<HTMLElement>('.boot');
 
   if (boot && root.classList.contains('booting')) {
+    root.classList.add('boot-alive'); // tells the fail-safe in Base.astro we're in control
     const log = boot.querySelector('.boot-log')!;
     const bar = boot.querySelector<HTMLElement>('.boot-bar i')!;
     const pct = boot.querySelector('.boot-pct')!;
-    const start = performance.now();
     const MIN = 1600;
     const MAX = 4000;
+    let start = 0;
     let finished = false;
-
-    const line = (label: string) => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span class="p">&gt;</span> <span class="l"></span><span class="d"></span><span class="s"></span>`;
-      li.querySelector('.l')!.textContent = label;
-      log.append(li);
-      play('step');
-      const s = li.querySelector('.s')!;
-      const done = (status: string, tone: 'ok' | 'warn' = 'ok') => {
-        s.textContent = status;
-        li.classList.add('done', tone);
-      };
-      return Object.assign(done, { set: (text: string) => (s.textContent = text) });
-    };
+    let charge = { set: (_p: number) => {}, stop: () => {} };
 
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const until = (test: () => boolean, timeout: number) =>
@@ -52,6 +47,22 @@ import { profile } from '../data/portfolio';
         const tick = () => (test() ? resolve(true) : performance.now() - t0 > timeout ? resolve(false) : requestAnimationFrame(tick));
         tick();
       });
+
+    const line = (label: string) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="p">&gt;</span> <span class="l"></span><span class="d"></span><span class="s"></span>`;
+      li.querySelector('.l')!.textContent = label;
+      log.append(li);
+      // Key clicks as the label "types" in.
+      for (let i = 0; i < Math.ceil(label.length / 3); i++) setTimeout(() => play('typeTick'), i * 24);
+      const s = li.querySelector('.s')!;
+      const done = (status: string, tone: 'ok' | 'warn' = 'ok') => {
+        s.textContent = status;
+        li.classList.add('done', tone);
+        play(tone === 'ok' ? 'bootOk' : 'bootWarn');
+      };
+      return Object.assign(done, { set: (text: string) => (s.textContent = text) });
+    };
 
     // Real work, reported as it completes.
     let tasksDone = 0;
@@ -93,6 +104,7 @@ import { profile } from '../data/portfolio';
             (img.complete ? Promise.resolve() : img.decode().catch(() => {})).then(() => {
               loaded++;
               render();
+              play('bootCount', loaded);
             }),
           ),
         ),
@@ -104,21 +116,19 @@ import { profile } from '../data/portfolio';
 
       const audio = line('audio');
       await wait(200);
-      audio(root.classList.contains('sfx-on') ? 'ONLINE' : 'STANDBY');
+      audio(running() ? 'ONLINE' : 'MUTED', running() ? 'ok' : 'warn');
       step();
     };
 
     // Progress = the slower of real work and the minimum runtime, so it never finishes early.
-    const progress = () => {
-      const t = Math.min(1, (performance.now() - start) / MIN);
-      return Math.min(t, tasksDone / TASKS);
-    };
+    const progress = () => Math.min(Math.min(1, (performance.now() - start) / MIN), tasksDone / TASKS);
 
     const frame = () => {
       if (finished) return;
       const p = progress();
       bar.style.transform = `scaleX(${p})`;
       pct.textContent = `${Math.round(p * 100)}%`;
+      charge.set(p);
       if ((p >= 1 && tasksDone >= TASKS) || performance.now() - start > MAX) finish();
       else requestAnimationFrame(frame);
     };
@@ -126,13 +136,14 @@ import { profile } from '../data/portfolio';
     const finish = () => {
       if (finished) return;
       finished = true;
+      charge.stop();
       bar.style.transform = 'scaleX(1)';
       pct.textContent = '100%';
       const ready = document.createElement('li');
       ready.className = 'ready';
       ready.textContent = 'READY';
       log.append(ready);
-      play('success');
+      play('bootReady');
       try {
         sessionStorage.setItem('booted', '1');
       } catch {
@@ -140,21 +151,49 @@ import { profile } from '../data/portfolio';
       }
       setTimeout(() => {
         boot.classList.add('boot-exit');
+        play('bootOpen');
         // Release the page (hero entrance, decode, etc.) as the screen opens.
         setTimeout(() => {
           root.classList.remove('booting');
           document.dispatchEvent(new Event('boot:done'));
         }, 180);
         setTimeout(() => boot.remove(), 700);
-      }, 200);
+      }, 260);
     };
 
     const skip = () => finish();
-    addEventListener('keydown', skip, { once: true });
-    boot.addEventListener('pointerdown', skip, { once: true });
 
-    void run();
-    requestAnimationFrame(frame);
+    // Power on: the log starts, sounds and all.
+    let begun = false;
+    const begin = async () => {
+      if (begun) return;
+      begun = true;
+      GATE_EVENTS.forEach((t) => removeEventListener(t, onGate, true));
+      await unlockAudio(); // no-op if already running; inside a gesture this is what unlocks audio
+      boot.classList.add('is-running');
+      play('bootPress');
+      await wait(180);
+      play('bootTitle');
+      start = performance.now();
+      charge = startCharge();
+      void run();
+      requestAnimationFrame(frame);
+      // Arm skipping a beat later, so the key that started the boot doesn't also skip it.
+      setTimeout(() => {
+        addEventListener('keydown', skip, { once: true });
+        boot.addEventListener('pointerdown', skip, { once: true });
+      }, 350);
+    };
+
+    // Browsers keep audio locked until a gesture, so ask for one ("press start") unless audio is
+    // already allowed. Scrolling also starts it (silently) so nobody gets stuck.
+    const GATE_EVENTS = ['keydown', 'pointerdown', 'wheel', 'touchmove'];
+    const onGate = () => void begin();
+    void unlockAudio().then((ok) => {
+      if (ok) return void begin();
+      boot.classList.add('is-gated');
+      GATE_EVENTS.forEach((t) => addEventListener(t, onGate, { capture: true, passive: true }));
+    });
   } else {
     boot?.remove();
   }
@@ -194,6 +233,65 @@ import { profile } from '../data/portfolio';
   .boot-inner {
     width: min(100%, 520px);
     min-width: 0;
+  }
+
+  /* Until started, only the title and the "press start" prompt show. */
+  .boot:not(.is-running) :is(.boot-log, .boot-bar, .boot-foot) {
+    visibility: hidden;
+  }
+
+  .boot-gate {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 2.5rem 0 0;
+    text-align: center;
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+  }
+
+  .boot.is-gated:not(.is-running) .boot-gate {
+    display: block;
+  }
+
+  .boot-gate > span {
+    display: block;
+  }
+
+  .gate-keys,
+  .gate-touch {
+    animation: boot-blink 1.1s steps(2, jump-none) infinite;
+    text-shadow: 0 0 12px rgb(245 165 36 / 0.6);
+  }
+
+  .gate-touch {
+    display: none !important;
+  }
+
+  @media (hover: none) {
+    .gate-keys {
+      display: none !important;
+    }
+
+    .gate-touch {
+      display: block !important;
+    }
+  }
+
+  .gate-note {
+    margin-top: 0.9rem;
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    opacity: 0.6;
+  }
+
+  .boot.is-gated {
+    cursor: pointer;
   }
 
   .boot-title {
