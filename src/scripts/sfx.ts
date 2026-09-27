@@ -108,6 +108,22 @@ const SOUNDS = {
     noise(0.13, 0.022, 'bandpass', 900, 2300, 0, 1.5);
     tone('sine', 294, 294, 0.16, 0.025, 0, 0.02);
   },
+  // Profile photo: the gleam of inspecting a polished blade. A narrow, whistling band of noise
+  // slides up the edge, then thin high partials ring out with a soft attack and a slight upward
+  // drift, each with a detuned twin for shimmer. Nothing below ~1.8 kHz, so no body or hum.
+  bladeShine: () => {
+    noise(0.34, 0.05, 'bandpass', 1800, 7600, 0, 9);
+    const edge: [freq: number, gain: number, life: number][] = [
+      [2489, 0.009, 1.3],
+      [3729, 0.0065, 1.05],
+      [5588, 0.0045, 0.8],
+      [7902, 0.003, 0.55],
+    ];
+    for (const [f, g, life] of edge) {
+      tone('sine', f, f * 1.006, life, g, 0.09, 0.014);
+      tone('sine', f * 1.0035, f * 1.0095, life * 0.9, g * 0.6, 0.09, 0.014);
+    }
+  },
   glassHover: () => {
     tone('sine', 2637, 2637, 0.28, 0.011);
     tone('sine', 3951, 3951, 0.16, 0.005, 0.01);
@@ -381,6 +397,7 @@ function startHum() {
 type Route = [selector: string, sound: Sound];
 
 const HOVER: Route[] = [
+  ['.hero-photo', 'bladeShine'],
   ['li.chip', 'chipHover'],
   ['.thumb', 'shutterHover'],
   ['.facade', 'videoHover'],
