@@ -7,12 +7,12 @@
 <canvas class="ambient-field" aria-hidden="true"></canvas>
 
 <script>
-  import { NOISE_GLSL, fullscreenProgram } from '../scripts/gl';
+  import { NOISE_GLSL, PRECISION_GLSL, tryFullscreenProgram } from '../scripts/gl';
 
   const PIXEL = 3; // CSS px per dither pixel
 
   const FRAG = `
-precision mediump float;
+${PRECISION_GLSL}
 uniform vec2 u_res;
 uniform float u_time;
 uniform float u_scroll;
@@ -25,7 +25,12 @@ float bayer2(vec2 a) {
   a = floor(a);
   return fract(a.x / 2.0 + a.y * a.y * 0.75);
 }
-float bayer4(vec2 a) { return bayer2(0.5 * a) * 0.25 + bayer2(a); }
+// Only the position inside the 4x4 cell matters; wrapping first keeps a.y * a.y tiny, where the
+// raw pixel row (hundreds on a phone) squared would overflow 16-bit floats.
+float bayer4(vec2 a) {
+  a = mod(floor(a), 4.0);
+  return bayer2(0.5 * a) * 0.25 + bayer2(a);
+}
 
 void main() {
   vec2 px = gl_FragCoord.xy;
@@ -55,8 +60,9 @@ void main() {
   const canvas = document.querySelector<HTMLCanvasElement>('canvas.ambient-field');
   const gl = canvas?.getContext('webgl', { antialias: false, premultipliedAlpha: true, powerPreference: 'low-power' });
 
-  if (canvas && gl) {
-    const fx = fullscreenProgram(gl, FRAG);
+  const fx = tryFullscreenProgram(gl, FRAG);
+
+  if (canvas && gl && fx) {
     const u = {
       res: fx.uniform('u_res'),
       time: fx.uniform('u_time'),
@@ -71,9 +77,13 @@ void main() {
     const screen = document.querySelector<HTMLElement>('.screen');
     const scrollPos = () => (root.classList.contains('crt') && screen ? screen.scrollTop : scrollY);
 
+    // Size from the canvas's real box (on phones 100vh and the visible height differ as the URL
+    // bar slides), so dither pixels stay square and the flashlight lines up with the finger/pointer.
+    const view = () => ({ w: canvas.clientWidth || innerWidth, h: canvas.clientHeight || innerHeight });
     const resize = () => {
-      canvas.width = Math.ceil(innerWidth / PIXEL);
-      canvas.height = Math.ceil(innerHeight / PIXEL);
+      const { w, h } = view();
+      canvas.width = Math.ceil(w / PIXEL);
+      canvas.height = Math.ceil(h / PIXEL);
       gl.viewport(0, 0, canvas.width, canvas.height);
       draw();
     };
@@ -92,9 +102,9 @@ void main() {
       gl!.uniform2f(u.res, canvas!.width, canvas!.height);
       gl!.uniform1f(u.time, time);
       gl!.uniform1f(u.scroll, reduced.matches ? 0 : scrollPos() / PIXEL);
-      gl!.uniform2f(u.light, light.x / PIXEL, (innerHeight - light.y) / PIXEL);
+      gl!.uniform2f(u.light, light.x / PIXEL, (view().h - light.y) / PIXEL);
       gl!.uniform1f(u.lightOn, lightOn);
-      fx.draw();
+      fx!.draw();
     }
 
     let last = performance.now();
@@ -136,8 +146,8 @@ void main() {
   .ambient-field {
     position: fixed;
     inset: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     z-index: -1;
     pointer-events: none;
     image-rendering: pixelated;
