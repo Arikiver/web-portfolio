@@ -1,46 +1,10 @@
-// Tiny synthesized sound kit (Web Audio, no files). Off by default; the header toggle enables it and
-// the choice is remembered. Browsers only allow audio after a user gesture, which the toggle is.
+// Synthesized sound kit (Web Audio, no audio files). Always on. Browsers keep audio locked until the
+// visitor's first click, tap or key press, so nothing plays before that (the boot screen asks for a
+// key press first for exactly this reason; see BootSequence.astro).
 
-type Sound =
-  | 'hover'
-  | 'click'
-  | 'open'
-  | 'close'
-  | 'step'
-  | 'key'
-  | 'success'
-  | 'crtOn'
-  | 'crtOff'
-  | 'toggle';
-
-const STORE = 'sfx';
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let noiseBuf: AudioBuffer | null = null;
-
-const read = () => {
-  try {
-    return localStorage.getItem(STORE) === 'on';
-  } catch {
-    return false;
-  }
-};
-
-let enabled = read();
-
-export const sfxEnabled = () => enabled;
-
-export function setSfx(on: boolean) {
-  enabled = on;
-  try {
-    localStorage.setItem(STORE, on ? 'on' : 'off');
-  } catch {
-    /* storage unavailable: session-only */
-  }
-  if (on) ensure();
-  document.documentElement.classList.toggle('sfx-on', on);
-  syncHum();
-}
 
 function ensure() {
   if (!ctx) {
@@ -53,20 +17,35 @@ function ensure() {
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const data = noiseBuf.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    ctx.addEventListener('statechange', syncHum);
   }
-  if (ctx.state === 'suspended') void ctx.resume();
   return ctx;
 }
 
-function tone(
-  type: OscillatorType,
-  from: number,
-  to: number,
-  dur: number,
-  gain: number,
-  at = 0,
-  attack = 0.004,
-) {
+/** True once the browser lets us make sound. */
+export const running = () => ctx?.state === 'running';
+
+/** Try to start audio; resolves true if it's running. Call from inside a user gesture. */
+export async function unlockAudio(): Promise<boolean> {
+  const c = ensure();
+  if (!c) return false;
+  if (c.state !== 'running') {
+    try {
+      await Promise.race([c.resume(), new Promise((r) => setTimeout(r, 150))]);
+    } catch {
+      /* ignore */
+    }
+  }
+  return running();
+}
+
+// Try right away (allowed after clicking through from another page on this site), and again on the
+// first gesture anywhere.
+void unlockAudio();
+const unlockOnce = () => void unlockAudio();
+['pointerdown', 'keydown', 'touchend'].forEach((t) => addEventListener(t, unlockOnce, { capture: true, passive: true }));
+
+function tone(type: OscillatorType, from: number, to: number, dur: number, gain: number, at = 0, attack = 0.004) {
   const c = ctx!;
   const t = c.currentTime + at;
   const osc = c.createOscillator();
@@ -102,56 +81,183 @@ function noise(dur: number, gain: number, filter: BiquadFilterType, fFrom: numbe
   src.stop(t + dur + 0.05);
 }
 
-// Pentatonic steps for the cheat-code progress notes.
-const SCALE = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51, 1567.98, 1760];
+// Pentatonic (C major) from C5 up, used for chips, cheat-code notes and jingles.
+const SCALE = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51, 1567.98, 1760, 2093];
 
-export function play(sound: Sound, step = 0) {
-  if (!enabled || !ensure()) return;
-  switch (sound) {
-    case 'hover':
-      tone('sine', 1900, 2300, 0.035, 0.025);
-      break;
-    case 'click':
-      tone('square', 520, 260, 0.07, 0.03);
-      noise(0.03, 0.04, 'highpass', 3000, 6000);
-      break;
-    case 'open':
-      noise(0.28, 0.08, 'bandpass', 400, 2600, 0, 2);
-      tone('sine', 300, 600, 0.2, 0.03);
-      break;
-    case 'close':
-      noise(0.22, 0.06, 'bandpass', 2400, 350, 0, 2);
-      break;
-    case 'step':
-      tone('triangle', 900, 1100, 0.05, 0.04);
-      break;
-    case 'key':
-      tone('square', SCALE[step % SCALE.length], SCALE[step % SCALE.length], 0.09, 0.035);
-      break;
-    case 'success':
-      [0, 2, 4, 5, 7].forEach((n, i) => tone('square', SCALE[n], SCALE[n], 0.12, 0.04, i * 0.07));
-      tone('square', SCALE[9], SCALE[9], 0.35, 0.04, 0.38);
-      break;
-    case 'crtOn':
-      tone('sine', 90, 45, 0.45, 0.25); // relay thump
-      noise(0.5, 0.12, 'lowpass', 6000, 800); // degauss crackle
-      tone('sine', 11800, 11800, 1.6, 0.012, 0.1, 0.3); // flyback whine
-      tone('sawtooth', 50, 50, 1.2, 0.02, 0.05, 0.2); // mains hum
-      break;
-    case 'crtOff':
-      tone('sine', 1400, 40, 0.4, 0.08);
-      noise(0.18, 0.08, 'highpass', 4000, 1500);
-      break;
-    case 'toggle':
-      tone('square', 660, 660, 0.06, 0.03);
-      tone('square', 990, 990, 0.08, 0.03, 0.07);
-      break;
-  }
+const SOUNDS = {
+  /* ---- hovers: each kind of element has its own voice ---- */
+  navHover: () => {
+    tone('triangle', 2600, 2350, 0.025, 0.02);
+    noise(0.012, 0.012, 'highpass', 6000, 8000);
+  },
+  linkHover: () => tone('sine', 1800, 2100, 0.03, 0.018),
+  btnHover: () => {
+    tone('sine', 880, 880, 0.035, 0.02);
+    tone('sine', 1320, 1320, 0.05, 0.018, 0.03);
+  },
+  btnPrimaryHover: () => {
+    tone('square', 660, 990, 0.05, 0.014);
+    tone('sine', 1980, 1980, 0.12, 0.008, 0.02);
+  },
+  cardHover: () => {
+    noise(0.2, 0.03, 'bandpass', 600, 1900, 0, 1.5); // air as the card lifts
+    tone('sine', 196, 196, 0.28, 0.035, 0, 0.03); // soft body
+    tone('sine', 1568, 1568, 0.2, 0.006, 0.05); // glint of the glare
+  },
+  cardSmallHover: () => {
+    noise(0.13, 0.022, 'bandpass', 900, 2300, 0, 1.5);
+    tone('sine', 294, 294, 0.16, 0.025, 0, 0.02);
+  },
+  glassHover: () => {
+    tone('sine', 2637, 2637, 0.28, 0.011);
+    tone('sine', 3951, 3951, 0.16, 0.005, 0.01);
+  },
+  chipHover: (i = 0) => tone('triangle', SCALE[i % 8] / 2, SCALE[i % 8] / 2, 0.12, 0.028),
+  shutterHover: () => {
+    noise(0.014, 0.05, 'highpass', 5000, 7000);
+    noise(0.014, 0.04, 'highpass', 5000, 7000, 0.045);
+  },
+  videoHover: () => {
+    tone('sine', 110, 165, 0.25, 0.045, 0, 0.03);
+    noise(0.2, 0.018, 'lowpass', 300, 700);
+  },
+  pageHover: () => noise(0.16, 0.028, 'bandpass', 1500, 3600, 0, 1.2),
+  backHover: () => noise(0.16, 0.028, 'bandpass', 3600, 1500, 0, 1.2),
+  coinHover: () => {
+    tone('square', 988, 988, 0.06, 0.02);
+    tone('square', 1319, 1319, 0.2, 0.02, 0.06);
+  },
+  insertHover: () => {
+    tone('square', 494, 494, 0.05, 0.018);
+    tone('square', 659, 659, 0.12, 0.018, 0.05);
+  },
+
+  /* ---- clicks ---- */
+  click: () => {
+    tone('square', 520, 260, 0.07, 0.03);
+    noise(0.03, 0.04, 'highpass', 3000, 6000);
+  },
+  select: () => {
+    tone('square', 523, 523, 0.05, 0.028);
+    tone('square', 784, 784, 0.1, 0.028, 0.05);
+    noise(0.02, 0.03, 'highpass', 4000, 6000);
+  },
+  itemGet: () => {
+    [4, 5, 7, 8, 10].forEach((n, i) => tone('triangle', SCALE[n], SCALE[n], 0.09, 0.03, i * 0.045));
+    tone('sine', 4186, 4186, 0.3, 0.006, 0.22);
+  },
+  play: () => {
+    tone('sawtooth', 60, 220, 0.35, 0.03, 0, 0.02);
+    noise(0.03, 0.05, 'highpass', 2000, 4000);
+  },
+  shutter: () => {
+    noise(0.02, 0.07, 'highpass', 3000, 6000);
+    noise(0.05, 0.05, 'bandpass', 1200, 600, 0.03, 2);
+  },
+  menuOpen: () => tone('triangle', 400, 900, 0.12, 0.03),
+  menuClose: () => tone('triangle', 900, 400, 0.12, 0.03),
+  toggle: () => {
+    tone('square', 660, 660, 0.06, 0.03);
+    tone('square', 990, 990, 0.08, 0.03, 0.07);
+  },
+  typeTick: () => noise(0.008, 0.018, 'bandpass', 2500 + Math.random() * 2500, 4000, 0, 3),
+
+  /* ---- lightbox ---- */
+  open: () => {
+    noise(0.28, 0.08, 'bandpass', 400, 2600, 0, 2);
+    tone('sine', 300, 600, 0.2, 0.03);
+  },
+  close: () => noise(0.22, 0.06, 'bandpass', 2400, 350, 0, 2),
+  step: () => tone('triangle', 900, 1100, 0.05, 0.04),
+
+  /* ---- cheat code + CRT ---- */
+  key: (i = 0) => tone('square', SCALE[i % SCALE.length], SCALE[i % SCALE.length], 0.09, 0.035),
+  success: () => {
+    [0, 2, 4, 5, 7].forEach((n, i) => tone('square', SCALE[n], SCALE[n], 0.12, 0.04, i * 0.07));
+    tone('square', SCALE[9], SCALE[9], 0.35, 0.04, 0.38);
+  },
+  crtOn: () => {
+    tone('sine', 90, 45, 0.45, 0.25); // relay thump
+    noise(0.5, 0.12, 'lowpass', 6000, 800); // degauss crackle
+    tone('sine', 11800, 11800, 1.6, 0.012, 0.1, 0.3); // flyback whine
+    tone('sawtooth', 50, 50, 1.2, 0.02, 0.05, 0.2); // mains hum
+  },
+  crtOff: () => {
+    tone('sine', 1400, 40, 0.4, 0.08);
+    noise(0.18, 0.08, 'highpass', 4000, 1500);
+  },
+
+  /* ---- boot sequence ---- */
+  bootPress: () => {
+    noise(0.03, 0.1, 'highpass', 2500, 5000); // switch
+    tone('sine', 70, 38, 0.4, 0.28, 0.02); // power relay thump
+    noise(0.35, 0.05, 'lowpass', 5000, 600, 0.03); // capacitor crackle
+  },
+  bootTitle: () => {
+    [0, 4, 7].forEach((n, i) => tone('triangle', SCALE[n], SCALE[n], 0.16, 0.035, i * 0.07));
+    tone('sine', 9000, 9000, 0.5, 0.004, 0.05, 0.1); // faint whine
+  },
+  bootOk: () => {
+    tone('sine', 1568, 1568, 0.05, 0.028);
+    tone('sine', 2093, 2093, 0.08, 0.024, 0.045);
+  },
+  bootWarn: () => {
+    tone('square', 220, 220, 0.07, 0.025);
+    tone('square', 185, 185, 0.1, 0.025, 0.09);
+  },
+  bootCount: (i = 0) => tone('triangle', 1200 + i * 60, 1200 + i * 60, 0.03, 0.018),
+  bootReady: () => {
+    [0, 2, 4].forEach((n) => tone('triangle', SCALE[n + 3], SCALE[n + 3], 0.5, 0.025, 0, 0.01)); // chord
+    [0, 4, 7, 10].forEach((n, i) => tone('square', SCALE[n], SCALE[n], 0.09, 0.022, 0.02 + i * 0.06)); // run
+  },
+  bootOpen: () => {
+    noise(0.5, 0.07, 'bandpass', 300, 4200, 0, 0.8); // screen opens
+    tone('sine', 62, 40, 0.7, 0.2, 0.05, 0.02); // boom
+    tone('sine', 3136, 4186, 0.4, 0.006, 0.1, 0.05); // shimmer
+  },
+} satisfies Record<string, (i?: number) => void>;
+
+export type Sound = keyof typeof SOUNDS;
+
+export function play(sound: Sound, i = 0) {
+  // Never schedule while suspended: queued sounds would all fire at once on unlock.
+  if (!running()) return;
+  SOUNDS[sound](i);
+}
+
+/** Continuous rising tone for loading bars. `set` takes 0..1. */
+export function startCharge() {
+  if (!running()) return { set: (_p: number) => {}, stop: () => {} };
+  const c = ctx!;
+  const osc = c.createOscillator();
+  osc.type = 'sawtooth';
+  const lp = c.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.Q.value = 6;
+  const g = c.createGain();
+  g.gain.setValueAtTime(0, c.currentTime);
+  g.gain.linearRampToValueAtTime(0.012, c.currentTime + 0.1);
+  osc.connect(lp).connect(g).connect(master!);
+  const set = (p: number) => {
+    const t = c.currentTime;
+    osc.frequency.setTargetAtTime(90 + p * 330, t, 0.05);
+    lp.frequency.setTargetAtTime(350 + p * 2600, t, 0.05);
+  };
+  set(0);
+  osc.start();
+  return {
+    set,
+    stop: () => {
+      const t = c.currentTime;
+      g.gain.setTargetAtTime(0, t, 0.03);
+      osc.stop(t + 0.2);
+    },
+  };
 }
 
 /* ---------- CRT ambience ----------
  * A quiet looping bed while CRT mode is on: mains hum, a faint flyback whine, hiss that breathes,
- * and the odd crackle. Runs only when both CRT mode and SFX are on. */
+ * and the odd crackle. */
 
 let humWanted = false;
 let hum: { out: GainNode; stop: () => void } | null = null;
@@ -162,7 +268,7 @@ export function setCrtHum(on: boolean) {
 }
 
 function syncHum() {
-  const want = humWanted && enabled && !document.hidden;
+  const want = humWanted && running() && !document.hidden;
   if (want && !hum && ensure()) hum = startHum();
   else if (!want && hum) {
     const h = hum;
@@ -256,18 +362,69 @@ function startHum() {
   };
 }
 
-/* Global hover/click sounds for interactive elements. */
-const INTERACTIVE = 'a, button, summary, .card-link';
+/* ---------- Routing: which sound for which element ----------
+ * Walk up from the element under the pointer; the first (innermost) match decides the voice. */
+
+type Route = [selector: string, sound: Sound];
+
+const HOVER: Route[] = [
+  ['li.chip', 'chipHover'],
+  ['.thumb', 'shutterHover'],
+  ['.facade', 'videoHover'],
+  // The card's full-size link overlay sits under the pointer, so match it before plain links.
+  ['.project-card-large, .project-card-large .stretched', 'cardHover'],
+  ['.project-card-small, .project-card-small .stretched', 'cardSmallHover'],
+  ['.pager-link', 'pageHover'],
+  ['.back', 'backHover'],
+  ['.brand', 'coinHover'],
+  ['.insert-coin', 'insertHover'],
+  ['.btn-primary', 'btnPrimaryHover'],
+  ['.btn, .crt-exit, .fx-toggle, summary, button', 'btnHover'],
+  ['.nav-desktop a, .nav-mobile a, .footer-links a', 'navHover'],
+  ['.focus, .skill-group, .other', 'glassHover'],
+  ['a[href]', 'linkHover'],
+];
+
+const CLICK: Route[] = [
+  ['a[download]', 'itemGet'],
+  ['.thumb', 'shutter'],
+  ['.facade', 'play'],
+  ['.card-link .stretched, .pager-link, .related a, .back', 'select'],
+  ['.fx-toggle', 'toggle'],
+  ['a[href], button, summary', 'click'],
+];
+
+function route(from: Element | null, routes: Route[]): [Element, Sound] | null {
+  for (let el = from; el; el = el.parentElement) {
+    for (const [sel, sound] of routes) if (el.matches(sel)) return [el, sound];
+  }
+  return null;
+}
+
 let lastHover: Element | null = null;
+let lastHoverAt = 0;
 document.addEventListener('pointerover', (e) => {
   if ((e as PointerEvent).pointerType !== 'mouse') return;
-  const el = (e.target as Element).closest(INTERACTIVE);
-  if (el && el !== lastHover && !el.contains(lastHover) && !lastHover?.contains(el)) play('hover');
+  const hit = route(e.target as Element, HOVER);
+  const el = hit?.[0] ?? null;
+  // Moving outward (from a chip back onto its card) or staying put is silent.
+  const fresh = el && el !== lastHover && !el.contains(lastHover);
   lastHover = el;
-});
-document.addEventListener('click', (e) => {
-  const el = (e.target as Element).closest('a, button, summary');
-  if (el && !el.closest('[data-sfx-silent]')) play('click');
+  if (!fresh || !hit) return;
+  const now = performance.now();
+  if (now - lastHoverAt < 45) return; // no machine-gunning when sweeping across a grid
+  lastHoverAt = now;
+  const index = hit[1] === 'chipHover' ? [...el.parentElement!.children].indexOf(el) : 0;
+  play(hit[1], index);
 });
 
-document.documentElement.classList.toggle('sfx-on', enabled);
+document.addEventListener('click', (e) => {
+  const target = e.target as Element;
+  if (target.closest('[data-sfx-silent]')) return;
+  const summary = target.closest('summary');
+  if (summary?.parentElement instanceof HTMLDetailsElement) {
+    return play(summary.parentElement.open ? 'menuClose' : 'menuOpen');
+  }
+  const hit = route(target, CLICK);
+  if (hit) play(hit[1]);
+});
