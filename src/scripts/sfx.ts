@@ -81,22 +81,6 @@ function noise(dur: number, gain: number, filter: BiquadFilterType, fFrom: numbe
   src.stop(t + dur + 0.05);
 }
 
-/**
- * Struck metal: inharmonic partials at the mode ratios of a free metal bar, higher modes decaying
- * faster, a detuned twin on the fundamental for shimmer, and a tiny bright transient for the "sh".
- */
-function metal(base: number, gain: number, at = 0, decay = 0.6) {
-  noise(0.018, gain * 1.1, 'highpass', 6500, 9000, at);
-  const partials: [ratio: number, level: number, life: number][] = [
-    [1, 1, 1],
-    [2.756, 0.45, 0.55],
-    [5.404, 0.22, 0.32],
-    [8.933, 0.1, 0.2],
-  ];
-  for (const [ratio, level, life] of partials) tone('sine', base * ratio, base * ratio, decay * life, gain * level, at, 0.002);
-  tone('sine', base * 1.004, base * 1.004, decay * 0.9, gain * 0.5, at, 0.002); // shimmer (beats against the fundamental)
-}
-
 // Pentatonic (C major) from C5 up, used for chips, cheat-code notes and jingles.
 const SCALE = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51, 1567.98, 1760, 2093];
 
@@ -115,16 +99,14 @@ const SOUNDS = {
     tone('square', 660, 990, 0.05, 0.014);
     tone('sine', 1980, 1980, 0.12, 0.008, 0.02);
   },
-  // Metallic "shing" for project tiles, tuned per tile so sweeping the grid plays a chime.
-  cardHover: (i = 0) => {
-    const f = SCALE[[0, 2, 4, 1][i % 4]]; // C5 E5 G5 D5 across the four featured tiles
-    metal(f, 0.014, 0, 0.7);
-    metal(f * 2, 0.005, 0.035, 0.45); // quick octave ring-out: the "-ing"
-    tone('sine', 196, 196, 0.22, 0.02, 0, 0.02); // soft body under it, as before
+  cardHover: () => {
+    noise(0.2, 0.03, 'bandpass', 600, 1900, 0, 1.5); // air as the card lifts
+    tone('sine', 196, 196, 0.28, 0.035, 0, 0.03); // soft body
+    tone('sine', 1568, 1568, 0.2, 0.006, 0.05); // glint of the glare
   },
-  cardSmallHover: (i = 0) => {
-    const f = SCALE[[4, 5, 7, 8][i % 4]]; // A5 C6 E6 G6: higher, lighter tiles
-    metal(f, 0.009, 0, 0.45);
+  cardSmallHover: () => {
+    noise(0.13, 0.022, 'bandpass', 900, 2300, 0, 1.5);
+    tone('sine', 294, 294, 0.16, 0.025, 0, 0.02);
   },
   glassHover: () => {
     tone('sine', 2637, 2637, 0.28, 0.011);
@@ -282,90 +264,6 @@ export function startCharge() {
       const t = c.currentTime;
       g.gain.setTargetAtTime(0, t, 0.03);
       osc.stop(t + 0.2);
-    },
-  };
-}
-
-/** A sustained whirr for tilting tiles: a detuned motor hum with a fluttering edge, plus airy wind.
- * `update(tilt, speed)` takes 0..1 values: tilt drives pitch and brightness, pointer speed drives
- * the wind. `size` scales loudness (smaller tiles are quieter). */
-export function tiltVoice(size = 1) {
-  if (!running()) return null;
-  const c = ctx!;
-  const t0 = c.currentTime;
-  const out = c.createGain();
-  out.gain.setValueAtTime(0, t0);
-  out.gain.linearRampToValueAtTime(size, t0 + 0.18);
-  out.connect(master!);
-  const nodes: AudioScheduledSourceNode[] = [];
-
-  // Motor hum: two slightly detuned sines beat against each other.
-  const hum = c.createGain();
-  hum.gain.value = 0.014;
-  hum.connect(out);
-  const humA = c.createOscillator();
-  const humB = c.createOscillator();
-  humA.frequency.value = 72;
-  humB.frequency.value = 72.9;
-  humA.connect(hum);
-  humB.connect(hum);
-
-  // Whirr: a filtered saw an octave up, amplitude-fluttered like a fan blade.
-  const whirrFilter = c.createBiquadFilter();
-  whirrFilter.type = 'lowpass';
-  whirrFilter.frequency.value = 260;
-  const whirr = c.createGain();
-  whirr.gain.value = 0.006;
-  const saw = c.createOscillator();
-  saw.type = 'sawtooth';
-  saw.frequency.value = 144;
-  saw.connect(whirrFilter).connect(whirr).connect(out);
-  const flutter = c.createOscillator();
-  flutter.frequency.value = 13;
-  const flutterDepth = c.createGain();
-  flutterDepth.gain.value = 0.004;
-  flutter.connect(flutterDepth).connect(whirr.gain);
-
-  // Wind: band-passed noise that swells with pointer speed.
-  const wind = c.createBufferSource();
-  wind.buffer = noiseBuf;
-  wind.loop = true;
-  const band = c.createBiquadFilter();
-  band.type = 'bandpass';
-  band.Q.value = 1.1;
-  band.frequency.value = 600;
-  const air = c.createGain();
-  air.gain.value = 0.003;
-  wind.connect(band).connect(air).connect(out);
-
-  [humA, humB, saw, flutter].forEach((o) => o.start());
-  wind.start(t0, Math.random());
-  nodes.push(humA, humB, saw, flutter, wind);
-
-  let stopped = false;
-  return {
-    update(tilt: number, speed: number) {
-      if (stopped) return;
-      const t = c.currentTime;
-      const base = 66 + tilt * 30;
-      humA.frequency.setTargetAtTime(base, t, 0.08);
-      humB.frequency.setTargetAtTime(base * 1.012, t, 0.08);
-      saw.frequency.setTargetAtTime(base * 2, t, 0.08);
-      whirrFilter.frequency.setTargetAtTime(220 + tilt * 520, t, 0.08);
-      flutter.frequency.setTargetAtTime(11 + speed * 14, t, 0.1);
-      hum.gain.setTargetAtTime(0.012 + tilt * 0.016, t, 0.1);
-      band.frequency.setTargetAtTime(500 + tilt * 1600 + speed * 1500, t, 0.06);
-      air.gain.setTargetAtTime(0.003 + speed * 0.03, t, 0.05);
-    },
-    stop() {
-      if (stopped) return;
-      stopped = true;
-      const t = c.currentTime;
-      out.gain.cancelScheduledValues(t);
-      out.gain.setValueAtTime(out.gain.value, t);
-      out.gain.linearRampToValueAtTime(0, t + 0.25);
-      nodes.forEach((n) => n.stop(t + 0.3));
-      setTimeout(() => out.disconnect(), 400);
     },
   };
 }
@@ -529,9 +427,7 @@ document.addEventListener('pointerover', (e) => {
   const now = performance.now();
   if (now - lastHoverAt < 45) return; // no machine-gunning when sweeping across a grid
   lastHoverAt = now;
-  const tuned = hit[1] === 'chipHover' || hit[1] === 'cardHover' || hit[1] === 'cardSmallHover';
-  const tile = el.closest('.project-card') ?? el;
-  const index = tuned ? [...tile.parentElement!.children].indexOf(tile) : 0;
+  const index = hit[1] === 'chipHover' ? [...el.parentElement!.children].indexOf(el) : 0;
   play(hit[1], index);
 });
 
