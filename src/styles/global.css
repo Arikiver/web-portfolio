@@ -694,6 +694,30 @@ html.crt body {
     color 0.15s ease;
 }
 
+.konami-hud b {
+  font-weight: inherit;
+}
+
+/* Touch screens finish the code with two taps, not B and A (and have no Esc key). */
+.konami-hud .tap {
+  display: none;
+  font-size: 0.7em;
+}
+
+@media (hover: none) {
+  .konami-hud .k {
+    display: none;
+  }
+
+  .konami-hud .tap {
+    display: inline;
+  }
+
+  .crt-exit kbd {
+    display: none;
+  }
+}
+
 .konami-hud span.lit {
   opacity: 1;
   color: var(--accent);

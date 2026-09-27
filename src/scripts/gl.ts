@@ -17,6 +17,7 @@ export function fullscreenProgram(gl: WebGLRenderingContext, frag: string) {
   gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
   gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag));
   gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog) ?? 'shader link');
   gl.useProgram(prog);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
@@ -30,6 +31,30 @@ export function fullscreenProgram(gl: WebGLRenderingContext, frag: string) {
     draw: () => gl.drawArrays(gl.TRIANGLES, 0, 3),
   };
 }
+
+/** Like fullscreenProgram, but returns null if this GPU can't compile/link the shader. */
+export function tryFullscreenProgram(gl: WebGLRenderingContext | null | undefined, frag: string) {
+  if (!gl) return null;
+  try {
+    return fullscreenProgram(gl, frag);
+  } catch (err) {
+    console.warn('Shader effect disabled:', err);
+    return null;
+  }
+}
+
+/**
+ * Fragment precision: highp wherever the GPU has it. Desktop GPUs quietly run mediump at 32-bit,
+ * but phone GPUs really use 16-bit floats (max 65504, ~3 significant digits), which wrecks noise
+ * hashing and anything that grows with screen coordinates.
+ */
+export const PRECISION_GLSL = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+`;
 
 /** Shared GLSL: value noise + fbm. */
 export const NOISE_GLSL = `

@@ -190,8 +190,9 @@ function onHoverEvent(e: MouseEvent) {
 
 function onPress(e: MouseEvent) {
   if (!inLens(e)) return;
-  // Keyboard-activated clicks have no pointer position; leave them alone.
-  if (e.type === 'click' && e.detail === 0) return;
+  // Keyboard-activated clicks have no pointer position; leave them alone. (Not `detail === 0` alone:
+  // taps can report that too. Keyboard clicks have no pointerType; taps say "touch".)
+  if (e.type === 'click' && e.detail === 0 && !(e instanceof PointerEvent && e.pointerType)) return;
   e.stopImmediatePropagation();
   e.preventDefault(); // no activation, focus or text selection on the element that's really under the cursor
   const p = lensMap(e.clientX, e.clientY);

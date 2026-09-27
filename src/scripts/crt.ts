@@ -280,7 +280,7 @@ try {
 
 type Input = 'up' | 'down' | 'left' | 'right' | 'b' | 'a';
 const CODE: Input[] = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
-const slots = [...hud.querySelectorAll<HTMLElement>('span')];
+const slots = [...hud.children] as HTMLElement[];
 let step = 0;
 let hideTimer = 0;
 
@@ -332,6 +332,15 @@ addEventListener('keydown', (e) => {
   else if (e.key.length === 1) step = 0;
 });
 
+function swallowNextClick() {
+  const swallow = (e: Event) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  };
+  addEventListener('click', swallow, { capture: true, once: true });
+  setTimeout(() => removeEventListener('click', swallow, { capture: true }), 600);
+}
+
 // Touch: swipes for the arrows, taps for B and A.
 let touch: { x: number; y: number; t: number } | null = null;
 addEventListener(
@@ -355,7 +364,12 @@ addEventListener(
     const ax = Math.abs(dx);
     const ay = Math.abs(dy);
     if (ax < 12 && ay < 12) {
-      if (step >= 8) input(CODE[step]); // a tap stands in for B, then A
+      if (step >= 8) {
+        // A tap stands in for B, then A. It's consumed by the code, so it must not also open
+        // whatever link it landed on (on a phone, cards can fill the whole screen).
+        swallowNextClick();
+        input(CODE[step]);
+      }
       return;
     }
     if (Math.max(ax, ay) < 40) return;

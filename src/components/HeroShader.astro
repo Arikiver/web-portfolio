@@ -10,10 +10,10 @@
 </button>
 
 <script>
-  import { NOISE_GLSL, fullscreenProgram } from '../scripts/gl';
+  import { NOISE_GLSL, PRECISION_GLSL, tryFullscreenProgram } from '../scripts/gl';
 
   const FRAG = `
-precision highp float;
+${PRECISION_GLSL}
 uniform vec2 u_res;
 uniform float u_time;
 uniform vec2 u_light;
@@ -84,8 +84,9 @@ void main() {
   const toggle = document.querySelector<HTMLButtonElement>('.fx-toggle');
   const gl = canvas?.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
 
-  if (canvas && toggle && gl) {
-    const fx = fullscreenProgram(gl, FRAG);
+  const fx = tryFullscreenProgram(gl, FRAG);
+
+  if (canvas && toggle && gl && fx) {
     const uRes = fx.uniform('u_res');
     const uTime = fx.uniform('u_time');
     const uLight = fx.uniform('u_light');
