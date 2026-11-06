@@ -1,0 +1,143 @@
+---
+// Typeset cover for projects without key art yet (cover: 'generated:<slug>'). Built only from
+// facts on the project: a blueprint of rooms, a torch beam, and the 3-of-7 evidence strip.
+// Text is live HTML and scales with the frame via container query units.
+interface Props {
+  slug: string;
+  alt: string;
+  vt?: string;
+  class?: string;
+}
+
+import { projects } from '../data/portfolio';
+
+const { slug, alt, vt, class: className } = Astro.props;
+const project = projects.find((p) => p.slug === slug);
+if (!project) throw new Error(`GeneratedCover: unknown project ${slug}`);
+const meta = (label: string) => project.meta.find((m) => m.label === label)?.value;
+const subtitle = [meta('Type'), meta('Engine')?.replace(/ \(.*\)$/, '')].filter(Boolean).join(' · ');
+
+// Deterministic floor plan: split a rectangle into rooms (binary space partition).
+let seed = 7;
+const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+type Room = { x: number; y: number; w: number; h: number };
+const rooms: Room[] = [];
+const split = (r: Room, depth: number) => {
+  if (depth === 0 || (r.w < 120 && r.h < 120)) return void rooms.push(r);
+  const vertical = r.w > r.h ? true : r.h > r.w ? false : rand() > 0.5;
+  const t = 0.35 + rand() * 0.3;
+  if (vertical) {
+    const w = Math.round(r.w * t);
+    split({ x: r.x, y: r.y, w, h: r.h }, depth - 1);
+    split({ x: r.x + w, y: r.y, w: r.w - w, h: r.h }, depth - 1);
+  } else {
+    const h = Math.round(r.h * t);
+    split({ x: r.x, y: r.y, w: r.w, h }, depth - 1);
+    split({ x: r.x, y: r.y + h, w: r.w, h: r.h - h }, depth - 1);
+  }
+};
+split({ x: 60, y: 70, w: 480, h: 330 }, 5);
+const hot = rooms.reduce((a, b, i) => (b.w * b.h > rooms[a].w * rooms[a].h && i > 3 ? i : a), 0);
+
+const evidence = [false, true, false, true, false, false, true]; // 3 of 7
+---
+
+<div class:list={['gen-cover', `gen-${slug}`, className]} role="img" aria-label={alt} style={vt ? `view-transition-name: ${vt}` : undefined}>
+  <svg class="gen-art" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <radialGradient id={`beam-${slug}`} cx="0.08" cy="0.95" r="0.9">
+        <stop offset="0" stop-color="#d9e4dc" stop-opacity="0.22"></stop>
+        <stop offset="0.55" stop-color="#9fb3a6" stop-opacity="0.06"></stop>
+        <stop offset="1" stop-color="#9fb3a6" stop-opacity="0"></stop>
+      </radialGradient>
+      <pattern id={`dots-${slug}`} width="12" height="12" patternUnits="userSpaceOnUse">
+        <circle cx="1" cy="1" r="0.8" fill="#c8d4cb" fill-opacity="0.08"></circle>
+      </pattern>
+    </defs>
+    <rect width="600" height="600" fill="#0a0d0c"></rect>
+    <rect width="600" height="600" fill={`url(#dots-${slug})`}></rect>
+    <g fill="none" stroke="#c8d4cb" stroke-opacity="0.32" stroke-width="1">
+      {
+        rooms.map((r, i) => (
+          <rect x={r.x + 3} y={r.y + 3} width={r.w - 6} height={r.h - 6} fill={i === hot ? '#f5a524' : 'none'} fill-opacity={i === hot ? 0.09 : 0} stroke={i === hot ? '#f5a524' : undefined} stroke-opacity={i === hot ? 0.7 : undefined} />
+        ))
+      }
+    </g>
+    <rect width="600" height="600" fill={`url(#beam-${slug})`}></rect>
+  </svg>
+  <div class="gen-text">
+    <ol class="gen-evidence" aria-hidden="true">
+      {evidence.map((on) => <li class:list={{ on }}></li>)}
+    </ol>
+    <p class="gen-title">{project.title}</p>
+    <p class="gen-sub">{subtitle}</p>
+  </div>
+</div>
+
+<style>
+  .gen-cover {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #0a0d0c;
+    container-type: inline-size;
+  }
+
+  .gen-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s var(--ease, ease);
+  }
+
+  .gen-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 7cqw;
+  }
+
+  .gen-evidence {
+    position: absolute;
+    top: 7cqw;
+    right: 7cqw;
+    display: flex;
+    gap: 1.2cqw;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gen-evidence li {
+    width: 2.4cqw;
+    height: 2.4cqw;
+    border: 1px solid rgb(200 212 203 / 0.45);
+  }
+
+  .gen-evidence li.on {
+    background: #f5a524;
+    border-color: #f5a524;
+  }
+
+  .gen-title {
+    margin: 0;
+    font-family: var(--font-display, serif);
+    font-size: 11.5cqw;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: #e8ece9;
+  }
+
+  .gen-sub {
+    margin: 2.2cqw 0 0;
+    font-family: var(--font-text, sans-serif);
+    font-size: max(12px, 2.8cqw);
+    font-weight: 500;
+    color: rgb(200 212 203 / 0.75);
+  }
+</style>

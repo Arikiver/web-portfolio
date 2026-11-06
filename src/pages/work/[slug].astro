@@ -1,12 +1,11 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import { getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Cover from '../../components/Cover.astro';
 import Gallery from '../../components/Gallery.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
-import { profile, projects, type Project } from '../../data/portfolio';
-import { coverPresentation, image, isGif } from '../../lib/images';
+import { disciplineLabel, profile, projects, type Project } from '../../data/portfolio';
+import { isGenerated } from '../../lib/images';
 import { url } from '../../lib/url';
 
 export const getStaticPaths = (() =>
@@ -26,132 +25,155 @@ interface Props {
 }
 
 const { project, prev, next } = Astro.props;
-
-// A tiny copy of the cover, blurred into an ambient glow behind the header.
-const coverMeta = await image(project.cover);
-const ambient = isGif(project.cover) ? coverMeta.src : (await getImage({ src: coverMeta, width: 96, format: 'webp' })).src;
-const isLogo = coverPresentation(project.cover).fit === 'contain';
+const index = projects.indexOf(project) + 1;
+const disciplines = project.disciplines.map((d) => disciplineLabel[d]).join(' · ');
+// Typeset covers have no raster image to share, so previews fall back to the portrait.
+const ogImage = isGenerated(project.cover) ? profile.photo : project.cover;
 ---
 
-<Base title={`${project.title} — ${profile.name}`} description={project.pitch} ogImage={project.cover}>
-  <div class:list={['ambient', { 'ambient-logo': isLogo }]} style={`--ambient: url("${ambient}")`} aria-hidden="true"></div>
-  <article class="container project">
-    <a class="back" href={`${url('/')}#work`}>← All work</a>
+<Base title={`${project.title} — ${profile.name}`} description={project.pitch} ogImage={ogImage}>
+  <article class="project">
+    <div class="wrap">
+      <a class="back link" href={`${url('/')}#work`}>← All work</a>
 
-    <header class="head">
-      <div class="head-text">
-        {project.status && <p class="status" data-decode>{project.status}</p>}
-        <h1 style={`view-transition-name: title-${project.slug}`}>{project.title}</h1>
-        <p class="pitch">{project.pitch}</p>
-        <dl class="meta">
-          {
-            project.meta.map((m) => (
-              <div class="chip">
-                <dt>{m.label}</dt>
-                <dd>{m.value}</dd>
-              </div>
-            ))
-          }
-        </dl>
-      </div>
-      <div class="head-art" data-tilt="10">
-        <Cover
-          class="head-cover"
-          file={project.cover}
-          alt={`${project.title} cover art`}
-          sizes="(min-width: 860px) 320px, 104px"
-          widths={[240, 320, 640]}
-          vt={`cover-${project.slug}`}
-          eager
-        />
-      </div>
-    </header>
+      <header class="p-head grid">
+        <div class="p-head-text">
+          <p class="label" data-hero>
+            <span class="num">{String(index).padStart(2, '0')}</span>{disciplines}
+          </p>
+          <h1 data-hero="lines" style={`view-transition-name: title-${project.slug}`}>{project.title}</h1>
+          <p class="lead" data-hero>{project.pitch}</p>
+          {project.status && <p class="status label" data-hero><span class="status-pip" aria-hidden="true" />{project.status}</p>}
+        </div>
+        <div class="p-cover frame" data-hero="media">
+          <Cover
+            file={project.cover}
+            alt={`${project.title} cover art`}
+            sizes="(min-width: 900px) 420px, calc(100vw - 48px)"
+            widths={[400, 640, 900]}
+            vt={`cover-${project.slug}`}
+            eager
+          />
+        </div>
+      </header>
+
+      <dl class="p-meta" data-hero>
+        {
+          project.meta.map((m) => (
+            <div>
+              <dt class="label">{m.label}</dt>
+              <dd>{m.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
 
     {
       project.video && (
-        <section class="block" aria-label="Video">
+        <div class="wrap p-video" data-reveal="media">
           <VideoEmbed video={project.video} poster={project.cover} />
-        </section>
+        </div>
       )
     }
 
-    <div class="layout">
-      <div class="main-col">
-        <section class="block">
-          <h2>Overview</h2>
-          {project.overview.map((p) => <p>{p}</p>)}
-        </section>
-
-        {
-          project.role && (
-            <section class="block">
-              <h2>My role</h2>
-              <p>{project.role}</p>
-            </section>
-          )
-        }
-
-        {
-          project.sections.map((s) => (
-            <section class="block">
-              <h2>{s.heading}</h2>
-              <ul class="points">
-                {s.points.map((pt) => (
-                  <li>{pt}</li>
-                ))}
-              </ul>
-            </section>
-          ))
-        }
-      </div>
-
-      <aside class="side-col">
-        <div class="card side-card">
-          <h2 class="side-title">Stack</h2>
-          <ul class="chips">
-            {project.stack.map((t) => <li class="chip">{t}</li>)}
-          </ul>
+    <div class="wrap p-body">
+      <section class="p-row grid" data-reveal-row>
+        <h2 data-reveal="lines">Overview</h2>
+        <div class="p-content">
+          {project.overview.map((para, i) => <p class:list={['measure', { lead: i === 0 }]} data-reveal>{para}</p>)}
         </div>
-        {
-          project.links.length > 0 && (
-            <div class="card side-card">
-              <h2 class="side-title">Links</h2>
-              <div class="links">
-                {project.links.map((l, i) => (
-                  <a class:list={['btn', { 'btn-primary': i === 0 }]} href={l.url} rel="noopener">
-                    {l.label}
-                  </a>
-                ))}
-              </div>
+      </section>
+
+      {
+        project.role && (
+          <section class="p-row grid" data-reveal-row>
+            <h2 data-reveal="lines">My role</h2>
+            <div class="p-content">
+              <p class="measure" data-reveal>
+                {project.role}
+              </p>
             </div>
-          )
-        }
-        {
-          project.note && (
-            <p class="note" role="note">
-              <span aria-hidden="true">ⓘ</span> {project.note}
-            </p>
-          )
-        }
-      </aside>
+          </section>
+        )
+      }
+
+      {
+        project.sections.map((sec) => (
+          <section class="p-row grid" data-reveal-row>
+            <h2 data-reveal="lines">{sec.heading}</h2>
+            <ol class="p-content points">
+              {sec.points.map((pt) => (
+                <li class="measure" data-reveal>
+                  {pt}
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))
+      }
+
+      <section class="p-row grid" data-reveal-row>
+        <h2 data-reveal="lines">Stack</h2>
+        <p class="p-content stack" data-reveal>
+          {project.stack.map((t, i) => (
+            <>
+              {i > 0 && (
+                <span class="sep" aria-hidden="true">
+                  /
+                </span>
+              )}
+              <span>{t}</span>
+            </>
+          ))}
+        </p>
+      </section>
+
+      {
+        (project.links.length > 0 || project.note) && (
+          <section class="p-row grid" data-reveal-row>
+            <h2 data-reveal="lines">Links</h2>
+            <div class="p-content">
+              {project.links.length > 0 && (
+                <div class="btn-row" data-reveal>
+                  {project.links.map((l, i) => (
+                    <a class:list={['btn', { 'btn-primary': i === 0 }]} href={l.url} rel="noopener">
+                      {l.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+              {project.note && (
+                <p class="note label" role="note" data-reveal>
+                  {project.note}
+                </p>
+              )}
+            </div>
+          </section>
+        )
+      }
     </div>
 
     {
       project.gallery && project.gallery.length > 0 && (
-        <section class="block">
-          <h2>Screenshots</h2>
+        <section class="wrap p-gallery" aria-labelledby="shots">
+          <header class="p-row grid p-gallery-head" data-reveal-row>
+            <h2 id="shots" data-reveal="lines">
+              Screenshots
+            </h2>
+          </header>
           <Gallery items={project.gallery} />
         </section>
       )
     }
 
-    <nav class="pager" aria-label="More projects">
-      <a class="card card-link pager-link" data-tilt="4" href={url(`/work/${prev.slug}/`)}>
-        <span class="muted">← Previous</span>
+    <nav class="wrap pager" aria-label="More projects">
+      <a class="pager-link" href={url(`/work/${prev.slug}/`)}>
+        <span class="label">← Previous project</span>
         <span class="pager-title">{prev.title}</span>
       </a>
-      <a class="card card-link pager-link next" data-tilt="4" href={url(`/work/${next.slug}/`)}>
-        <span class="muted">Next →</span>
+      <a class="pager-link next" href={url(`/work/${next.slug}/`)}>
+        <span class="label">Next project →</span>
         <span class="pager-title">{next.title}</span>
       </a>
     </nav>
@@ -159,288 +181,230 @@ const isLogo = coverPresentation(project.cover).fit === 'contain';
 </Base>
 
 <style>
-  .ambient {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 820px;
-    z-index: -1;
-    pointer-events: none;
-    overflow: hidden;
-    -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent);
-    mask-image: linear-gradient(to bottom, #000 30%, transparent);
-  }
-
-  .ambient::before {
-    content: '';
-    position: absolute;
-    inset: -20%;
-    background: var(--ambient) center / cover no-repeat;
-    filter: blur(70px) saturate(1.35);
-    opacity: 0.32;
-    animation: ambient-drift 18s ease-in-out infinite alternate;
-  }
-
-  .ambient-logo::before {
-    opacity: 0.16;
-  }
-
-  @keyframes ambient-drift {
-    to {
-      transform: scale(1.15) translate(3%, -2%) rotate(3deg);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ambient::before {
-      animation: none;
-    }
-  }
-
   .project {
-    position: relative;
-    padding-top: 2rem;
+    padding-top: 32px;
   }
 
   .back {
     display: inline-block;
-    color: var(--muted);
-    text-decoration: none;
-    font-weight: 500;
-    margin-bottom: 2rem;
+    margin-bottom: 40px;
+    font-size: var(--t-small);
+    color: var(--ink-2);
   }
 
   .back:hover {
-    color: var(--accent);
+    color: var(--ink);
   }
 
-  .head {
-    display: grid;
-    gap: 1.25rem;
-    align-items: center;
-    margin-bottom: 2.5rem;
+  .p-head {
+    row-gap: 32px;
+    align-items: end;
   }
 
-  .head-art {
-    order: -1;
-    width: 104px;
-    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+  .p-head-text,
+  .p-cover {
+    grid-column: 1 / -1;
   }
 
-  .head-art :global(.head-cover) {
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.9);
+  .p-head h1 {
+    font-size: var(--t-hero);
+    line-height: 0.98;
+    letter-spacing: -0.022em;
+    margin: 20px 0 24px;
+    max-width: 12ch;
   }
 
-  @media (min-width: 860px) {
-    .head {
-      grid-template-columns: 1fr 320px;
-      gap: 3rem;
-    }
-
-    .head-art {
-      order: 0;
-      width: auto;
-    }
-
-    .head-art :global(.head-cover) {
-      border-radius: var(--radius);
-    }
+  .p-head .lead {
+    color: var(--ink-2);
+    margin-bottom: 20px;
   }
 
   .status {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--accent);
-    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
-    background: rgb(245 165 36 / 0.08);
-    border-radius: 999px;
-    padding: 0.25rem 0.75rem;
-    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
   }
 
-  h1 {
-    font-size: clamp(2.2rem, 6vw, 3.75rem);
-    margin-bottom: 0.75rem;
+  .status-pip {
+    width: 7px;
+    height: 7px;
+    background: var(--accent);
   }
 
-  .pitch {
-    font-size: clamp(1.05rem, 2vw, 1.25rem);
-    color: var(--muted);
-    max-width: 44rem;
-    margin-bottom: 1.5rem;
+  .p-cover {
+    width: min(100%, 420px);
+    aspect-ratio: 1;
   }
 
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0;
+  .p-cover :global(.cover) {
+    height: 100%;
   }
 
-  .meta .chip {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    padding: 0.45rem 0.75rem;
+  @media (min-width: 900px) {
+    .p-head-text {
+      grid-column: 1 / 8;
+    }
+
+    .p-cover {
+      grid-column: 9 / 13;
+      justify-self: end;
+    }
   }
 
-  .meta dt {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  .meta dd {
-    margin: 0;
-    color: var(--text);
-    font-size: 0.82rem;
-  }
-
-  .block {
-    margin-bottom: 2.75rem;
-  }
-
-  .block h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.9rem;
-  }
-
-  .layout {
+  .p-meta {
     display: grid;
-    gap: 1rem 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 20px 24px;
+    margin: 48px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
   }
 
-  @media (min-width: 860px) {
-    .layout {
-      grid-template-columns: minmax(0, 1fr) 320px;
-      align-items: start;
-    }
-
-    .side-col {
-      position: sticky;
-      top: 88px;
-    }
+  .p-meta dd {
+    margin: 4px 0 0;
+    font-size: var(--t-small);
+    font-variant-numeric: tabular-nums;
   }
 
-  .main-col p {
-    max-width: 46rem;
+  .p-video {
+    margin-top: 72px;
+  }
+
+  .p-body {
+    margin-top: 72px;
+  }
+
+  /* Document rows: heading on the left, content on the grid. */
+  .p-row {
+    border-top: 1px solid var(--line);
+    padding-block: 28px 40px;
+    row-gap: 16px;
+  }
+
+  .p-row h2 {
+    grid-column: 1 / -1;
+    font-size: var(--t-h4);
+    line-height: 1.15;
+  }
+
+  .p-content {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  .p-content p:not(.lead) {
+    color: var(--ink-2);
+  }
+
+  @media (min-width: 900px) {
+    .p-row h2 {
+      grid-column: 1 / 4;
+    }
+
+    .p-content {
+      grid-column: 4 / 12;
+    }
   }
 
   .points {
-    margin: 0;
-    padding: 0;
     list-style: none;
-    display: grid;
-    gap: 0.7rem;
-    max-width: 46rem;
+    padding: 0;
+    counter-reset: point;
   }
 
   .points li {
+    counter-increment: point;
     position: relative;
-    padding-left: 1.5rem;
+    padding-left: 2.5em;
+    color: var(--ink-2);
   }
 
-  .points li {
-    transition: translate 0.25s ease;
-  }
-
-  .points li:hover {
-    translate: 4px 0;
-  }
-
-  .points li:hover::before {
-    box-shadow: 0 0 10px var(--accent);
+  .points li + li {
+    margin-top: 14px;
   }
 
   .points li::before {
-    content: '';
+    content: counter(point, decimal-leading-zero);
     position: absolute;
-    left: 0.15rem;
-    top: 0.62em;
-    width: 8px;
-    height: 8px;
-    background: var(--accent);
-    transform: rotate(45deg);
-  }
-
-  .side-col {
-    display: grid;
-    gap: 1rem;
-    margin-bottom: 2.75rem;
-  }
-
-  .side-card {
-    padding: 1.25rem;
-  }
-
-  .side-title {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
+    left: 0;
+    top: 0.2em;
+    font-size: var(--t-label);
     font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.9rem;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
   }
 
-  .links {
-    display: grid;
-    gap: 0.6rem;
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    line-height: 1.8;
   }
 
-  .links .btn {
-    text-align: center;
-    border-radius: var(--radius-sm);
+  .sep {
+    color: var(--ink-3);
+    margin-inline: 0.55em;
   }
 
   .note {
-    margin: 0;
-    padding: 0.9rem 1rem;
-    border-left: 3px solid var(--accent);
-    background: var(--surface);
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    font-size: 0.92rem;
-    color: var(--muted);
+    margin-top: 16px;
+  }
+
+  .p-gallery {
+    margin-top: 72px;
+  }
+
+  .p-gallery-head {
+    padding-bottom: 24px;
   }
 
   .pager {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 96px;
+    border-top: 1px solid var(--line);
+  }
+
+  @media (min-width: 720px) {
+    .pager {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
   .pager-link {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    padding: 1.1rem 1.25rem;
+    gap: 10px;
+    padding: 28px 0 8px;
+    color: var(--ink);
     text-decoration: none;
-    color: var(--text);
-    min-width: 0;
   }
 
   .pager-link.next {
     text-align: right;
+    align-items: flex-end;
   }
 
-  .pager-link .muted {
-    font-size: 0.85rem;
+  @media (max-width: 719px) {
+    .pager-link.next {
+      border-top: 1px solid var(--line);
+    }
   }
 
   .pager-title {
-    font-family: var(--font-head);
-    font-weight: 700;
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
-    overflow-wrap: anywhere;
+    font-family: var(--font-display);
+    font-size: var(--t-h3);
+    line-height: 1.05;
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0% 1px;
+    transition: background-size var(--hover-out) var(--ease);
+  }
+
+  .pager-link.next .pager-title {
+    background-position: 100% 100%;
   }
 
   .pager-link:hover .pager-title {
-    color: var(--accent);
+    background-size: 100% 1px;
+    transition-duration: var(--hover-in);
   }
 </style>

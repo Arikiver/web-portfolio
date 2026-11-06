@@ -398,12 +398,11 @@ type Route = [selector: string, sound: Sound];
 
 const HOVER: Route[] = [
   ['.hero-photo', 'bladeShine'],
-  ['li.chip', 'chipHover'],
   ['.thumb', 'shutterHover'],
   ['.facade', 'videoHover'],
-  // The card's full-size link overlay sits under the pointer, so match it before plain links.
-  ['.project-card-large, .project-card-large .stretched', 'cardHover'],
-  ['.project-card-small, .project-card-small .stretched', 'cardSmallHover'],
+  // A row's full-size link overlay sits under the pointer, so match it before plain links.
+  ['.feature, .feature .stretched', 'cardHover'],
+  ['.index-row, .index-link', 'cardSmallHover'],
   ['.pager-link', 'pageHover'],
   ['.back', 'backHover'],
   ['.brand', 'coinHover'],
@@ -411,7 +410,7 @@ const HOVER: Route[] = [
   ['.btn-primary', 'btnPrimaryHover'],
   ['.btn, .crt-exit, .fx-toggle, summary, button', 'btnHover'],
   ['.nav-desktop a, .nav-mobile a, .footer-links a', 'navHover'],
-  ['.focus, .skill-group, .other', 'glassHover'],
+  ['.discipline', 'glassHover'],
   ['a[href]', 'linkHover'],
 ];
 
@@ -419,7 +418,7 @@ const CLICK: Route[] = [
   ['a[download]', 'itemGet'],
   ['.thumb', 'shutter'],
   ['.facade', 'play'],
-  ['.card-link .stretched, .pager-link, .related a, .back', 'select'],
+  ['.feature .stretched, .index-link, .pager-link, .seen-in a, .back', 'select'],
   ['.fx-toggle', 'toggle'],
   ['a[href], button, summary', 'click'],
 ];

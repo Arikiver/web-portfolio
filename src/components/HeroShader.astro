@@ -204,46 +204,35 @@ void main() {
     opacity: 1;
   }
 
+  /* Plain text control: anything that moves for more than a few seconds gets a pause. */
   .fx-toggle {
     position: absolute;
-    right: var(--gutter);
-    bottom: 1.25rem;
+    right: var(--gut);
+    bottom: 20px;
     z-index: 2;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.7rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: rgb(11 11 15 / 0.6);
-    backdrop-filter: blur(6px);
-    color: var(--muted);
-    font: 0.72rem/1 var(--font-mono);
+    gap: 8px;
+    min-height: 32px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-2);
+    font: 500 var(--t-label) / 1 var(--font-text);
     cursor: pointer;
   }
 
   .fx-toggle:hover {
-    color: var(--text);
-    border-color: var(--accent);
+    color: var(--ink);
   }
 
   .fx-dot {
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
     background: var(--accent);
-    box-shadow: 0 0 8px var(--accent);
-    animation: fx-blink 1.6s steps(2, jump-none) infinite;
   }
 
   .fx-toggle[aria-pressed='true'] .fx-dot {
-    animation: none;
-    background: var(--muted);
-    box-shadow: none;
-  }
-
-  @keyframes fx-blink {
-    50% {
-      opacity: 0.25;
-    }
+    background: var(--ink-3);
   }
 </style>

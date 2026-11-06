@@ -12,6 +12,9 @@ export async function image(file: string): Promise<ImageMetadata> {
 
 export const isGif = (file: string) => file.toLowerCase().endsWith('.gif');
 
+/** Covers written as `generated:<slug>` are typeset (GeneratedCover.astro), not image files. */
+export const isGenerated = (file: string) => file.startsWith('generated:');
+
 /**
  * Logos are shown whole on their own background colour instead of being cropped.
  * `radius` clips baked-in corners (boop.png is an app icon with opaque black corners).

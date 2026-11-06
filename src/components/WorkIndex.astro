@@ -1,0 +1,246 @@
+---
+// Project index: dense rows for the rest of the work. On desktop a preview of the hovered project
+// follows the pointer and rolls between covers as you move down the list (after 21st.dev's
+// "Hover Reel" pattern). On touch / small screens each row carries a small thumbnail instead.
+import Cover from './Cover.astro';
+import { disciplineLabel, type Project } from '../data/portfolio';
+import { url } from '../lib/url';
+
+interface Props {
+  projects: Project[];
+  start: number;
+}
+
+const { projects, start } = Astro.props;
+const year = (p: Project) => p.meta.find((m) => m.label === 'Dates' || m.label === 'Released')?.value ?? '';
+---
+
+<div class="index-wrap">
+  <ol class="index">
+    {
+      projects.map((p, i) => (
+        <li class="index-row" data-reveal-row data-reel={i}>
+          <a class="index-link" href={url(`/work/${p.slug}/`)}>
+            <span class="i-num">{String(start + i).padStart(2, '0')}</span>
+            <span class="i-thumb frame">
+              <Cover file={p.cover} alt="" sizes="64px" widths={[128]} />
+            </span>
+            <span class="i-main">
+              <span class="i-title" style={`view-transition-name: title-${p.slug}`}>{p.title}</span>
+              <span class="i-pitch">{p.pitch}</span>
+            </span>
+            <span class="i-disc">{p.disciplines.map((d) => disciplineLabel[d]).join(' · ')}</span>
+            <span class="i-year">{year(p)}</span>
+            <span class="i-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="reel" aria-hidden="true">
+    <div class="reel-track">
+      {
+        projects.map((p) => (
+          <div class="reel-item">
+            <Cover file={p.cover} alt="" sizes="300px" widths={[300, 600]} />
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const wrap = document.querySelector<HTMLElement>('.index-wrap');
+  const reel = wrap?.querySelector<HTMLElement>('.reel');
+  const track = reel?.querySelector<HTMLElement>('.reel-track');
+  const canHover = matchMedia('(hover: hover) and (pointer: fine) and (min-width: 900px)');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (wrap && reel && track) {
+    // Position follows the pointer with a little lag; quickTo reuses one tween per axis.
+    const toX = gsap.quickTo(reel, 'x', { duration: 0.5, ease: 'power3.out' });
+    const toY = gsap.quickTo(reel, 'y', { duration: 0.5, ease: 'power3.out' });
+    let shown = false;
+
+    const place = (e: PointerEvent, instant = false) => {
+      const x = e.clientX + 24;
+      const y = e.clientY - reel.offsetHeight / 2;
+      if (instant) gsap.set(reel, { x, y });
+      else {
+        toX(x);
+        toY(y);
+      }
+    };
+
+    wrap.querySelectorAll<HTMLElement>('.index-row').forEach((row) => {
+      const i = Number(row.dataset.reel);
+      row.addEventListener('pointerenter', (e) => {
+        if (!canHover.matches || reduced.matches || e.pointerType !== 'mouse') return;
+        if (!shown) {
+          place(e, true);
+          gsap.set(track, { yPercent: -100 * i });
+          gsap.fromTo(reel, { autoAlpha: 0, scale: 0.92, clipPath: 'inset(12% 12% 12% 12%)' }, { autoAlpha: 1, scale: 1, clipPath: 'inset(0% 0% 0% 0%)', duration: 0.45, ease: 'power3.out', overwrite: 'auto' });
+          shown = true;
+        } else {
+          // Roll to the hovered project's cover.
+          gsap.to(track, { yPercent: -100 * i, duration: 0.55, ease: 'power3.inOut', overwrite: true });
+        }
+      });
+      row.addEventListener('pointermove', (e) => canHover.matches && e.pointerType === 'mouse' && place(e));
+    });
+
+    wrap.querySelector('.index')?.addEventListener('pointerleave', () => {
+      if (!shown) return;
+      shown = false;
+      gsap.to(reel, { autoAlpha: 0, scale: 0.94, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
+    });
+  }
+</script>
+
+<style>
+  .index {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .index-row {
+    border-top: 1px solid var(--line);
+  }
+
+  .index-link {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) 20px;
+    grid-template-areas: 'thumb main arrow';
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    color: var(--ink);
+    text-decoration: none;
+    transition: background-color var(--hover-out) var(--ease);
+  }
+
+  .i-num,
+  .i-disc,
+  .i-year {
+    display: none;
+  }
+
+  .i-thumb {
+    grid-area: thumb;
+    width: 64px;
+    height: 64px;
+    display: block;
+  }
+
+  .i-main {
+    grid-area: main;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .i-title {
+    font-family: var(--font-display);
+    font-size: var(--t-h4);
+    line-height: 1.1;
+  }
+
+  .i-pitch {
+    font-size: var(--t-small);
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+
+  .i-arrow {
+    grid-area: arrow;
+    color: var(--ink-2);
+    transition:
+      translate var(--hover-out) var(--ease),
+      color var(--hover-out) var(--ease);
+  }
+
+  .index-link:hover .i-arrow,
+  .index-link:focus-visible .i-arrow {
+    translate: 3px 0;
+    color: var(--ink);
+    transition-duration: var(--hover-in);
+  }
+
+  @media (min-width: 900px) {
+    .index-link {
+      grid-template-columns: 3rem minmax(0, 1fr) 11rem 9.5rem 20px;
+      grid-template-areas: 'num main disc year arrow';
+      gap: 24px;
+      padding: 24px 0;
+    }
+
+    .i-thumb {
+      display: none;
+    }
+
+    .i-num,
+    .i-disc,
+    .i-year {
+      display: block;
+      font-size: var(--t-small);
+      color: var(--ink-2);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .i-num {
+      grid-area: num;
+      color: var(--ink-3);
+    }
+
+    .i-disc {
+      grid-area: disc;
+    }
+
+    .i-year {
+      grid-area: year;
+    }
+
+    .i-pitch {
+      max-width: 52ch;
+    }
+
+    .index-link:hover {
+      background: var(--ground-alt);
+      transition-duration: var(--hover-in);
+    }
+  }
+
+  /* Pointer-following preview (desktop only). */
+  .reel {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 40;
+    width: 280px;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: var(--r-sm);
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  .reel-track {
+    height: 100%;
+  }
+
+  .reel-item {
+    height: 100%;
+  }
+
+  .reel-item :global(.cover) {
+    height: 100%;
+  }
+</style>

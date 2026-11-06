@@ -1,9 +1,10 @@
 ---
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import ProjectCard from '../components/ProjectCard.astro';
 import HeroShader from '../components/HeroShader.astro';
-import { education, experience, focusAreas, otherWork, profile, projects, skills } from '../data/portfolio';
+import FeatureRow from '../components/FeatureRow.astro';
+import WorkIndex from '../components/WorkIndex.astro';
+import { disciplines, education, experience, otherWork, profile, projects, skills } from '../data/portfolio';
 import { image } from '../lib/images';
 import { url } from '../lib/url';
 
@@ -16,7 +17,6 @@ const projectLinks = (slugs: string[]) =>
     if (!p) throw new Error(`Unknown project slug: ${slug}`);
     return { href: url(`/work/${slug}/`), title: p.title };
   });
-const itch = profile.links.find((l) => l.label === 'itch.io');
 const resumeHref = url(`/${profile.resume}`);
 const portrait = await image(profile.photo);
 const otherImages = new Map(
@@ -24,690 +24,709 @@ const otherImages = new Map(
 );
 ---
 
-<Base title={`${profile.name} — ${profile.title}`} description={profile.intro}>
-  <section class="hero-wrap">
+<Base title={`${profile.name} — ${profile.title}`} description={`${profile.fact} ${profile.intro}`}>
+  <section class="hero" aria-labelledby="hero-title">
     <HeroShader />
-    <div class="hero container">
-    <div class="hero-text">
-      <p class="eyebrow hero-in" style="--d: 0" data-decode>{profile.title}</p>
-      <h1>
-        <span class="sr-only">{profile.name}</span>
-        <span class="name" aria-hidden="true">
-          {
-            profile.name.split(' ').map((word, w) => (
-              <span class="word">
-                {[...word].map((ch, i) => (
-                  <span class="letter" style={`--i: ${w * 8 + i}`}>{ch}</span>
-                ))}
-              </span>
-            ))
-          }
-          <span class="caret"></span>
-        </span>
-      </h1>
-      <p class="intro hero-in" style="--d: 1">{profile.intro}</p>
-      <div class="btn-row hero-in" style="--d: 2">
-        <a class="btn btn-primary" href="#work">View work</a>
-        <a class="btn" href={resumeHref} download>Résumé</a>
-        {itch && <a class="btn" href={itch.url} rel="noopener">itch.io</a>}
+    <div class="wrap hero-grid grid">
+      <div class="hero-copy">
+        <p class="label hero-label" data-hero>{profile.name} · {profile.location}</p>
+        <h1 id="hero-title" class="hero-title" data-hero="lines">{profile.headline}</h1>
+        <p class="lead hero-fact" data-hero>{profile.fact}</p>
+        <p class="hero-intro" data-hero>{profile.intro}</p>
+        <div class="btn-row" data-hero>
+          <a class="btn btn-primary" href="#work">See selected work</a>
+          <a class="btn" href={resumeHref} download>Download résumé</a>
+        </div>
       </div>
+      <figure class="hero-photo frame" data-hero="media">
+        <Image
+          src={portrait}
+          alt={`Portrait of ${profile.name}`}
+          widths={[320, 480, 720, 960]}
+          sizes="(min-width: 1360px) 380px, (min-width: 900px) 28vw, 60vw"
+          format="webp"
+          loading="eager"
+          fetchpriority="high"
+        />
+        <span class="glint" aria-hidden="true"></span>
+      </figure>
     </div>
-    <div class="hero-photo hero-in" style="--d: 1" data-tilt="8">
-      <Image
-        src={portrait}
-        alt={`Portrait of ${profile.name}`}
-        widths={[320, 480, 720, 960]}
-        sizes="(min-width: 960px) 400px, (min-width: 720px) 36vw, 70vw"
-        format="webp"
-        loading="eager"
-        fetchpriority="high"
-      />
-      <span class="photo-glare" aria-hidden="true"></span>
-    </div>
-    </div>
+    <dl class="wrap hero-specs" data-hero>
+      <div>
+        <dt class="label">Disciplines</dt>
+        <dd>Development, technical art, game design</dd>
+      </div>
+      <div>
+        <dt class="label">Engines and code</dt>
+        <dd>{profile.focus.slice(0, 3).join(' · ')}</dd>
+      </div>
+      <div>
+        <dt class="label">Based in</dt>
+        <dd>{profile.location}</dd>
+      </div>
+    </dl>
   </section>
 
-  <section id="work" class="section container">
-    <div class="section-head">
-      <p class="eyebrow">Selected projects</p>
-      <h2 class="section-title">Featured work</h2>
-    </div>
-    <div class="grid-featured">
-      {featured.map((p) => <ProjectCard project={p} />)}
-    </div>
-
-    <h3 class="sub-title">More work</h3>
-    <div class="grid-more">
-      {more.map((p) => <ProjectCard project={p} size="small" />)}
-    </div>
-  </section>
-
-  <section class="section container" aria-labelledby="focus-title">
-    <div class="section-head">
-      <p class="eyebrow">What I bring</p>
-      <h2 class="section-title" id="focus-title">Technical focus</h2>
-    </div>
-    <ul class="focus-grid">
-      {
-        focusAreas.map((area, i) => (
-          <li class="card card-link focus" data-tilt="4">
-            <span class="focus-index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <h3>{area.title}</h3>
-            <p class="muted">{area.text}</p>
-            <p class="related">
-              {projectLinks(area.links).map((l) => (
-                <a href={l.href}>{l.title} →</a>
-              ))}
-            </p>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
-
-  <section id="experience" class="section container">
-    <div class="section-head">
-      <p class="eyebrow">Where I've worked</p>
-      <h2 class="section-title">Experience</h2>
-    </div>
-    <ol class="timeline">
-      {
-        experience.map((job) => (
-          <li>
-            <div class="when">
-              <span class="chip">{job.dates}</span>
-            </div>
-            <div class="what">
-              <h3>
-                {job.role} <span class="org">· {job.org}</span>
-              </h3>
-              <p class="mode">{job.mode}</p>
-              <p class="muted">{job.summary}</p>
-              <p class="related">
-                {projectLinks(job.projects).map((l) => (
-                  <a href={l.href}>{l.title} →</a>
+  <section id="disciplines" class="section">
+    <div class="wrap">
+      <header class="section-head grid">
+        <p class="label" data-reveal><span class="num">01</span>Disciplines</p>
+        <h2 data-reveal="lines">Development, technical art and game design</h2>
+      </header>
+      <div class="disciplines">
+        {
+          disciplines.map((d) => (
+            <article class="discipline" data-reveal-row>
+              <h3 data-reveal="lines">{d.title}</h3>
+              <p class="muted" data-reveal>{d.text}</p>
+              <ul class="facts" data-reveal>
+                {d.facts.map((f) => (
+                  <li>{f}</li>
+                ))}
+              </ul>
+              <p class="seen-in" data-reveal>
+                <span class="label">Seen in</span>
+                {projectLinks(d.links).map((l) => (
+                  <a class="link" href={l.href}>
+                    {l.title}
+                  </a>
                 ))}
               </p>
-            </div>
-          </li>
-        ))
-      }
-    </ol>
-  </section>
-
-  <section id="skills" class="section container">
-    <div class="section-head">
-      <p class="eyebrow">Toolbox</p>
-      <h2 class="section-title">Skills</h2>
-    </div>
-    <div class="skills-grid">
-      {
-        skills.map((group) => (
-          <div class="card card-link skill-group" data-tilt="3">
-            <h3>{group.group}</h3>
-            <ul class="chips">
-              {group.items.map((item) => (
-                <li class="chip">{item}</li>
-              ))}
-            </ul>
-          </div>
-        ))
-      }
-    </div>
-  </section>
-
-  <section class="section container" aria-labelledby="other-title">
-    <div class="section-head">
-      <p class="eyebrow">Beyond games</p>
-      <h2 class="section-title" id="other-title">Other work</h2>
-    </div>
-    <ul class="other-grid">
-      {
-        otherWork.map((item) => (
-          <li class="card card-link other" data-tilt="4">
-            {item.image && (
-              <Image
-                src={otherImages.get(item.image)!}
-                alt={`${item.title} render`}
-                widths={[400, 700, 1100]}
-                sizes="(min-width: 1184px) 368px, (min-width: 720px) calc(33vw - 32px), calc(100vw - 32px)"
-                format="webp"
-                loading="lazy"
-              />
-            )}
-            <div class="other-body">
-              <p class="chip other-kind">{item.kind}</p>
-              <h3>{item.title}</h3>
-              <p class="muted">{item.text}</p>
-              {item.link && (
-                <a href={item.link.url} rel="noopener">
-                  {item.link.label} ↗
-                </a>
-              )}
-            </div>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
-
-  <section id="about" class="section container">
-    <div class="about">
-      <div>
-        <p class="eyebrow">About</p>
-        <h2 class="section-title">About me</h2>
+            </article>
+          ))
+        }
       </div>
-      <div>
-        {profile.about.map((para) => <p class="about-text">{para}</p>)}
-        <div class="card education">
-          <p class="eyebrow">Education</p>
-          <h3>{education.degree}</h3>
+    </div>
+  </section>
+
+  <section id="work" class="section">
+    <div class="wrap">
+      <header class="section-head grid">
+        <p class="label" data-reveal><span class="num">02</span>Selected work</p>
+        <h2 data-reveal="lines">Games and real-time projects</h2>
+      </header>
+      <div class="features">
+        {featured.map((p, i) => <FeatureRow project={p} index={i + 1} />)}
+      </div>
+      <div class="more">
+        <p class="label more-label" data-reveal>More projects</p>
+        <WorkIndex projects={more} start={featured.length + 1} />
+      </div>
+    </div>
+  </section>
+
+  <section id="experience" class="section">
+    <div class="wrap">
+      <header class="section-head grid">
+        <p class="label" data-reveal><span class="num">03</span>Experience</p>
+        <h2 data-reveal="lines">Studios, teams and clients</h2>
+      </header>
+      <ol class="xp">
+        {
+          experience.map((job) => (
+            <li class="xp-row grid" data-reveal-row>
+              <p class="xp-dates" data-reveal>
+                <span class="pip" aria-hidden="true" />
+                {job.dates}
+              </p>
+              <div class="xp-main">
+                <h3 data-reveal="lines">{job.role}</h3>
+                <p class="label xp-org" data-reveal>
+                  {job.org} · {job.mode}
+                </p>
+                <p class="xp-summary measure" data-reveal>
+                  {job.summary}
+                </p>
+                <p class="seen-in" data-reveal>
+                  {projectLinks(job.projects).map((l) => (
+                    <a class="link link-arrow" href={l.href}>
+                      {l.title}
+                    </a>
+                  ))}
+                </p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section id="skills" class="section">
+    <div class="wrap">
+      <header class="section-head grid">
+        <p class="label" data-reveal><span class="num">04</span>Skills</p>
+        <h2 data-reveal="lines">Languages, engines and tools</h2>
+      </header>
+      <dl class="skills">
+        {
+          skills.map((g) => (
+            <div class="skill-row grid" data-reveal-row>
+              <dt data-reveal>{g.group}</dt>
+              <dd data-reveal>
+                {g.items.map((item, i) => (
+                  <>
+                    {i > 0 && (
+                      <span class="sep" aria-hidden="true">
+                        /
+                      </span>
+                    )}
+                    <span class="skill">{item}</span>
+                  </>
+                ))}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="other-title">
+    <div class="wrap">
+      <header class="section-head grid">
+        <p class="label" data-reveal><span class="num">05</span>Other work</p>
+        <h2 id="other-title" data-reveal="lines">Rendering, tools and side projects</h2>
+      </header>
+      <ul class="others">
+        {
+          otherWork.map((w) => (
+            <li class="other grid" data-reveal-row>
+              <div class="other-main">
+                <p class="label" data-reveal>
+                  {w.kind}
+                </p>
+                <h3 data-reveal="lines">{w.title}</h3>
+                <p class="muted measure" data-reveal>
+                  {w.text}
+                </p>
+                {w.link && (
+                  <a class="link link-arrow" href={w.link.url} rel="noopener" data-reveal>
+                    {w.link.label}
+                  </a>
+                )}
+              </div>
+              {w.image && (
+                <div class="other-media frame" data-reveal="media">
+                  <Image
+                    src={otherImages.get(w.image)!}
+                    alt={`${w.title} render`}
+                    widths={[400, 700, 1000]}
+                    sizes="(min-width: 900px) 30vw, calc(100vw - 48px)"
+                    format="webp"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section id="about" class="section">
+    <div class="wrap">
+      <header class="section-head grid">
+        <p class="label" data-reveal><span class="num">06</span>About</p>
+        <h2 data-reveal="lines">How I work</h2>
+      </header>
+      <div class="about grid">
+        <div class="about-text">
+          {profile.about.map((para, i) => <p class:list={['measure', { lead: i === 0 }]} data-reveal>{para}</p>)}
+        </div>
+        <aside class="about-side" data-reveal>
+          <p class="label">Education</p>
+          <p class="edu-degree">{education.degree}</p>
           <p class="muted">
             {education.school} · {education.dates} · CGPA {education.cgpa}
           </p>
-        </div>
+          <a class="btn" href={resumeHref} download>Download résumé</a>
+        </aside>
       </div>
     </div>
   </section>
 
-  <section id="contact" class="section container">
-    <div class="card contact">
-      <p class="eyebrow">Contact</p>
-      <h2 class="section-title">Get in touch</h2>
-      <p class="muted">{profile.location}</p>
-      <p><a class="email" href={`mailto:${profile.email}`}>{profile.email}</a></p>
-      <div class="btn-row">
-        <a class="btn btn-primary" href={`mailto:${profile.email}`}>Email</a>
-        {profile.links.map((l) => <a class="btn" href={l.url} rel="noopener">{l.label}</a>)}
+  <section id="contact" class="section contact">
+    <div class="wrap">
+      <header class="section-head grid">
+        <p class="label" data-reveal><span class="num">07</span>Contact</p>
+        <h2 data-reveal="lines">Write to me</h2>
+      </header>
+      <a class="contact-email link" href={`mailto:${profile.email}`} data-reveal>{profile.email}</a>
+      <div class="contact-row" data-reveal>
+        <ul class="contact-links">
+          {
+            profile.links.map((l) => (
+              <li>
+                <a class="link link-arrow" href={l.url} rel="noopener">
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="label">{profile.location}</p>
       </div>
     </div>
   </section>
 </Base>
 
 <style>
-  .hero-wrap {
+  /* ---------- Hero ---------- */
+  .hero {
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    margin-top: -65px; /* slide under the translucent header */
-    padding-top: 65px;
-    padding-bottom: 3.5rem;
-    background: radial-gradient(ellipse at 75% 55%, rgb(245 165 36 / 0.14), transparent 55%), var(--bg);
+    min-height: calc(100svh - var(--nav-h));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-top: 48px;
+    background: var(--ground);
   }
 
-  /* Keeps the text side of the fog calm enough to read. */
-  .hero-wrap::after {
+  /* Keep the text side of the fog calm enough to read. */
+  .hero::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background: radial-gradient(ellipse 45% 50% at 25% 55%, rgb(11 11 15 / 0.55), transparent);
+    background: linear-gradient(90deg, rgb(12 12 11 / 0.7), rgb(12 12 11 / 0.2) 60%, transparent);
   }
 
-  @media (max-width: 719px) {
-    .hero-wrap::after {
-      background: linear-gradient(to bottom, transparent 20%, rgb(11 11 15 / 0.55) 55%, rgb(11 11 15 / 0.3));
-    }
-  }
-
-  .hero {
+  .hero-grid,
+  .hero-specs {
     position: relative;
     z-index: 1;
-    display: grid;
-    gap: 2.5rem;
-    align-items: center;
-    padding-top: clamp(2.5rem, 7vw, 5.5rem);
-    min-height: min(78svh, 760px);
   }
 
-  .hero h1 {
-    font-size: clamp(2.6rem, 8vw, 4.75rem);
-    margin-bottom: 1.25rem;
+  .hero-grid {
+    align-items: end;
+    row-gap: 40px;
   }
 
-  .name {
-    display: inline;
+  .hero-copy,
+  .hero-photo {
+    grid-column: 1 / -1;
   }
 
-  .word {
-    display: inline-block;
-    white-space: nowrap;
-    margin-right: 0.25em;
+  .hero-label {
+    margin-bottom: 24px;
   }
 
-  .word:nth-last-child(2) {
-    margin-right: 0;
+  .hero-title {
+    font-size: clamp(2.9rem, 1.5rem + 4.6vw, 5.6rem);
+    line-height: 0.98;
+    letter-spacing: -0.022em;
+    max-width: 15ch;
+    margin-bottom: 32px;
   }
 
-  .letter {
-    display: inline-block;
-    animation: letter-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) calc(150ms + var(--i) * 38ms) both;
+  .hero-fact {
+    margin-bottom: 12px;
+    max-width: 36em;
   }
 
-  .caret {
-    display: inline-block;
-    width: 0.14em;
-    height: 0.78em;
-    margin-left: 0.08em;
-    vertical-align: -0.02em;
-    background: var(--accent);
-    box-shadow: 0 0 18px rgb(245 165 36 / 0.8);
-    animation:
-      hero-in 0.6s ease 0.9s both,
-      caret-blink 1.1s steps(2, jump-none) 1.5s infinite;
-  }
-
-  @keyframes caret-blink {
-    50% {
-      opacity: 0;
-    }
-  }
-
-  @keyframes letter-in {
-    from {
-      opacity: 0;
-      translate: 0 0.55em;
-      rotate: 8deg;
-      filter: blur(10px);
-    }
-  }
-
-  .hero-in {
-    animation: hero-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) calc(350ms + var(--d) * 140ms) both;
-  }
-
-  @keyframes hero-in {
-    from {
-      opacity: 0;
-      translate: 0 24px;
-      filter: blur(8px);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .letter,
-    .hero-in,
-    .caret {
-      animation: none;
-    }
-  }
-
-  .intro {
-    font-size: clamp(1.05rem, 2vw, 1.25rem);
-    color: var(--muted);
-    max-width: 38rem;
-    margin-bottom: 2rem;
+  .hero-intro {
+    color: var(--ink-2);
+    max-width: 40em;
+    margin-bottom: 32px;
   }
 
   .hero-photo {
-    justify-self: center;
-    width: min(100%, 400px);
-    position: relative;
-    transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-    transform-style: preserve-3d;
-    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-
-  /* Offset frame sits "behind" the photo and parallaxes with the tilt. */
-  .hero-photo::before {
-    content: '';
-    position: absolute;
-    inset: 14px -14px -14px 14px;
-    border: 1px solid var(--accent);
-    border-radius: var(--radius);
-    opacity: 0.6;
-    transform: translateZ(-40px);
-    box-shadow: 0 0 40px -10px rgb(245 165 36 / 0.5);
+    margin: 0;
+    width: min(70%, 300px);
+    aspect-ratio: 4 / 5;
+    order: -1;
   }
 
   .hero-photo img {
-    position: relative;
     width: 100%;
-    aspect-ratio: 3 / 4;
+    height: 100%;
     object-fit: cover;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.9);
+    transition: scale 0.6s var(--ease);
   }
 
-  .photo-glare {
+  .hero-photo:hover img {
+    scale: 1.03;
+  }
+
+  /* A specular streak crosses the photo on hover (paired with the blade-gleam sound). */
+  .glint {
     position: absolute;
-    inset: 0;
-    border-radius: var(--radius);
+    inset: -20%;
+    background: linear-gradient(105deg, transparent 42%, rgb(255 244 222 / 0.22) 50%, transparent 58%);
+    translate: -70% 0;
     pointer-events: none;
-    background: radial-gradient(
-      500px circle at var(--mx, 70%) var(--my, 10%),
-      rgb(255 210 140 / 0.22),
-      transparent 45%
-    );
-    mix-blend-mode: soft-light;
-    opacity: 0;
-    transition: opacity 0.4s ease;
+    mix-blend-mode: screen;
   }
 
-  .hero-photo.is-tilting .photo-glare {
-    opacity: 1;
+  .hero-photo:hover .glint {
+    translate: 70% 0;
+    transition: translate 0.9s var(--ease-travel);
   }
 
-  @media (max-width: 719px) {
-    .hero-photo {
-      width: min(62%, 250px);
-      order: -1;
-    }
-  }
-
-  @media (min-width: 720px) {
+  @media (min-width: 900px) {
     .hero {
-      grid-template-columns: 1.4fr 1fr;
+      padding-top: 72px;
+    }
+
+    .hero-copy {
+      grid-column: 1 / 9;
+    }
+
+    .hero-photo {
+      order: 0;
+      grid-column: 9 / 13;
+      width: 100%;
+      max-width: 380px;
+      justify-self: end;
     }
   }
 
-  .grid-featured {
+  .hero-specs {
     display: grid;
-    gap: 1.25rem;
+    gap: 16px 24px;
+    margin-top: 56px;
+    margin-bottom: 0;
+    padding-block: 20px 56px;
+    border-top: 1px solid var(--line);
+  }
+
+  .hero-specs dd {
+    margin: 4px 0 0;
+    font-size: var(--t-small);
   }
 
   @media (min-width: 720px) {
-    .grid-featured {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
+    .hero-specs {
+      grid-template-columns: repeat(3, 1fr);
     }
   }
 
-  .sub-title {
-    font-size: 1.4rem;
-    margin: 3.5rem 0 1.25rem;
-  }
-
-  .grid-more {
+  /* ---------- Disciplines ---------- */
+  .disciplines {
     display: grid;
-    gap: 1rem;
+    gap: 48px;
   }
 
-  @media (min-width: 560px) {
-    .grid-more {
-      grid-template-columns: repeat(2, 1fr);
+  @media (min-width: 900px) {
+    .disciplines {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
     }
-  }
 
-  @media (min-width: 720px) {
-    .grid-more {
-      grid-template-columns: repeat(4, 1fr);
+    .discipline {
+      padding-inline: 24px;
+      border-left: 1px solid var(--line);
     }
-  }
 
-  .focus-grid,
-  .other-grid {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  }
-
-  .focus {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .focus p.muted {
-    flex: 1;
-  }
-
-  .focus-index {
-    font-family: var(--font-mono);
-    color: var(--accent);
-    font-size: 0.85rem;
-    margin-bottom: 0.75rem;
-    transition: text-shadow 0.3s ease;
-  }
-
-  .focus:hover .focus-index {
-    text-shadow: 0 0 12px var(--accent);
-  }
-
-  .focus,
-  .skill-group,
-  .other {
-    position: relative;
-  }
-
-  .focus h3,
-  .skill-group h3,
-  .other h3 {
-    font-size: 1.2rem;
-  }
-
-  .related {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem 1.1rem;
-    margin: 0;
-    font-size: 0.92rem;
-    font-weight: 500;
-  }
-
-  .related a {
-    text-decoration: none;
-  }
-
-  .related a:hover {
-    text-decoration: underline;
-  }
-
-  .timeline {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    border-left: 2px solid var(--border);
-  }
-
-  .timeline li {
-    position: relative;
-    padding: 0 0 2.25rem 1.5rem;
-    display: grid;
-    gap: 0.6rem;
-  }
-
-  .timeline li:last-child {
-    padding-bottom: 0;
-  }
-
-  .timeline li::before {
-    content: '';
-    position: absolute;
-    left: -7px;
-    top: 0.45rem;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--bg);
-    border: 2px solid var(--accent);
-  }
-
-  .timeline li.is-in::before {
-    animation: dot-pulse 1.4s ease-out calc(var(--reveal-delay, 0ms) + 200ms) both;
-  }
-
-  @keyframes dot-pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgb(245 165 36 / 0.7);
-      background: var(--accent);
-    }
-    100% {
-      box-shadow: 0 0 0 14px rgb(245 165 36 / 0);
-      background: var(--bg);
-    }
-  }
-
-  .when .chip {
-    display: inline-block;
-    color: var(--text);
-  }
-
-  .timeline h3 {
-    font-size: 1.3rem;
-    margin-bottom: 0.2rem;
-  }
-
-  .org {
-    color: var(--accent);
-  }
-
-  .mode {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-bottom: 0.6rem;
-  }
-
-  .what p.muted {
-    margin-bottom: 0.6rem;
-  }
-
-  @media (min-width: 720px) {
-    .timeline {
+    .discipline:first-child {
+      padding-left: 0;
       border-left: 0;
     }
-
-    .timeline li {
-      grid-template-columns: 200px 1fr;
-      gap: 2rem;
-      padding-left: 0;
-    }
-
-    .timeline li::before {
-      left: 208px;
-    }
-
-    .timeline li::after {
-      content: '';
-      position: absolute;
-      left: 213px;
-      top: 1.3rem;
-      bottom: -0.45rem;
-      width: 2px;
-      background: var(--border);
-    }
-
-    .timeline li:last-child::after {
-      display: none;
-    }
-
-    .when {
-      text-align: right;
-    }
-
-    .what {
-      padding-left: 1.5rem;
-    }
   }
 
-  .skills-grid {
-    display: grid;
-    gap: 1rem;
-  }
-
-  @media (min-width: 720px) {
-    .skills-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  .skill-group {
-    padding: 1.5rem;
-  }
-
-  .skill-group .chip {
-    color: var(--text);
-  }
-
-  .other-grid {
-    align-items: start;
-  }
-
-  .other {
+  .discipline {
     display: flex;
     flex-direction: column;
   }
 
-  .other img {
-    transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  .discipline h3 {
+    font-size: var(--t-h3);
+    margin-bottom: 16px;
   }
 
-  .other:hover img {
-    transform: scale(1.04);
+  .facts {
+    list-style: none;
+    margin: 8px 0 24px;
+    padding: 0;
   }
 
-  .other img {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-bottom: 1px solid var(--border);
+  .facts li {
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    font-size: var(--t-small);
   }
 
-  .other-body {
-    padding: 1.4rem 1.5rem 1.5rem;
+  .seen-in {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 18px;
+    margin: auto 0 0;
+    font-size: var(--t-small);
   }
 
-  .other-kind {
-    display: inline-block;
-    margin-bottom: 0.75rem;
+  .seen-in .label {
+    margin-right: 2px;
   }
 
-  .about {
-    display: grid;
-    gap: 1.5rem;
+  /* ---------- Work ---------- */
+  .more {
+    margin-top: 72px;
   }
 
-  @media (min-width: 860px) {
-    .about {
-      grid-template-columns: 1fr 2fr;
-      gap: 3rem;
+  .more-label {
+    margin-bottom: 16px;
+  }
+
+  /* ---------- Experience ---------- */
+  .xp {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .xp-row {
+    border-top: 1px solid var(--line);
+    padding-block: 28px 36px;
+    row-gap: 12px;
+  }
+
+  .xp-dates,
+  .xp-main {
+    grid-column: 1 / -1;
+  }
+
+  .xp-dates {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: var(--t-small);
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The pixel lights up as the row arrives (fx.ts adds .is-lit with the blip sound). */
+  .pip {
+    width: 7px;
+    height: 7px;
+    border: 1px solid var(--ink-3);
+    flex: none;
+    transition:
+      background-color 0.2s var(--ease),
+      border-color 0.2s var(--ease);
+  }
+
+  .xp-row.is-lit .pip,
+  html:not(.fx) .pip {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .xp-main h3 {
+    font-size: var(--t-h4);
+    margin-bottom: 6px;
+  }
+
+  .xp-org {
+    margin-bottom: 14px;
+  }
+
+  .xp-summary {
+    color: var(--ink-2);
+    margin-bottom: 14px;
+  }
+
+  @media (min-width: 900px) {
+    .xp-dates {
+      grid-column: 1 / 4;
+      align-self: start;
+      padding-top: 0.45em;
+    }
+
+    .xp-main {
+      grid-column: 4 / 12;
     }
   }
 
-  .about-text {
-    font-size: 1.1rem;
-  }
-
-  .education {
-    padding: 1.4rem 1.5rem;
-    margin-top: 1.5rem;
-  }
-
-  .education h3 {
-    font-size: 1.15rem;
-  }
-
-  .education p.muted {
+  /* ---------- Skills ---------- */
+  .skills {
     margin: 0;
   }
 
-  .contact {
-    padding: clamp(1.75rem, 5vw, 3.5rem);
-    text-align: center;
-    background:
-      radial-gradient(ellipse at top, rgb(245 165 36 / 0.12), transparent 60%),
-      var(--surface);
+  .skill-row {
+    border-top: 1px solid var(--line);
+    padding-block: 20px;
+    row-gap: 8px;
   }
 
-  .contact .section-title {
-    margin-bottom: 0.5rem;
+  .skill-row dt,
+  .skill-row dd {
+    grid-column: 1 / -1;
   }
 
-  .email {
-    font-family: var(--font-head);
-    font-size: clamp(1.05rem, 4vw, 1.6rem);
-    font-weight: 700;
+  .skill-row dt {
+    font-size: var(--t-small);
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .skill-row dd {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    line-height: 1.7;
+  }
+
+  .sep {
+    color: var(--ink-3);
+    margin-inline: 0.55em;
+  }
+
+  .skill {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 559px) {
+    .skill {
+      white-space: normal;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .skill-row dt {
+      grid-column: 1 / 4;
+    }
+
+    .skill-row dd {
+      grid-column: 4 / 13;
+    }
+  }
+
+  /* ---------- Other work ---------- */
+  .others {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .other {
+    border-top: 1px solid var(--line);
+    padding-block: 28px 36px;
+    row-gap: 24px;
+  }
+
+  .other-main,
+  .other-media {
+    grid-column: 1 / -1;
+  }
+
+  .other h3 {
+    font-size: var(--t-h4);
+    margin: 8px 0 12px;
+  }
+
+  .other-media {
+    aspect-ratio: 3 / 2;
+  }
+
+  .other-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale 0.6s var(--ease);
+  }
+
+  .other-media:hover img {
+    scale: 1.03;
+  }
+
+  @media (min-width: 900px) {
+    .other-main {
+      grid-column: 4 / 10;
+    }
+
+    .other-media {
+      grid-column: 10 / 13;
+    }
+  }
+
+  /* ---------- About ---------- */
+  .about {
+    row-gap: 48px;
+  }
+
+  .about-text,
+  .about-side {
+    grid-column: 1 / -1;
+  }
+
+  .about-text .lead {
+    margin-bottom: 1.2em;
+  }
+
+  .about-text p:not(.lead) {
+    color: var(--ink-2);
+  }
+
+  .about-side {
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
+  }
+
+  .about-side .label {
+    margin-bottom: 8px;
+  }
+
+  .edu-degree {
+    font-family: var(--font-display);
+    font-size: var(--t-h4);
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+
+  .about-side .btn {
+    margin-top: 16px;
+  }
+
+  @media (min-width: 900px) {
+    .about-text {
+      grid-column: 4 / 10;
+    }
+
+    .about-side {
+      grid-column: 10 / 13;
+    }
+  }
+
+  /* ---------- Contact ---------- */
+  .contact-email {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1rem + 4.6vw, 5.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
     overflow-wrap: anywhere;
+    background-size: 100% 1px;
+    margin-bottom: 40px;
   }
 
-  .contact .btn-row {
-    justify-content: center;
-    margin-top: 1.5rem;
+  .contact-email:hover {
+    color: var(--accent);
+  }
+
+  .contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .contact-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 32px;
   }
 </style>

@@ -1,146 +1,153 @@
-// Page-wide motion: scroll reveals, eyebrow text decode, card tilt + spotlight, header state and a
-// few hints for the CRT easter egg (see crt.ts). Everything is progressive: without JS (or with
-// reduced motion) content is static.
+// Motion, built on GSAP. Short and purposeful: headings reveal line by line through masks, media
+// wipes in, text fades up a few pixels; the hero plays its entrance after the boot screen; one
+// scroll-linked 3D moment as the hero portrait recedes. Each reveal carries its sound (sfx.ts).
+// Progressive: without JS or with reduced motion everything is simply visible (html.fx is only
+// set when motion is allowed; see Base.astro).
 
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 import { play, type Sound } from './sfx';
+
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const root = document.documentElement;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const EASE = 'power3.out'; // ≈ cubic-bezier(.2,.8,.2,1)
 
-/* ---------- Scroll reveal ---------- */
+/* ---------- Primitives ---------- */
 
-const REVEAL = [
-  '.section-head',
-  '.sub-title',
-  '.project-card',
-  '.focus',
-  '.timeline > li',
-  '.skill-group',
-  '.other',
-  '.about > *',
-  '.contact',
-  '.block',
-  '.side-card',
-  '.note',
-  '.gallery li',
-  '.pager-link',
-].join(',');
+/** Reveal one element according to its data-reveal / data-hero kind. Returns the tween. */
+function reveal(el: HTMLElement, delay = 0, kind = el.dataset.reveal ?? el.dataset.hero ?? '') {
+  el.classList.add('is-in');
+  if (kind === 'lines') {
+    const split = SplitText.create(el, { type: 'lines', mask: 'lines', linesClass: 'rl-line' });
+    gsap.set(el, { opacity: 1 });
+    return gsap.fromTo(
+      split.lines,
+      { yPercent: 105 },
+      {
+        yPercent: 0,
+        duration: 1,
+        ease: 'power4.out',
+        stagger: 0.09,
+        delay,
+        // Put the text back together once it's in, so it reflows naturally on resize.
+        onComplete: () => split.revert(),
+      },
+    );
+  }
+  if (kind === 'media') {
+    const inner = el.querySelectorAll('img, .gen-art');
+    gsap.fromTo(inner, { scale: 1.14 }, { scale: 1, duration: 1.4, ease: EASE, delay, clearProps: 'scale' });
+    return gsap.fromTo(
+      el,
+      { opacity: 1, clipPath: 'inset(100% 0% 0% 0%)' },
+      { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: 'power3.inOut', delay, clearProps: 'clipPath' },
+    );
+  }
+  return gsap.fromTo(el, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.75, ease: EASE, delay, clearProps: 'transform' });
+}
+
+/* ---------- Reveal sounds, timed to each row's own entrance ---------- */
+
+const ROW_SOUNDS: [selector: string, sound: Sound, offset: number][] = [
+  ['.xp-row', 'revealDot', 0.25],
+  ['.feature, .index-row, .discipline, .other', 'revealTile', 0.05],
+  ['.section-head, .skill-row, .p-row', 'revealText', 0],
+];
+
+let budget = 0; // cap per burst so a jump down the page doesn't turn into a drum roll
+function rowSound(row: Element, i: number, delay: number) {
+  if (document.hidden || root.classList.contains('booting')) return;
+  const voice = ROW_SOUNDS.find(([sel]) => row.matches(sel));
+  if (!voice || budget >= 6) return;
+  budget++;
+  setTimeout(() => (budget = Math.max(0, budget - 1)), 600);
+  gsap.delayedCall(delay + voice[2], () => {
+    // Experience pips light up exactly on their blip.
+    if (row.matches('.xp-row')) row.classList.add('is-lit');
+    play(voice[1], i);
+  });
+}
+
+/* ---------- Scroll reveals ---------- */
+
+function initReveals() {
+  const rows = [...document.querySelectorAll<HTMLElement>('[data-reveal-row], .section-head')];
+  const inRow = (el: Element) => rows.some((r) => r !== el && r.contains(el));
+  const orphans = [...document.querySelectorAll<HTMLElement>('[data-reveal]')].filter((el) => !inRow(el));
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries
+        .filter((e) => e.isIntersecting)
+        .forEach((e, j) => {
+          const target = e.target as HTMLElement;
+          io.unobserve(target);
+          const base = Math.min(j, 5) * 0.08; // things arriving together stagger slightly
+          if (target.matches('[data-reveal-row], .section-head')) {
+            target.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el, k) => reveal(el, base + k * 0.07));
+            rowSound(target, j, base);
+          } else reveal(target, base);
+        });
+    },
+    { rootMargin: '0px 0px -10% 0px', threshold: 0.05 },
+  );
+  [...rows.filter((r) => !inRow(r)), ...orphans].forEach((el) => io.observe(el));
+}
+
+/* ---------- Hero entrance ---------- */
+
+function playHeroIntro() {
+  const items = [...document.querySelectorAll<HTMLElement>('[data-hero]')];
+  items.forEach((el, i) => {
+    const kind = el.dataset.hero ?? '';
+    reveal(el, 0.1 + i * (kind === 'lines' ? 0.12 : 0.09), kind);
+  });
+}
+
+/* ---------- One scroll moment: the hero portrait tips back and recedes ---------- */
+
+let heroScroll: gsap.core.Timeline | null = null;
+
+function initHeroScroll() {
+  const hero = document.querySelector<HTMLElement>('.hero');
+  const photo = hero?.querySelector<HTMLElement>('.hero-photo');
+  const copy = hero?.querySelector<HTMLElement>('.hero-copy');
+  if (!hero || !photo || !copy || !matchMedia('(min-width: 900px)').matches) return;
+  heroScroll = gsap
+    .timeline({ scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.6 } })
+    .to(photo, { rotateX: 14, rotateY: -8, scale: 0.88, yPercent: -6, opacity: 0.35, transformPerspective: 900, transformOrigin: '50% 100%', ease: 'none' }, 0)
+    .to(copy, { yPercent: -10, opacity: 0.3, ease: 'none' }, 0);
+}
+
+function killHeroScroll() {
+  heroScroll?.scrollTrigger?.kill();
+  heroScroll?.progress(0).kill();
+  heroScroll = null;
+  gsap.set('.hero-photo, .hero-copy', { clearProps: 'transform,opacity' });
+}
+
+/* ---------- Boot ---------- */
 
 if (reduced || !('IntersectionObserver' in window)) {
   root.classList.remove('fx');
 } else {
-  const io = new IntersectionObserver(
-    (entries) => {
-      // Stagger siblings that enter together.
-      entries
-        .filter((e) => e.isIntersecting)
-        .forEach((e, i) => {
-          const el = e.target as HTMLElement;
-          const delay = Math.min(i, 6) * 70;
-          el.style.setProperty('--reveal-delay', `${delay}ms`);
-          el.classList.add('is-in');
-          revealSound(el, i, delay);
-          el.querySelectorAll<HTMLElement>('.eyebrow').forEach(decode);
-          io.unobserve(el);
-        });
-    },
-    { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
-  );
-  document.querySelectorAll(REVEAL).forEach((el) => io.observe(el));
-  // Hero labels decode once the page is on screen (after the boot screen, if one is showing).
-  const decodeHero = () =>
-    document.querySelectorAll<HTMLElement>('[data-decode]').forEach((el) => setTimeout(() => decode(el), 250));
-  if (root.classList.contains('booting')) document.addEventListener('boot:done', decodeHero, { once: true });
-  else decodeHero();
   root.classList.add('fx-ready');
-}
-
-/* ---------- Reveal sounds, timed to each element's own entrance ---------- */
-
-// Voices per element type. Timeline dots land on their pulse (CSS: dot-pulse starts +200 ms).
-const REVEAL_SOUNDS: [selector: string, sound: Sound, offset: number][] = [
-  ['.timeline > li', 'revealDot', 200],
-  ['.project-card, .focus, .skill-group, .other, .contact, .side-card, .gallery li, .pager-link', 'revealTile', 30],
-  ['.section-head, .sub-title, .block, .about > *, .note', 'revealText', 0],
-];
-
-let revealBudget = 0; // cap per burst so a jump down the page doesn't turn into a drum roll
-function revealSound(el: Element, i: number, delay: number) {
-  if (document.hidden || root.classList.contains('booting')) return;
-  const voice = REVEAL_SOUNDS.find(([sel]) => el.matches(sel));
-  if (!voice || revealBudget >= 6) return;
-  revealBudget++;
-  setTimeout(() => (revealBudget = Math.max(0, revealBudget - 1)), 600);
-  setTimeout(() => play(voice[1], i), delay + voice[2]);
-}
-
-/* ---------- Eyebrow decode (text scrambles into place) ---------- */
-
-// Arrows, B and A turn up more often than chance would suggest.
-const GLYPHS = '█▓▒░<>/_#*+=↑↑↓↓←→←→BABABAKLMNPRSTUVWXYZ0123456789';
-
-function decode(el: HTMLElement) {
-  if (el.dataset.decoded) return;
-  el.dataset.decoded = '1';
-  const text = el.textContent ?? '';
-  // Screen readers get the real text; the animated copy is decorative.
-  const sr = document.createElement('span');
-  sr.className = 'sr-only';
-  sr.textContent = text;
-  const vis = document.createElement('span');
-  vis.setAttribute('aria-hidden', 'true');
-  el.replaceChildren(sr, vis);
-  const start = performance.now();
-  const duration = 650;
-  let frames = 0;
-  const tick = (now: number) => {
-    const p = Math.min(1, (now - start) / duration);
-    const solved = Math.floor(p * text.length);
-    let out = text.slice(0, solved);
-    for (let i = solved; i < text.length; i++) {
-      out += text[i] === ' ' ? ' ' : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+  // Line splitting needs final font metrics.
+  document.fonts.ready.then(() => {
+    initReveals();
+    if (root.classList.contains('booting')) document.addEventListener('boot:done', playHeroIntro, { once: true });
+    else playHeroIntro();
+    if (!root.classList.contains('crt')) initHeroScroll();
+  });
+  // In CRT mode the page scrolls inside the tube, not the window: park the scroll moment there.
+  document.addEventListener('crt:change', () => {
+    if (root.classList.contains('crt')) killHeroScroll();
+    else if (!heroScroll) {
+      initHeroScroll();
+      ScrollTrigger.refresh();
     }
-    vis.textContent = out;
-    if (++frames % 4 === 0 && p < 1) play('typeTick'); // soft teletype clicks while it decodes
-    if (p < 1) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
-}
-
-/* ---------- Tilt + spotlight on cards (fine pointers only) ---------- */
-
-if (!reduced && matchMedia('(hover: hover) and (pointer: fine)').matches) {
-  document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((el) => {
-    const max = Number(el.dataset.tilt) || 6;
-    let frame = 0;
-    el.addEventListener('pointermove', (e) => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const r = el.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width;
-        const y = (e.clientY - r.top) / r.height;
-        el.style.setProperty('--rx', `${(0.5 - y) * max}deg`);
-        el.style.setProperty('--ry', `${(x - 0.5) * max}deg`);
-        el.style.setProperty('--mx', `${x * 100}%`);
-        el.style.setProperty('--my', `${y * 100}%`);
-        el.classList.add('is-tilting');
-      });
-    });
-    el.addEventListener('pointerleave', () => {
-      cancelAnimationFrame(frame);
-      el.classList.remove('is-tilting');
-      el.style.removeProperty('--rx');
-      el.style.removeProperty('--ry');
-    });
   });
 }
-
-/* ---------- Header state ---------- */
-
-const header = document.querySelector('.site-header');
-const tube = document.querySelector<HTMLElement>('.screen');
-// In CRT mode the page scrolls inside .screen instead of the window.
-const onScroll = () => header?.classList.toggle('is-scrolled', Math.max(scrollY, tube?.scrollTop ?? 0) > 8);
-addEventListener('scroll', onScroll, { passive: true });
-tube?.addEventListener('scroll', onScroll, { passive: true });
-onScroll();
