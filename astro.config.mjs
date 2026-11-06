@@ -3,7 +3,7 @@ import { defineConfig } from 'astro/config';
 import { copyFile, readFile, readdir, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-const RESUME = 'Aaradhya_Bhatiya_Resume_GameDev.pdf';
+const RESUME = 'Aaradhya_Bhatiya_Resume_GameDeveloper.pdf';
 const BASE = '/web-portfolio';
 
 /**

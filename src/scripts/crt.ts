@@ -223,6 +223,7 @@ function enter(animate: boolean) {
   probe = [];
   root.classList.add('crt');
   syncInput();
+  document.dispatchEvent(new Event('crt:change'));
   screen.scrollTop = y;
   screen.tabIndex = -1; // lets arrow keys / PageDown scroll the tube
   screen.focus({ preventScroll: true });
@@ -248,6 +249,7 @@ function exit() {
     const y = screen.scrollTop;
     root.classList.remove('crt', 'crt-shutdown');
     syncInput();
+    document.dispatchEvent(new Event('crt:change'));
     screen.removeAttribute('tabindex');
     cancelAnimationFrame(raf);
     exitBtn.hidden = true;

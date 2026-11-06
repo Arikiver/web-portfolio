@@ -1,7 +1,7 @@
 import type { ImageMetadata } from 'astro';
 
 // Lazy glob: only images the content actually references end up in the build.
-const files = import.meta.glob<{ default: ImageMetadata }>('/images/*.{png,jpg,jpeg,gif}');
+const files = import.meta.glob<{ default: ImageMetadata }>('/images/**/*.{png,jpg,jpeg,gif}');
 
 /** Loads a curated asset from /images by file name (as used in portfolio.ts). */
 export async function image(file: string): Promise<ImageMetadata> {

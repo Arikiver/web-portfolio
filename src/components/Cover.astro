@@ -44,7 +44,7 @@ const loading = eager ? 'eager' : 'lazy';
 <style>
   .cover {
     aspect-ratio: 1;
-    background: var(--cover-bg, var(--surface-2));
+    background: var(--cover-bg, var(--ground-alt));
     overflow: hidden;
   }
 
@@ -61,5 +61,9 @@ const loading = eager ? 'eager' : 'lazy';
   .cover-contain img {
     object-fit: contain;
     border-radius: var(--logo-radius, 0);
+  }
+
+  .pixelated {
+    image-rendering: pixelated;
   }
 </style>

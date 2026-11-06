@@ -1,5 +1,6 @@
-// Site content. Every claim here comes from portfolio-research.json (resumes, itch pages,
-// Drive, or owner decisions); edit this file to change what the site says.
+// Site content. Every claim here comes from the owner's résumés (Game Developer and Game Designer
+// editions, Nov 2026), portfolio-research.json (itch pages, Drive, owner decisions) or owner
+// decisions; edit this file to change what the site says.
 
 export type Video =
   | { kind: 'youtube'; id: string; title: string }
@@ -9,13 +10,24 @@ export type Link = { label: string; url: string };
 
 export type Section = { heading: string; points: string[] };
 
+/** The three hats; projects list the ones they show. */
+export type Discipline = 'development' | 'technical-art' | 'design';
+
+export const disciplineLabel: Record<Discipline, string> = {
+  development: 'Development',
+  'technical-art': 'Technical art',
+  design: 'Design',
+};
+
 export type Project = {
   slug: string;
   title: string;
   pitch: string;
+  /** File in /images (subfolders allowed, e.g. 'Roblox/icon_title.png'). */
   cover: string;
   coverPixelated?: boolean;
   featured: boolean;
+  disciplines: Discipline[];
   meta: { label: string; value: string }[];
   status?: string;
   video?: Video;
@@ -30,17 +42,22 @@ export type Project = {
 
 export const profile = {
   name: 'Aaradhya Bhatiya',
-  title: 'Unity Developer | Technical Artist',
+  title: 'Game Developer · Technical Artist · Game Designer',
+  /** One-line headline for the hero. */
+  headline: 'Game developer, technical artist and game designer',
+  focus: ['Unity', 'Roblox (Luau)', 'HLSL shaders', 'Gameplay systems', 'Systems and balance design'],
   location: 'Indore, India',
   email: 'bhatiyaaaradhya@gmail.com',
   photo: 'profile.jpeg',
+  /** The one hard fact for the first screen. */
+  fact: '3+ years building shipped games and real-time applications across mobile, WebGL, AR and Roblox.',
   intro:
-    'Unity developer and technical artist building shipped games and real-time applications across mobile, WebGL and AR, with depth in gameplay architecture, animation systems and custom HLSL shader programming.',
+    'I take games from GDD to release: gameplay architecture and data-driven systems, custom HLSL shaders and visual development, and systems design backed by numerical balancing.',
   about: [
-    'I have 3+ years of experience building games and real-time applications, with production experience taking titles from GDD through Play Store release.',
-    'Most recently I owned the entire Unity client of a 3D character-driven mobile product, building its behaviour, animation, rendering and tooling systems end-to-end. Alongside that I lead development at TONIZTOZ on an original 2D pixel-art horror game, where I drive the visuals through custom HLSL shaders.',
+    'I take ideas from concept to release on my own: design, configure the content in data, implement it, playtest and iterate. I am comfortable working inside existing codebases and toolchains, scripting in C#, Luau and SQL, and creating or adapting game art myself through pixel art, Blender and custom HLSL shaders.',
+    'Recently I owned the full Unity client of a 3D companion app, lead a five-person team on an original horror game, and designed and built a large co-op Roblox game end-to-end with an AI-assisted workflow. Clear, practical documentation is part of how I work.',
   ],
-  resume: 'Aaradhya_Bhatiya_Resume_GameDev.pdf',
+  resume: 'Aaradhya_Bhatiya_Resume_GameDeveloper.pdf',
   links: [
     { label: 'itch.io', url: 'https://arikiver.itch.io/' },
     { label: 'GitHub', url: 'https://github.com/Arikiver' },
@@ -59,11 +76,104 @@ const driveView = (id: string) => `https://drive.google.com/file/d/${id}/view`;
 
 export const projects: Project[] = [
   {
+    slug: 'paranormal-inc',
+    title: 'Paranormal Inc.',
+    pitch: 'A 1–4 player co-op horror investigation game on Roblox, designed and built end-to-end.',
+    cover: 'Roblox/icon_title.png',
+    featured: true,
+    disciplines: ['design', 'development'],
+    meta: [
+      { label: 'Type', value: 'Co-op horror investigation' },
+      { label: 'Role', value: 'Lead designer and developer' },
+      { label: 'Dates', value: '2026 – Present' },
+      { label: 'Engine', value: 'Roblox (Luau)' },
+      { label: 'Players', value: '1–4, persistent progression' },
+    ],
+    status: 'Playable, playtested build',
+    gallery: [
+      { file: 'Roblox/01_hq_overview_title.png', alt: 'Paranormal Inc.: The crew headquarters hub' },
+      { file: 'Roblox/02_hq_case_board_title.png', alt: 'Paranormal Inc.: The case board in the headquarters, with clues pinned to it' },
+      { file: 'Roblox/03_bloodmoon_house_title.png', alt: 'Paranormal Inc.: A house under a red blood moon' },
+      { file: 'Roblox/04_bloodmoon_graveyard_title.png', alt: 'Paranormal Inc.: A graveyard at night under the red blood moon' },
+      { file: 'Roblox/05_house_hallway_flashlight_title.png', alt: 'Paranormal Inc.: A dark house hallway lit by a flashlight' },
+      { file: 'Roblox/06_keyart_revenant_hallway_title.png', alt: 'Paranormal Inc.: Key art: a ghostly figure at the end of a dark hallway' },
+      { file: 'Roblox/07_revenant_close_title.png', alt: 'Paranormal Inc.: A revenant seen close up in a corridor' },
+      { file: 'Roblox/08_camcorder_evidence_title.png', alt: 'Paranormal Inc.: Holding the camcorder to catch evidence in a dark hallway' },
+      { file: 'Roblox/09_store_exterior_title.png', alt: 'Paranormal Inc.: The abandoned convenience store at night, with a van parked outside' },
+      { file: 'Roblox/10_store_aisles_title.png', alt: 'Paranormal Inc.: Inside the convenience store aisles, lit by a flashlight' },
+      { file: 'Roblox/11_van_drive_off_title.png', alt: 'Paranormal Inc.: The crew van driving away at night' },
+      { file: 'Roblox/12_school_gym_title.png', alt: 'Paranormal Inc.: A dark corridor inside Ravenwood Elementary' },
+      { file: 'Roblox/13_school_classroom_title.png', alt: 'Paranormal Inc.: A classroom in the school' },
+      { file: 'Roblox/14_school_exterior_title.png', alt: 'Paranormal Inc.: The school exterior at night, with a school bus' },
+      { file: 'Roblox/15_motel_exterior_title.png', alt: 'Paranormal Inc.: The old motel at night, with a van parked out front' },
+      { file: 'Roblox/16_motel_corridor_title.png', alt: 'Paranormal Inc.: A motel corridor' },
+      { file: 'Roblox/17_lobby_vans_title.png', alt: 'Paranormal Inc.: The lobby, where players pick a van' },
+    ],
+    overview: [
+      'A first-person co-op horror investigation game for 1–4 players with persistent progression: 4 maps (80 rooms), 5 entities each with a unique 3-of-7 evidence fingerprint, 10 upgradeable devices, 45 paranormal events and 12 location stories.',
+      'I own it from concept to a playable, playtested build: design, configuring the content in data, implementation in Luau, then playtesting and iteration.',
+    ],
+    role: 'Lead designer and developer: the core loop, systems and balance, all implementation, and playtest-driven updates.',
+    sections: [
+      {
+        heading: 'Game design',
+        points: [
+          'The core loop, 4 maps (80 rooms), 5 enemy types each with a unique 3-of-7 evidence fingerprint, 10 upgradeable tools with tier-2 versions, and 45 scripted events.',
+          '5 enemy types with distinct behaviours and counters, an escalating 5-stage threat model, and events paced by stage, with rare set pieces and quiet periods.',
+        ],
+      },
+      {
+        heading: 'Progression and economy',
+        points: [
+          'A 16-rank reputation curve tuned by Monte Carlo simulation of ~12-minute sessions: new content after almost every early job, the hardest tier at ~16 hours, top rank at ~35 hours, with map and tier unlocks staggered to keep goals in view.',
+          'Itemized payouts (evidence, photos, objectives, identification) with a co-op bonus of +10% per teammate, softened failure and death payouts, penalties for wrong answers, and one-time first-clear and story rewards; gear prices and reputation gates act as sinks.',
+        ],
+      },
+      {
+        heading: 'Difficulty and pacing',
+        points: [
+          '5 difficulty tiers built from separate levers: enemy aggression growth, grace period, attack thresholds, cooldowns, attack duration and speed, sanity drain, item effectiveness, hidden-information chance and spawn weights. Rewards scale ×1 to ×5.',
+          'An agitation-based pacing model: threat follows a baseline curve plus player-driven provocation spikes, with stage-based event cadence, quiet periods after big moments, and rare events rolled once per session.',
+        ],
+      },
+      {
+        heading: 'Live-style content',
+        points: [
+          'Rotating side objectives (10 types), 12 location stories with randomized clue placement, and a rare 3% blood-moon event with its own deduction puzzle, all driven from configuration.',
+          'An HQ hub with social activities, and fair monetization: revives and private servers only, nothing that affects balance.',
+        ],
+      },
+      {
+        heading: 'Multiplayer and live service',
+        points: [
+          'Lobby-to-crew-server teleports with a host and voting flow, session-locked DataStore saves and MemoryStore private-server listings.',
+          'Voice-driven mechanics using mic loudness and speech-to-text.',
+        ],
+      },
+      {
+        heading: 'Architecture and tools',
+        points: [
+          'Server-authoritative, ~43k lines of Luau: 38 services, 40 client controllers and 15 data-definition modules, so all balance is data and tuning never needs code.',
+          'Built with an AI-assisted workflow (Claude via Roblox Studio MCP) and 25 in-house editor tools; every system reviewed and playtested, including client-side snapshot interpolation for smooth AI movement.',
+        ],
+      },
+      {
+        heading: 'Iteration and documentation',
+        points: [
+          'Multiple structured playtest rounds of 20–25 feedback items each, all triaged, shipped and documented, including re-pacing the whole game when players said too much happened too fast.',
+        ],
+      },
+    ],
+    stack: ['Roblox Studio', 'Luau', 'DataStore', 'MemoryStore', 'TeleportService', 'MarketplaceService', 'Voice and audio API', 'Monte Carlo simulation', 'Claude via Roblox Studio MCP'],
+    links: [{ label: 'Play on Roblox', url: 'https://www.roblox.com/games/84916613959771' }],
+  },
+  {
     slug: 'chalo-yaar',
     title: 'Chalo Yaar!',
     pitch: 'A cozy 3D travel simulator about road trips, exploration, photography, and vanlife.',
     cover: 'chaloyaar-itch-cover.png',
     featured: true,
+    disciplines: ['development', 'technical-art', 'design'],
     meta: [
       { label: 'Type', value: '3D multiplayer travel game' },
       { label: 'Dates', value: 'Jan 2026 – May 2026' },
@@ -97,8 +207,9 @@ export const projects: Project[] = [
         ],
       },
       {
-        heading: 'Gameplay systems',
+        heading: 'Design and gameplay systems',
         points: [
+          'Designed a cozy progression loop: a drivable campervan hub, wildlife photography progression, inventory and survival stats.',
           'First-person exploration with a drivable campervan hub.',
           'Wildlife photography progression, inventory and survival stat systems.',
           'Modular multiplayer architecture built on Netcode for GameObjects.',
@@ -118,6 +229,7 @@ export const projects: Project[] = [
     cover: 'toniztoz.gif',
     coverPixelated: true,
     featured: true,
+    disciplines: ['design', 'technical-art', 'development'],
     meta: [
       { label: 'Role', value: 'Lead Game Developer' },
       { label: 'Studio', value: 'TONIZTOZ' },
@@ -129,7 +241,7 @@ export const projects: Project[] = [
     overview: [
       'An original 2D pixel-art horror game rooted in Asian folklore. As the sole senior developer I own it from storyline, storyboard and GDD through active development, leading a five-person cross-disciplinary team.',
     ],
-    role: 'Technical direction and project architecture, core systems, all shader work, and mentoring juniors on Unity, Aseprite and asset workflows.',
+    role: 'Design ownership from storyline, storyboard and GDD onward; setting priorities and direction for the team; technical direction and project architecture, core systems, all shader work, and mentoring juniors on Unity, Aseprite and asset workflows.',
     sections: [
       {
         heading: 'Visual development in HLSL',
@@ -159,6 +271,7 @@ export const projects: Project[] = [
     pitch: 'Sole ownership of the Unity client for a 3D character-driven companion product.',
     cover: 'boop.png',
     featured: true,
+    disciplines: ['development', 'design'],
     meta: [
       { label: 'Role', value: 'Unity Developer (contract)' },
       { label: 'Dates', value: 'Jun 2026 – Sep 2026' },
@@ -215,6 +328,7 @@ export const projects: Project[] = [
     pitch: 'The Slenderman experience in augmented reality. Step into the portal where reality fades; the woods await.',
     cover: 'slenderar-itch-cover.jpg',
     featured: true,
+    disciplines: ['development', 'design'],
     meta: [
       { label: 'Type', value: 'AR horror survival' },
       { label: 'Released', value: '2025' },
@@ -248,11 +362,48 @@ export const projects: Project[] = [
     note: 'Play in an open space.',
   },
   {
+    slug: 'casino-games',
+    title: 'Casino Games',
+    pitch: 'Four real-time casino games — Mines, Roulette, Crash and Teen Patti — whose numbers I designed and built in Unity for a web platform.',
+    cover: 'casino.png',
+    featured: false,
+    disciplines: ['design', 'development'],
+    meta: [
+      { label: 'Role', value: 'Independent contractor' },
+      { label: 'Dates', value: '2024 – Present' },
+      { label: 'Engine', value: 'Unity' },
+      { label: 'Platform', value: 'Web (Unity HTML5 build)' },
+    ],
+    status: 'Shipped',
+    video: { kind: 'drive', id: '1z-a7FEdexifu57A-EBr27j9TohTP_SBw', title: 'Casino games showcase' },
+    overview: [
+      'Four real-time casual casino games, shipped as Unity HTML5 builds displayed directly inside the client platform\'s website UI.',
+    ],
+    sections: [
+      {
+        heading: 'Design: the numbers',
+        points: [
+          'Designed the RTP mathematical models, probability systems and payout balance for all four games.',
+          'Retention-focused gameplay loops.',
+        ],
+      },
+      {
+        heading: 'Systems',
+        points: [
+          'Backend API integration with live wallet systems, balance synchronisation and currency switching.',
+        ],
+      },
+    ],
+    stack: ['Unity', 'C#', 'WebGL', 'Backend API integration'],
+    links: [{ label: 'Watch the showcase', url: driveView('1z-a7FEdexifu57A-EBr27j9TohTP_SBw') }],
+  },
+  {
     slug: 'ar-vr',
     title: 'AR & VR Work',
     pitch: '15+ AR Unity projects for freelance clients: real-time tracking, indoor navigation and interactive environments.',
     cover: 'ar.png',
     featured: false,
+    disciplines: ['development'],
     meta: [
       { label: 'Role', value: 'Independent contractor' },
       { label: 'Dates', value: '2024 – Present' },
@@ -261,7 +412,7 @@ export const projects: Project[] = [
     ],
     video: { kind: 'drive', id: '1iMk_JXJmiUd9uYt55lHy2tGyB1OgJUSP', title: 'AR/VR showreel' },
     overview: [
-      'I have delivered 15+ AR Unity projects for local freelance clients, across desktop and mobile. The showreel collects AR and VR work.',
+      'I have delivered 15+ AR Unity projects for local freelance clients across desktop and mobile, owning each from requirements to delivery. The showreel collects AR and VR work.',
     ],
     sections: [
       {
@@ -278,41 +429,12 @@ export const projects: Project[] = [
     note: 'Client projects are shown in the showreel only.',
   },
   {
-    slug: 'casino-games',
-    title: 'Casino Games',
-    pitch: 'Four real-time casino games — Mines, Roulette, Crash and Teen Patti — built in Unity for a web platform.',
-    cover: 'casino.png',
-    featured: false,
-    meta: [
-      { label: 'Role', value: 'Independent contractor' },
-      { label: 'Dates', value: '2024 – Present' },
-      { label: 'Engine', value: 'Unity' },
-      { label: 'Platform', value: 'Web (Unity HTML5 build)' },
-    ],
-    status: 'Shipped',
-    video: { kind: 'drive', id: '1z-a7FEdexifu57A-EBr27j9TohTP_SBw', title: 'Casino games showcase' },
-    overview: [
-      'Four real-time casual casino games, shipped as Unity HTML5 builds displayed directly inside the client platform\'s website UI.',
-    ],
-    sections: [
-      {
-        heading: 'Systems',
-        points: [
-          'Backend API integration with live wallet systems, balance synchronisation and currency switching.',
-          'RTP mathematical models and probability systems.',
-          'Retention-focused gameplay loops.',
-        ],
-      },
-    ],
-    stack: ['Unity', 'C#', 'WebGL', 'Backend API integration'],
-    links: [{ label: 'Watch the showcase', url: driveView('1z-a7FEdexifu57A-EBr27j9TohTP_SBw') }],
-  },
-  {
     slug: '2minwin',
     title: '2MinWin',
     pitch: '17+ mini-games built from scratch for a live production title by MINWIN Digital Studios.',
     cover: '2minwin.jpg',
     featured: false,
+    disciplines: ['development'],
     meta: [
       { label: 'Role', value: 'Unity Developer Intern' },
       { label: 'Company', value: 'Pythrust Technologies, Gurugram' },
@@ -340,6 +462,7 @@ export const projects: Project[] = [
     pitch: 'A 3D horror maze runner with procedurally generated levels and adaptive enemy AI.',
     cover: 'lucius.png',
     featured: false,
+    disciplines: ['development', 'design'],
     meta: [
       { label: 'Type', value: '3D horror maze runner' },
       { label: 'Dates', value: '2024 – 2025' },
@@ -363,41 +486,58 @@ export const projects: Project[] = [
   },
 ];
 
-export const focusAreas = [
+/** The three hats, each with résumé facts and the projects that show it. */
+export const disciplines: { id: Discipline; title: string; text: string; facts: string[]; links: string[] }[] = [
   {
-    title: 'Shaders and rendering',
-    text: 'Custom HLSL: Worley-noise water caustics, 3D-noise volumetric fog and GPU foliage wind in Chalo Yaar!; 2D volumetric fog, horror lighting and ghost shaders in The God They Buried.',
+    id: 'development',
+    title: 'Game development',
+    text: 'Gameplay architecture and data-driven systems in Unity (C#) and Roblox (Luau): behaviour and state systems, animation, physics, AI pathfinding, server-authoritative multiplayer and custom editor tooling.',
+    facts: [
+      '27 data-driven behaviours run by a 20-step execution interpreter',
+      '~43k lines of server-authoritative Luau',
+      '17+ mini-games built for a live title',
+    ],
+    links: ['boop', 'paranormal-inc', '2minwin'],
+  },
+  {
+    id: 'technical-art',
+    title: 'Technical art',
+    text: 'Custom HLSL shaders and visual development: volumetric fog and lighting, Worley-noise water caustics, GPU foliage wind and a pixel-art horror lighting pipeline, backed by profiling and optimisation.',
+    facts: [
+      'Draw-call batches cut from 130,000+ to under 30,000',
+      'Sustained framerate raised from 15 to 50+ fps',
+      '2D volumetric fog, ghost and demon shaders',
+    ],
     links: ['chalo-yaar', 'the-god-they-buried'],
   },
   {
-    title: 'Gameplay and animation systems',
-    text: 'A data-driven behaviour system with 27 ScriptableObject behaviours, a 20-step execution interpreter and 11 editor tools; spring-bone motion and animator-locked audio cues.',
-    links: ['boop'],
-  },
-  {
-    title: 'Optimisation',
-    text: 'Draw call batches cut from 130,000+ to under 30,000 and framerate raised from 15 to 50+ fps; three URP quality tiers with device-tier detection.',
-    links: ['chalo-yaar', 'boop'],
-  },
-  {
-    title: 'Multiplayer',
-    text: 'Modular multiplayer architecture on Netcode for GameObjects, and multiplayer across 17+ mini-games in a live title.',
-    links: ['chalo-yaar', '2minwin'],
-  },
-  {
-    title: 'AR',
-    text: '15+ client AR projects covering tracking and indoor navigation from 3D spatial scans, plus SlenderAR, a portal-based AR horror game.',
-    links: ['ar-vr', 'slenderar'],
+    id: 'design',
+    title: 'Game design',
+    text: 'Systems, progression and economy design backed by numerical balancing: probability and RTP models, Monte Carlo-tuned progression, difficulty built from separate levers, encounter and pacing design, GDDs and playtest-driven iteration.',
+    facts: [
+      '16-rank progression tuned with Monte Carlo simulation',
+      'RTP and probability models for four shipped casino games',
+      '5 difficulty tiers built from ~12 separate levers each',
+    ],
+    links: ['paranormal-inc', 'casino-games', 'the-god-they-buried'],
   },
 ];
 
 export const experience = [
   {
+    role: 'Lead designer and developer',
+    org: 'Paranormal Inc.',
+    mode: 'Independent project · Roblox',
+    dates: '2026 – Present',
+    summary: 'Designing and building a co-op horror investigation game end-to-end: difficulty tiers, a simulation-tuned 16-rank progression curve, an itemized reward economy, 45 scripted events and playtest-driven updates.',
+    projects: ['paranormal-inc'],
+  },
+  {
     role: 'Unity Developer',
     org: 'Boop',
-    mode: 'Remote / Contract',
+    mode: 'Remote, contract',
     dates: 'Jun 2026 – Sep 2026',
-    summary: 'Sole owner of the Unity client for a 3D companion product: behaviour, animation, rendering and tooling systems through to a near-release build.',
+    summary: 'Took over the Unity client of a 3D companion app mid-development and delivered it to a near-release build on my own: a data-driven behaviour system I designed, animation, rendering and designer-facing tools.',
     projects: ['boop'],
   },
   {
@@ -405,7 +545,7 @@ export const experience = [
     org: 'TONIZTOZ',
     mode: 'Remote',
     dates: 'Mar 2025 – Present',
-    summary: 'Leading a five-person team on an original 2D pixel-art horror game; architecture, core systems, HLSL visual development and mentoring.',
+    summary: 'Leading a five-person cross-disciplinary team on an original 2D pixel-art horror game: I own its design from storyline, storyboard and GDD, set technical direction, and drive the look through custom HLSL shaders.',
     projects: ['the-god-they-buried'],
   },
   {
@@ -413,32 +553,41 @@ export const experience = [
     org: 'Pythrust Technologies',
     mode: 'Gurugram, India',
     dates: 'Oct 2025 – Jan 2026',
-    summary: '17+ mini-games for 2MinWin by MINWIN Digital Studios; IronSource, analytics and backend integration; cross-device QA.',
+    summary: 'Built 17+ complete mini-games for 2MinWin, a live title by MINWIN Digital Studios, working with UI and sound design to keep designs achievable in engine, with IronSource ads, analytics events and cross-device QA.',
     projects: ['2minwin'],
   },
   {
     role: 'Independent Contractor',
     org: 'Freelance',
-    mode: 'Remote / Contract',
+    mode: 'Remote',
     dates: '2024 – Present',
-    summary: '15+ AR Unity projects and four shipped real-time casino games with backend integration and RTP models.',
-    projects: ['ar-vr', 'casino-games'],
+    summary: 'Designed the numbers for four shipped real-time casino games (RTP models, probability systems and payout balance) and delivered 15+ AR projects, owning each from requirements to delivery.',
+    projects: ['casino-games', 'ar-vr'],
   },
 ];
 
 export const skills = [
-  { group: 'Languages', items: ['C#', 'C/C++', 'HLSL', 'GML', 'Python', 'JavaScript', 'SQL'] },
+  { group: 'Languages', items: ['C#', 'Luau/Lua', 'C/C++', 'HLSL', 'GML', 'Python', 'JavaScript', 'SQL'] },
+  { group: 'Engines', items: ['Unity 3D/2D (URP)', 'Roblox Studio', 'GameMaker Studio'] },
   {
-    group: 'Engines and graphics',
-    items: ['Unity 3D/2D (URP)', 'GameMaker Studio', 'Custom HLSL shaders', 'Shader Graph', 'OpenGL 3.3', 'WebGL', 'Real-time VFX', 'Planar reflections', 'Procedural generation', 'Profiling and optimisation'],
+    group: 'Gameplay and systems',
+    items: ['Behaviour and state architecture', 'Animation systems and state machines', 'Character controllers', 'Physics', 'AI pathfinding', 'Server-authoritative multiplayer (Netcode for GameObjects, Roblox)', 'Data-driven content pipelines', 'Custom editor tooling'],
   },
   {
-    group: 'Gameplay systems',
-    items: ['Behaviour and state architecture', 'Animation systems and state machines', 'Character controllers', 'Rigidbody physics', 'AI pathfinding', 'Netcode for GameObjects', 'Custom editor tooling'],
+    group: 'Technical art',
+    items: ['Custom HLSL shaders', 'Shader Graph', 'Real-time VFX', 'Volumetric fog and lighting', 'Planar reflections', 'Procedural generation', 'OpenGL 3.3', 'WebGL', 'Profiling and optimisation', 'Blender', 'Aseprite', 'Pixel art'],
+  },
+  {
+    group: 'Game design',
+    items: ['Systems and progression design', 'Economy and numerical balancing (RTP and probability models, Monte Carlo simulation)', 'Difficulty tuning', 'Encounter and pacing design', 'GDDs', 'Playtest-driven iteration'],
+  },
+  {
+    group: 'Roblox platform',
+    items: ['DataStore (session-locked saves)', 'MemoryStore', 'TeleportService and reserved servers', 'MarketplaceService', 'Voice and audio API'],
   },
   {
     group: 'Pipeline and tools',
-    items: ['Android and iOS builds', 'Play Store submission', 'IronSource ad mediation', 'Native plugins (Objective-C, Java/JNI)', 'Cross-device QA', 'Blender', 'Aseprite', 'Figma', 'Pixel art', 'Git/GitHub', 'JIRA', 'Asana'],
+    items: ['Android/iOS builds', 'Play Store submission', 'IronSource', 'Analytics', 'Native plugins (Objective-C, Java/JNI)', 'React Native interop', 'Cross-device QA', 'AI-assisted development (Claude Code, Roblox Studio MCP)', 'Git/GitHub', 'JIRA', 'Asana', 'Figma'],
   },
 ];
 
