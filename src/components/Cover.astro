@@ -1,7 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import GeneratedCover from './GeneratedCover.astro';
-import { coverPresentation, image, isGenerated, isGif } from '../lib/images';
+import { coverPresentation, image, isGif } from '../lib/images';
 
 interface Props {
   file: string;
@@ -15,37 +14,32 @@ interface Props {
 }
 
 const { file, alt, sizes, widths = [360, 560, 800, 1100], eager = false, class: className, vt } = Astro.props;
-const generated = isGenerated(file);
-const src = generated ? null : await image(file);
+const src = await image(file);
 const { fit, bg, radius } = coverPresentation(file);
 const loading = eager ? 'eager' : 'lazy';
 ---
 
-{
-  generated ? (
-    <GeneratedCover slug={file.slice('generated:'.length)} alt={alt} vt={vt} class:list={['cover', className]} />
-  ) : (
-    <div
-      class:list={['cover', `cover-${fit}`, className]}
-      style={[bg && `--cover-bg: ${bg}`, radius && `--logo-radius: ${radius}`, vt && `view-transition-name: ${vt}`].filter(Boolean).join('; ') || undefined}
-    >
-      {isGif(file) ? (
-        // Served untouched so the animation survives; scaled up with nearest-neighbour.
-        <img class="pixelated" src={src!.src} width={src!.width} height={src!.height} alt={alt} loading={loading} decoding="async" />
-      ) : (
-        <Image
-          src={src!}
-          alt={alt}
-          widths={widths.filter((w) => w <= src!.width).concat(src!.width < widths[0] ? [src!.width] : [])}
-          sizes={sizes}
-          format="webp"
-          loading={loading}
-          fetchpriority={eager ? 'high' : undefined}
-        />
-      )}
-    </div>
-  )
-}
+<div
+  class:list={['cover', `cover-${fit}`, className]}
+  style={[bg && `--cover-bg: ${bg}`, radius && `--logo-radius: ${radius}`, vt && `view-transition-name: ${vt}`].filter(Boolean).join('; ') || undefined}
+>
+  {
+    isGif(file) ? (
+      // Served untouched so the animation survives; scaled up with nearest-neighbour.
+      <img class="pixelated" src={src.src} width={src.width} height={src.height} alt={alt} loading={loading} decoding="async" />
+    ) : (
+      <Image
+        src={src}
+        alt={alt}
+        widths={widths.filter((w) => w <= src.width).concat(src.width < widths[0] ? [src.width] : [])}
+        sizes={sizes}
+        format="webp"
+        loading={loading}
+        fetchpriority={eager ? 'high' : undefined}
+      />
+    )
+  }
+</div>
 
 <style>
   .cover {

@@ -5,7 +5,6 @@ import Cover from '../../components/Cover.astro';
 import Gallery from '../../components/Gallery.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
 import { disciplineLabel, profile, projects, type Project } from '../../data/portfolio';
-import { isGenerated } from '../../lib/images';
 import { url } from '../../lib/url';
 
 export const getStaticPaths = (() =>
@@ -27,11 +26,9 @@ interface Props {
 const { project, prev, next } = Astro.props;
 const index = projects.indexOf(project) + 1;
 const disciplines = project.disciplines.map((d) => disciplineLabel[d]).join(' · ');
-// Typeset covers have no raster image to share, so previews fall back to the portrait.
-const ogImage = isGenerated(project.cover) ? profile.photo : project.cover;
 ---
 
-<Base title={`${project.title} — ${profile.name}`} description={project.pitch} ogImage={ogImage}>
+<Base title={`${project.title} — ${profile.name}`} description={project.pitch} ogImage={project.cover}>
   <article class="project">
     <div class="wrap">
       <a class="back link" href={`${url('/')}#work`}>← All work</a>

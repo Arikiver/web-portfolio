@@ -167,13 +167,11 @@ const href = url(`/work/${project.slug}/`);
     transition-duration: var(--hover-in);
   }
 
-  .feature-media :global(img),
-  .feature-media :global(.gen-art) {
+  .feature-media :global(img) {
     transition: scale 0.6s var(--ease);
   }
 
-  .feature:hover .feature-media :global(img),
-  .feature:hover .feature-media :global(.gen-art) {
+  .feature:hover .feature-media :global(img) {
     scale: 1.03;
   }
 </style>

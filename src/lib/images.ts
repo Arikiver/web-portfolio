@@ -1,7 +1,7 @@
 import type { ImageMetadata } from 'astro';
 
 // Lazy glob: only images the content actually references end up in the build.
-const files = import.meta.glob<{ default: ImageMetadata }>('/images/*.{png,jpg,jpeg,gif}');
+const files = import.meta.glob<{ default: ImageMetadata }>('/images/**/*.{png,jpg,jpeg,gif}');
 
 /** Loads a curated asset from /images by file name (as used in portfolio.ts). */
 export async function image(file: string): Promise<ImageMetadata> {
@@ -11,9 +11,6 @@ export async function image(file: string): Promise<ImageMetadata> {
 }
 
 export const isGif = (file: string) => file.toLowerCase().endsWith('.gif');
-
-/** Covers written as `generated:<slug>` are typeset (GeneratedCover.astro), not image files. */
-export const isGenerated = (file: string) => file.startsWith('generated:');
 
 /**
  * Logos are shown whole on their own background colour instead of being cropped.

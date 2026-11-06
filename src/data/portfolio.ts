@@ -23,7 +23,7 @@ export type Project = {
   slug: string;
   title: string;
   pitch: string;
-  /** File in /images, or `generated:<slug>` for a typeset cover (no key art yet). */
+  /** File in /images (subfolders allowed, e.g. 'Roblox/icon_title.png'). */
   cover: string;
   coverPixelated?: boolean;
   featured: boolean;
@@ -79,7 +79,7 @@ export const projects: Project[] = [
     slug: 'paranormal-inc',
     title: 'Paranormal Inc.',
     pitch: 'A 1–4 player co-op horror investigation game on Roblox, designed and built end-to-end.',
-    cover: 'generated:paranormal-inc',
+    cover: 'Roblox/icon_title.png',
     featured: true,
     disciplines: ['design', 'development'],
     meta: [
@@ -90,6 +90,25 @@ export const projects: Project[] = [
       { label: 'Players', value: '1–4, persistent progression' },
     ],
     status: 'Playable, playtested build',
+    gallery: [
+      { file: 'Roblox/01_hq_overview_title.png', alt: 'Paranormal Inc.: The crew headquarters hub' },
+      { file: 'Roblox/02_hq_case_board_title.png', alt: 'Paranormal Inc.: The case board in the headquarters, with clues pinned to it' },
+      { file: 'Roblox/03_bloodmoon_house_title.png', alt: 'Paranormal Inc.: A house under a red blood moon' },
+      { file: 'Roblox/04_bloodmoon_graveyard_title.png', alt: 'Paranormal Inc.: A graveyard at night under the red blood moon' },
+      { file: 'Roblox/05_house_hallway_flashlight_title.png', alt: 'Paranormal Inc.: A dark house hallway lit by a flashlight' },
+      { file: 'Roblox/06_keyart_revenant_hallway_title.png', alt: 'Paranormal Inc.: Key art: a ghostly figure at the end of a dark hallway' },
+      { file: 'Roblox/07_revenant_close_title.png', alt: 'Paranormal Inc.: A revenant seen close up in a corridor' },
+      { file: 'Roblox/08_camcorder_evidence_title.png', alt: 'Paranormal Inc.: Holding the camcorder to catch evidence in a dark hallway' },
+      { file: 'Roblox/09_store_exterior_title.png', alt: 'Paranormal Inc.: The abandoned convenience store at night, with a van parked outside' },
+      { file: 'Roblox/10_store_aisles_title.png', alt: 'Paranormal Inc.: Inside the convenience store aisles, lit by a flashlight' },
+      { file: 'Roblox/11_van_drive_off_title.png', alt: 'Paranormal Inc.: The crew van driving away at night' },
+      { file: 'Roblox/12_school_gym_title.png', alt: 'Paranormal Inc.: A dark corridor inside Ravenwood Elementary' },
+      { file: 'Roblox/13_school_classroom_title.png', alt: 'Paranormal Inc.: A classroom in the school' },
+      { file: 'Roblox/14_school_exterior_title.png', alt: 'Paranormal Inc.: The school exterior at night, with a school bus' },
+      { file: 'Roblox/15_motel_exterior_title.png', alt: 'Paranormal Inc.: The old motel at night, with a van parked out front' },
+      { file: 'Roblox/16_motel_corridor_title.png', alt: 'Paranormal Inc.: A motel corridor' },
+      { file: 'Roblox/17_lobby_vans_title.png', alt: 'Paranormal Inc.: The lobby, where players pick a van' },
+    ],
     overview: [
       'A first-person co-op horror investigation game for 1–4 players with persistent progression: 4 maps (80 rooms), 5 entities each with a unique 3-of-7 evidence fingerprint, 10 upgradeable devices, 45 paranormal events and 12 location stories.',
       'I own it from concept to a playable, playtested build: design, configuring the content in data, implementation in Luau, then playtesting and iteration.',
@@ -146,7 +165,7 @@ export const projects: Project[] = [
       },
     ],
     stack: ['Roblox Studio', 'Luau', 'DataStore', 'MemoryStore', 'TeleportService', 'MarketplaceService', 'Voice and audio API', 'Monte Carlo simulation', 'Claude via Roblox Studio MCP'],
-    links: [],
+    links: [{ label: 'Play on Roblox', url: 'https://www.roblox.com/games/84916613959771' }],
   },
   {
     slug: 'chalo-yaar',

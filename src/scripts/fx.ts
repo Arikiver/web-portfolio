@@ -38,7 +38,7 @@ function reveal(el: HTMLElement, delay = 0, kind = el.dataset.reveal ?? el.datas
     );
   }
   if (kind === 'media') {
-    const inner = el.querySelectorAll('img, .gen-art');
+    const inner = el.querySelectorAll('img');
     gsap.fromTo(inner, { scale: 1.14 }, { scale: 1, duration: 1.4, ease: EASE, delay, clearProps: 'scale' });
     return gsap.fromTo(
       el,
