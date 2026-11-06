@@ -57,7 +57,7 @@ export const profile = {
     'I take ideas from concept to release on my own: design, configure the content in data, implement it, playtest and iterate. I am comfortable working inside existing codebases and toolchains, scripting in C#, Luau and SQL, and creating or adapting game art myself through pixel art, Blender and custom HLSL shaders.',
     'Recently I owned the full Unity client of a 3D companion app, lead a five-person team on an original horror game, and designed and built a large co-op Roblox game end-to-end with an AI-assisted workflow. Clear, practical documentation is part of how I work.',
   ],
-  resume: 'Aaradhya_Bhatiya_Resume_GameDev.pdf',
+  resume: 'Aaradhya_Bhatiya_Resume_GameDeveloper.pdf',
   links: [
     { label: 'itch.io', url: 'https://arikiver.itch.io/' },
     { label: 'GitHub', url: 'https://github.com/Arikiver' },
