@@ -161,6 +161,18 @@ const SOUNDS = {
     tone('sine', f * 2, f * 2, 0.06, 0.006, 0.015);
   },
 
+  /* ---- 3D carousels ---- */
+  // A mechanical detent as the ring locks onto the next project.
+  ringTick: (i = 0) => {
+    noise(0.025, 0.05, 'bandpass', 2600, 1800, 0, 4);
+    tone('triangle', 330 + i * 40, 300 + i * 40, 0.06, 0.03);
+    tone('sine', 1320 + i * 80, 1320 + i * 80, 0.12, 0.008, 0.02);
+  },
+  filter: () => {
+    noise(0.12, 0.03, 'bandpass', 900, 3200, 0, 1.5);
+    tone('square', 784, 1046, 0.08, 0.02);
+  },
+
   /* ---- clicks ---- */
   click: () => {
     tone('square', 520, 260, 0.07, 0.03);
@@ -398,27 +410,29 @@ type Route = [selector: string, sound: Sound];
 
 const HOVER: Route[] = [
   ['.hero-photo', 'bladeShine'],
-  ['.thumb', 'shutterHover'],
+  ['li.chip', 'chipHover'],
+  ['.cf-item, .cf-thumb, .thumb', 'shutterHover'],
   ['.facade', 'videoHover'],
-  // A row's full-size link overlay sits under the pointer, so match it before plain links.
-  ['.feature, .feature .stretched', 'cardHover'],
-  ['.index-row, .index-link', 'cardSmallHover'],
-  ['.pager-link', 'pageHover'],
+  ['.ring-card, .rl-card', 'cardHover'],
+  ['.pcard', 'cardSmallHover'],
+  ['.next-card', 'pageHover'],
   ['.back', 'backHover'],
   ['.brand', 'coinHover'],
   ['.insert-coin', 'insertHover'],
+  ['.filter', 'navHover'],
   ['.btn-primary', 'btnPrimaryHover'],
   ['.btn, .crt-exit, .fx-toggle, summary, button', 'btnHover'],
-  ['.nav-desktop a, .nav-mobile a, .footer-links a', 'navHover'],
-  ['.discipline', 'glassHover'],
+  ['.nav-desktop a, .nav-mobile a, .footer-links a, .toc a', 'navHover'],
+  ['.discipline, .stat, .other', 'glassHover'],
   ['a[href]', 'linkHover'],
 ];
 
 const CLICK: Route[] = [
   ['a[download]', 'itemGet'],
-  ['.thumb', 'shutter'],
+  ['.filter', 'filter'],
   ['.facade', 'play'],
-  ['.feature .stretched, .index-link, .pager-link, .seen-in a, .back', 'select'],
+  ['.cf-item, .cf-thumb, .cf-nav, .ring-nav button', 'step'],
+  ['.ring-card, .rl-card, .pcard, .next-card, .seen-in a, .back', 'select'],
   ['.fx-toggle', 'toggle'],
   ['a[href], button, summary', 'click'],
 ];
