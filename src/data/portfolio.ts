@@ -26,6 +26,11 @@ export type Project = {
   /** File in /images (subfolders allowed, e.g. 'Roblox/icon_title.png'). */
   cover: string;
   coverPixelated?: boolean;
+  /** Focal point when the cover is cropped into a non-square card. */
+  coverPosition?: string;
+  /** Wide image for the project page hero (file in /images), and its focal point. */
+  banner?: string;
+  bannerPosition?: string;
   featured: boolean;
   disciplines: Discipline[];
   meta: { label: string; value: string }[];
@@ -80,6 +85,10 @@ export const projects: Project[] = [
     title: 'Paranormal Inc.',
     pitch: 'A 1–4 player co-op horror investigation game on Roblox, designed and built end-to-end.',
     cover: 'Roblox/icon_title.png',
+    coverPosition: '50% 100%',
+    // Screenshots carry a caption along the bottom; anchoring to the top crops it out.
+    banner: 'Roblox/06_keyart_revenant_hallway_title.png',
+    bannerPosition: '50% 0%',
     featured: true,
     disciplines: ['design', 'development'],
     meta: [
@@ -172,6 +181,8 @@ export const projects: Project[] = [
     title: 'Chalo Yaar!',
     pitch: 'A cozy 3D travel simulator about road trips, exploration, photography, and vanlife.',
     cover: 'chaloyaar-itch-cover.png',
+    banner: 'chaloyaar-itch-background.png',
+    bannerPosition: '50% 45%',
     featured: true,
     disciplines: ['development', 'technical-art', 'design'],
     meta: [
@@ -327,6 +338,8 @@ export const projects: Project[] = [
     title: 'SlenderAR',
     pitch: 'The Slenderman experience in augmented reality. Step into the portal where reality fades; the woods await.',
     cover: 'slenderar-itch-cover.jpg',
+    banner: 'slenderar-itch-background.jpg',
+    bannerPosition: '35% 60%',
     featured: true,
     disciplines: ['development', 'design'],
     meta: [
@@ -487,15 +500,22 @@ export const projects: Project[] = [
 ];
 
 /** The three hats, each with résumé facts and the projects that show it. */
-export const disciplines: { id: Discipline; title: string; text: string; facts: string[]; links: string[] }[] = [
+/** The three hats, each with résumé figures (animated counters) and the projects that show it. */
+export const disciplines: {
+  id: Discipline;
+  title: string;
+  text: string;
+  stats: { value: string; label: string }[];
+  links: string[];
+}[] = [
   {
     id: 'development',
     title: 'Game development',
     text: 'Gameplay architecture and data-driven systems in Unity (C#) and Roblox (Luau): behaviour and state systems, animation, physics, AI pathfinding, server-authoritative multiplayer and custom editor tooling.',
-    facts: [
-      '27 data-driven behaviours run by a 20-step execution interpreter',
-      '~43k lines of server-authoritative Luau',
-      '17+ mini-games built for a live title',
+    stats: [
+      { value: '27', label: 'data-driven behaviours run by a 20-step interpreter' },
+      { value: '43k', label: 'lines of server-authoritative Luau' },
+      { value: '17+', label: 'mini-games built for a live title' },
     ],
     links: ['boop', 'paranormal-inc', '2minwin'],
   },
@@ -503,10 +523,10 @@ export const disciplines: { id: Discipline; title: string; text: string; facts: 
     id: 'technical-art',
     title: 'Technical art',
     text: 'Custom HLSL shaders and visual development: volumetric fog and lighting, Worley-noise water caustics, GPU foliage wind and a pixel-art horror lighting pipeline, backed by profiling and optimisation.',
-    facts: [
-      'Draw-call batches cut from 130,000+ to under 30,000',
-      'Sustained framerate raised from 15 to 50+ fps',
-      '2D volumetric fog, ghost and demon shaders',
+    stats: [
+      { value: '130k → 30k', label: 'draw-call batches after optimisation' },
+      { value: '15 → 50+', label: 'sustained fps after the same pass' },
+      { value: '3', label: 'URP quality tiers with device detection' },
     ],
     links: ['chalo-yaar', 'the-god-they-buried'],
   },
@@ -514,10 +534,10 @@ export const disciplines: { id: Discipline; title: string; text: string; facts: 
     id: 'design',
     title: 'Game design',
     text: 'Systems, progression and economy design backed by numerical balancing: probability and RTP models, Monte Carlo-tuned progression, difficulty built from separate levers, encounter and pacing design, GDDs and playtest-driven iteration.',
-    facts: [
-      '16-rank progression tuned with Monte Carlo simulation',
-      'RTP and probability models for four shipped casino games',
-      '5 difficulty tiers built from ~12 separate levers each',
+    stats: [
+      { value: '16', label: 'rank progression tuned with Monte Carlo simulation' },
+      { value: '5', label: 'difficulty tiers built from ~12 levers each' },
+      { value: '4', label: 'shipped casino games with RTP models I designed' },
     ],
     links: ['paranormal-inc', 'casino-games', 'the-god-they-buried'],
   },

@@ -1,65 +1,63 @@
 /*
- * Design system. Editorial and restrained on purpose: one warm near-black ground, one ink, one
- * accent used sparingly, a serif display face over a quiet grotesk, a 12-column grid, hairline
- * rules instead of boxes, and motion that is short and purposeful.
+ * Design system: a game-UI language. Heavy condensed display type for titles, a mono HUD voice for
+ * labels and numbers, chamfered buttons, corner-bracket frames, one amber accent on near-black.
  * CRT / cheat-code styles live in crt.css.
  */
 
 :root {
-  /* Grounds and ink */
-  --ground: #0c0c0b;
-  --ground-alt: #121210;
-  --ground-raise: #181816;
-  --ink: #ece9e3;
-  --ink-2: #a9a59e;
-  --ink-3: #8a867f;
-  --line: rgb(236 233 227 / 0.12);
-  --line-strong: rgb(236 233 227 / 0.24);
+  --ground: #08080a;
+  --ground-alt: #0f0f12;
+  --ground-raise: #16161b;
+  --ink: #f0ede7;
+  --ink-2: #a8a5a0;
+  --ink-3: #6f6c68;
+  --line: rgb(240 237 231 / 0.1);
+  --line-strong: rgb(240 237 231 / 0.22);
   --accent: #f5a524;
-  --on-accent: #17120a;
+  --accent-hot: #ffbe4d;
+  --accent-dim: rgb(245 165 36 / 0.14);
+  --on-accent: #140f06;
 
-  /* Type */
-  --font-display: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
-  --font-text: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --font-display: 'Archivo Variable', 'Archivo', 'Arial Narrow', sans-serif;
+  --font-text: 'Geist Variable', 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, Menlo, monospace;
 
-  --t-hero: clamp(2.9rem, 1.4rem + 5.4vw, 6.4rem);
-  --t-h2: clamp(2.2rem, 1.5rem + 2.4vw, 3.6rem);
-  --t-h3: clamp(1.7rem, 1.3rem + 1.3vw, 2.4rem);
-  --t-h4: clamp(1.4rem, 1.2rem + 0.6vw, 1.75rem);
-  --t-lead: clamp(1.125rem, 1.05rem + 0.35vw, 1.3rem);
+  --t-mega: clamp(3.4rem, 1rem + 10.5vw, 11rem);
+  --t-hero: clamp(2.8rem, 1rem + 6.4vw, 7rem);
+  --t-h2: clamp(2.4rem, 1.2rem + 4vw, 5rem);
+  --t-h3: clamp(1.6rem, 1.2rem + 1.4vw, 2.4rem);
+  --t-h4: clamp(1.25rem, 1.1rem + 0.5vw, 1.55rem);
+  --t-lead: clamp(1.1rem, 1rem + 0.4vw, 1.3rem);
   --t-body: 1.0625rem;
   --t-small: 0.9375rem;
-  --t-label: 0.8125rem;
+  --t-hud: 0.75rem;
 
-  /* Space and grid */
-  --gut: 24px;
-  --wrap: 1280px;
-  --col-gap: 24px;
-  --nav-h: 60px;
-  --sec-top: 96px;
-  --sec-bottom: 64px;
+  --gut: 20px;
+  --wrap: 1320px;
+  --nav-h: 64px;
+  --sec: clamp(88px, 6vw + 60px, 160px);
 
-  /* Shape and motion */
-  --r-sm: 4px;
-  --r: 6px;
-  --r-lg: 10px;
+  --r: 4px;
+  --chamfer: 10px;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-travel: cubic-bezier(0.65, 0, 0.35, 1);
-  --hover-in: 140ms;
-  --hover-out: 200ms;
 
-  /* Aliases kept for older components (CRT, boot, gallery, video). */
+  /* Aliases kept for older components (CRT, boot, video). */
   --bg: var(--ground);
   --surface: var(--ground-alt);
   --surface-2: var(--ground-raise);
   --border: var(--line);
   --text: var(--ink);
   --muted: var(--ink-2);
-  --radius-sm: var(--r-sm);
-  --radius: var(--r-lg);
+  --radius-sm: var(--r);
+  --radius: 8px;
   --font-body: var(--font-text);
   --font-head: var(--font-display);
+  --r-sm: var(--r);
+  --r-lg: 8px;
+  --t-label: 0.8125rem;
+  --hover-in: 140ms;
+  --hover-out: 220ms;
 
   color-scheme: dark;
 }
@@ -67,19 +65,14 @@
 @media (min-width: 720px) {
   :root {
     --gut: 40px;
-    --nav-h: 68px;
-    --sec-top: 120px;
-    --sec-bottom: 72px;
   }
 }
 
 @media (min-width: 1200px) {
   :root {
-    --gut: 80px;
+    --gut: 64px;
   }
 }
-
-/* ---------- Base ---------- */
 
 *,
 *::before,
@@ -88,7 +81,6 @@
 }
 
 html {
-  scroll-behavior: smooth;
   scroll-padding-top: calc(var(--nav-h) + 16px);
   -webkit-text-size-adjust: 100%;
 }
@@ -99,10 +91,7 @@ body {
   color: var(--ink);
   font-family: var(--font-text);
   font-size: var(--t-body);
-  font-weight: 400;
-  line-height: 1.65;
-  font-kerning: normal;
-  text-rendering: optimizeLegibility;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -119,9 +108,11 @@ h3,
 h4 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 400;
-  line-height: 1.04;
-  letter-spacing: -0.012em;
+  font-weight: 800;
+  font-stretch: 72%;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
   text-wrap: balance;
 }
 
@@ -142,19 +133,12 @@ a {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
-  border-radius: 2px;
 }
 
 .wrap,
 .container {
   width: min(100% - 2 * var(--gut), var(--wrap));
   margin-inline: auto;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: var(--col-gap);
 }
 
 .sr-only {
@@ -177,37 +161,56 @@ a {
   padding: 0.6rem 1rem;
   background: var(--accent);
   color: var(--on-accent);
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
-  border-radius: var(--r);
 }
 
 .skip-link:focus {
   top: 1rem;
 }
 
-/* ---------- Type helpers ---------- */
+/* ---------- HUD voice ---------- */
 
-.label {
+.hud {
   margin: 0;
-  font-size: var(--t-label);
+  font-family: var(--font-mono);
+  font-size: var(--t-hud);
   font-weight: 500;
   line-height: 1.4;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--ink-2);
-  letter-spacing: 0.005em;
 }
 
-.label .num {
-  color: var(--ink-3);
-  font-variant-numeric: tabular-nums;
-  margin-right: 0.6em;
+.hud .num {
+  color: var(--accent);
+  margin-right: 0.9em;
+}
+
+.hud-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.hud-tag.hot {
+  border-color: rgb(245 165 36 / 0.5);
+  color: var(--accent);
+  background: var(--accent-dim);
 }
 
 .lead {
   font-size: var(--t-lead);
-  line-height: 1.55;
-  color: var(--ink);
-  max-width: 34em;
+  line-height: 1.5;
 }
 
 .muted {
@@ -215,88 +218,143 @@ a {
 }
 
 .measure {
-  max-width: 62ch;
+  max-width: 64ch;
 }
 
-/* Underline that draws left to right on hover. */
 .link {
   color: var(--ink);
   text-decoration: none;
   background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0% 1px;
-  transition: background-size var(--hover-out) var(--ease);
+  transition: background-size 0.3s var(--ease), color 0.2s;
   padding-bottom: 1px;
 }
 
 .link:hover,
 .link:focus-visible {
   background-size: 100% 1px;
-  transition-duration: var(--hover-in);
 }
 
 .link-arrow::after {
   content: '→';
   display: inline-block;
   margin-left: 0.4em;
-  transition: translate var(--hover-out) var(--ease);
+  transition: translate 0.25s var(--ease);
 }
 
-.link-arrow:hover::after,
-.link-arrow:focus-visible::after {
-  translate: 3px 0;
-  transition-duration: var(--hover-in);
+.link-arrow:hover::after {
+  translate: 4px 0;
 }
 
-/* ---------- Buttons: one filled, one outlined, nothing else ---------- */
+/* ---------- Corner-bracket frame (HUD reticle) ---------- */
+
+.corners {
+  position: relative;
+}
+
+.corners::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: 3;
+  pointer-events: none;
+  --c: var(--line-strong);
+  --l: 14px;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--l) 1px,
+    linear-gradient(var(--c), var(--c)) top left / 1px var(--l),
+    linear-gradient(var(--c), var(--c)) top right / var(--l) 1px,
+    linear-gradient(var(--c), var(--c)) top right / 1px var(--l),
+    linear-gradient(var(--c), var(--c)) bottom left / var(--l) 1px,
+    linear-gradient(var(--c), var(--c)) bottom left / 1px var(--l),
+    linear-gradient(var(--c), var(--c)) bottom right / var(--l) 1px,
+    linear-gradient(var(--c), var(--c)) bottom right / 1px var(--l);
+  background-repeat: no-repeat;
+  transition: inset 0.35s var(--ease);
+}
+
+/* ---------- Buttons: chamfered, two styles ---------- */
 
 .btn {
+  --bg: transparent;
+  --fg: var(--ink);
+  --edge: var(--line-strong);
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  min-height: 44px;
-  padding: 0 24px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r);
-  background: transparent;
-  color: var(--ink);
-  font: 500 1rem/1 var(--font-text);
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 26px;
+  border: 0;
+  background: var(--edge);
+  color: var(--fg);
+  font: 600 0.8125rem/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    translate var(--hover-out) var(--ease),
-    background-color var(--hover-out) var(--ease),
-    border-color var(--hover-out) var(--ease);
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% calc(100% - var(--chamfer)), calc(100% - var(--chamfer)) 100%, 0 100%, 0 var(--chamfer));
+  transition: translate 0.2s var(--ease);
 }
 
-.btn:hover {
-  translate: 0 -1px;
-  border-color: var(--ink-2);
-  background: var(--ground-raise);
-  transition-duration: var(--hover-in);
+/* Inner fill, one pixel in, so the chamfered edge reads as a border. */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--bg);
+  clip-path: inherit;
+  transition: background-color 0.2s var(--ease);
+}
+
+/* Light sweep. */
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.28) 50%, transparent 65%);
+  translate: -120% 0;
+  transition: translate 0.7s var(--ease);
+  pointer-events: none;
+}
+
+.btn:hover::after {
+  translate: 120% 0;
+}
+
+.btn:not(.btn-primary) {
+  --bg: rgb(8 8 10 / 0.7);
+}
+
+.btn:not(.btn-primary):hover {
+  --edge: var(--ink-2);
+  --bg: var(--ground-raise);
 }
 
 .btn:active {
   translate: 0 1px;
-  scale: 0.985;
-  transition-duration: 90ms;
 }
 
 .btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--on-accent);
+  --bg: var(--accent);
+  --edge: var(--accent);
+  --fg: var(--on-accent);
 }
 
 .btn-primary:hover {
-  background: #ffb43d;
-  border-color: #ffb43d;
+  --bg: var(--accent-hot);
+  --edge: var(--accent-hot);
 }
 
 .btn-sm {
   min-height: 38px;
-  padding: 0 16px;
-  font-size: 0.9375rem;
+  padding: 0 18px;
+  font-size: 0.75rem;
+  --chamfer: 7px;
 }
 
 .btn-row {
@@ -305,68 +363,71 @@ a {
   gap: 12px;
 }
 
-@media (max-width: 559px) {
-  .btn-row .btn {
-    flex: 1 1 100%;
-  }
-}
-
 /* ---------- Sections ---------- */
 
 .section {
-  padding-block: var(--sec-top) var(--sec-bottom);
+  position: relative;
+  padding-block: var(--sec) 0;
 }
 
-/* Chapter head: a hairline, the index label on the left, the heading on the grid. */
-.section-head {
-  border-top: 1px solid var(--line);
-  padding-top: 20px;
-  margin-bottom: 48px;
-  row-gap: 20px;
+.sec-head {
+  display: grid;
+  gap: 20px;
+  margin-bottom: clamp(40px, 5vw, 72px);
 }
 
-.section-head .label {
-  grid-column: 1 / -1;
-}
-
-.section-head h2 {
-  grid-column: 1 / -1;
+.sec-head h2 {
   font-size: var(--t-h2);
-  max-width: 22ch;
 }
 
-.section-head .intro {
-  grid-column: 1 / -1;
+.sec-head .intro {
+  max-width: 48ch;
   margin: 0;
   color: var(--ink-2);
-  max-width: 46ch;
 }
 
 @media (min-width: 900px) {
-  .section-head {
-    margin-bottom: 64px;
+  .sec-head {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    column-gap: 48px;
   }
 
-  .section-head .label {
-    grid-column: 1 / 4;
-    padding-top: 0.55em;
-  }
-
-  .section-head h2 {
-    grid-column: 4 / 11;
-  }
-
-  .section-head .intro {
-    grid-column: 4 / 10;
+  .sec-head .hud {
+    grid-column: 1 / -1;
   }
 }
 
-/* Covers whose art is a logo sit on their own colour; key art fills the frame. */
 .frame {
   position: relative;
   overflow: hidden;
   background: var(--ground-alt);
-  border-radius: var(--r-sm);
+}
+
+/* ---------- Tilt + glare (fx.ts drives --rx/--ry/--mx/--my) ---------- */
+
+[data-tilt] {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.5s var(--ease);
+}
+
+[data-tilt].is-tilting {
+  transition: transform 0.12s linear;
+}
+
+.glare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgb(255 214 150 / 0.16), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.35s var(--ease);
+}
+
+[data-tilt].is-tilting .glare {
+  opacity: 1;
 }
 
 /* ---------- Reveal (html.fx is set before first paint; fx.ts animates with GSAP) ---------- */
@@ -375,10 +436,10 @@ a {
   opacity: 0;
 }
 
-/* SplitText line masks: a little room so descenders aren't clipped mid-animation. */
-.rl-line-mask {
-  padding-bottom: 0.12em;
-  margin-bottom: -0.12em;
+.rl-line-mask,
+.rl-char-mask {
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
 }
 
 /* ---------- Film grain ---------- */
@@ -389,7 +450,7 @@ body::after {
   inset: 0;
   z-index: 90;
   pointer-events: none;
-  opacity: 0.035;
+  opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -400,28 +461,29 @@ body::after {
 }
 
 ::view-transition-group(*) {
-  animation-duration: 0.55s;
+  animation-duration: 0.6s;
   animation-timing-function: var(--ease-travel);
 }
 
 ::view-transition-old(root) {
-  animation: vt-out 0.25s ease both;
+  animation: vt-out 0.3s ease both;
 }
 
 ::view-transition-new(root) {
-  animation: vt-in 0.45s var(--ease) 0.05s both;
+  animation: vt-in 0.5s var(--ease) 0.05s both;
 }
 
 @keyframes vt-out {
   to {
     opacity: 0;
+    scale: 0.98;
   }
 }
 
 @keyframes vt-in {
   from {
     opacity: 0;
-    translate: 0 12px;
+    translate: 0 16px;
   }
 }
 
@@ -430,14 +492,76 @@ body::after {
     navigation: none;
   }
 
-  html {
-    scroll-behavior: auto;
-  }
-
   *,
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+
+  [data-tilt] {
+    transform: none !important;
+  }
+}
+
+/* ---------- HUD reticle (fx.ts): trails the pointer, opens over interactive things ---------- */
+
+.reticle {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 120;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.reticle.on {
+  opacity: 1;
+}
+
+.reticle-ring {
+  position: absolute;
+  left: -14px;
+  top: -14px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgb(240 237 231 / 0.45);
+  border-radius: 50%;
+  transition:
+    transform 0.35s var(--ease),
+    border-color 0.25s,
+    border-radius 0.35s var(--ease),
+    background-color 0.25s;
+}
+
+.reticle.hot .reticle-ring {
+  transform: scale(1.6) rotate(45deg);
+  border-color: var(--accent);
+  border-radius: 2px;
+}
+
+.reticle.labelled .reticle-ring {
+  transform: scale(2.6);
+  background: rgb(245 165 36 / 0.92);
+  border-color: transparent;
+  border-radius: 50%;
+}
+
+.reticle-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  font: 600 0.625rem/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--on-accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.reticle.labelled .reticle-label {
+  opacity: 1;
 }

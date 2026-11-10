@@ -2,14 +2,13 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import HeroShader from '../components/HeroShader.astro';
-import FeatureRow from '../components/FeatureRow.astro';
-import WorkIndex from '../components/WorkIndex.astro';
+import FeaturedRing from '../components/FeaturedRing.astro';
+import ProjectGrid from '../components/ProjectGrid.astro';
 import { disciplines, education, experience, otherWork, profile, projects, skills } from '../data/portfolio';
 import { image } from '../lib/images';
 import { url } from '../lib/url';
 
 const featured = projects.filter((p) => p.featured);
-const more = projects.filter((p) => !p.featured);
 const bySlug = new Map(projects.map((p) => [p.slug, p]));
 const projectLinks = (slugs: string[]) =>
   slugs.map((slug) => {
@@ -22,74 +21,101 @@ const portrait = await image(profile.photo);
 const otherImages = new Map(
   await Promise.all(otherWork.flatMap((w) => (w.image ? [image(w.image).then((m) => [w.image, m] as const)] : []))),
 );
+const [first, last] = profile.name.split(' ');
+const roles = ['Game developer', 'Technical artist', 'Game designer'];
+const band = ['Unity', 'Roblox', 'HLSL', 'Luau', 'C#', 'Shader Graph', 'Blender', 'Netcode', 'URP', 'Aseprite', 'WebGL', 'GameMaker'];
 ---
 
 <Base title={`${profile.name} — ${profile.title}`} description={`${profile.fact} ${profile.intro}`}>
   <section class="hero" aria-labelledby="hero-title">
     <HeroShader />
-    <div class="wrap hero-grid grid">
+    <div class="wrap hero-grid">
+      <p class="hud hero-top" data-hero><span class="num">P1</span>{profile.location} · Portfolio {new Date().getFullYear()}</p>
+
+      <h1 id="hero-title" class="hero-name">
+        <span class="hn-1"><span data-hero="chars">{first}</span></span>
+        <span class="hn-2"><span data-hero="chars">{last}</span></span>
+      </h1>
+
+      <div class="hero-photo">
+        <div class="hero-card corners" data-hero="pop" data-tilt="12">
+          <Image
+            src={portrait}
+            alt={`Portrait of ${profile.name}`}
+            widths={[320, 480, 720, 960]}
+            sizes="(min-width: 900px) 360px, 48vw"
+            format="webp"
+            loading="eager"
+            fetchpriority="high"
+          />
+          <span class="glint" aria-hidden="true"></span>
+          <span class="glare" aria-hidden="true"></span>
+          <span class="hud card-tag" aria-hidden="true"><i></i>Player 1</span>
+        </div>
+      </div>
+
       <div class="hero-copy">
-        <p class="label hero-label" data-hero>{profile.name} · {profile.location}</p>
-        <h1 id="hero-title" class="hero-title" data-hero="lines">{profile.headline}</h1>
+        <p class="hero-role" data-hero>
+          <span class="sr-only">{roles.join(', ')}</span>
+          <span class="prism" aria-hidden="true">
+            <span class="prism-size">Technical artist</span>
+            <span class="prism-in">
+              {roles.map((r) => <span class="face">{r}</span>)}
+            </span>
+          </span>
+        </p>
         <p class="lead hero-fact" data-hero>{profile.fact}</p>
         <p class="hero-intro" data-hero>{profile.intro}</p>
         <div class="btn-row" data-hero>
-          <a class="btn btn-primary" href="#work">See selected work</a>
-          <a class="btn" href={resumeHref} download>Download résumé</a>
+          <a class="btn btn-primary" href="#work" data-magnetic>See the work</a>
+          <a class="btn" href={resumeHref} download data-magnetic>Download résumé</a>
         </div>
       </div>
-      <figure class="hero-photo frame" data-hero="media">
-        <Image
-          src={portrait}
-          alt={`Portrait of ${profile.name}`}
-          widths={[320, 480, 720, 960]}
-          sizes="(min-width: 1360px) 380px, (min-width: 900px) 28vw, 60vw"
-          format="webp"
-          loading="eager"
-          fetchpriority="high"
-        />
-        <span class="glint" aria-hidden="true"></span>
-      </figure>
     </div>
     <dl class="wrap hero-specs" data-hero>
-      <div>
-        <dt class="label">Disciplines</dt>
-        <dd>Development, technical art, game design</dd>
-      </div>
-      <div>
-        <dt class="label">Engines and code</dt>
-        <dd>{profile.focus.slice(0, 3).join(' · ')}</dd>
-      </div>
-      <div>
-        <dt class="label">Based in</dt>
-        <dd>{profile.location}</dd>
-      </div>
+      <div><dt class="hud">Disciplines</dt><dd>Development · Technical art · Design</dd></div>
+      <div><dt class="hud">Engines</dt><dd>Unity · Roblox · GameMaker</dd></div>
+      <div><dt class="hud">Shipping</dt><dd>Mobile · WebGL · AR · Roblox</dd></div>
+      <div class="scroll-cue"><dt class="hud">Scroll</dt><dd><span class="cue-bar"><i></i></span></dd></div>
     </dl>
   </section>
 
+  <FeaturedRing projects={featured} />
+
+  <ProjectGrid projects={projects} />
+
+  <div class="band" aria-hidden="true">
+    <div class="band-row"><div class="band-track">{[...band, ...band].map((b) => <span>{b}<i>✦</i></span>)}</div></div>
+    <div class="band-row band-rev"><div class="band-track">{[...band, ...band].reverse().map((b) => <span>{b}<i>✦</i></span>)}</div></div>
+  </div>
+
   <section id="disciplines" class="section">
     <div class="wrap">
-      <header class="section-head grid">
-        <p class="label" data-reveal><span class="num">01</span>Disciplines</p>
-        <h2 data-reveal="lines">Development, technical art and game design</h2>
+      <header class="sec-head" data-reveal-group>
+        <p class="hud" data-reveal><span class="num">03</span>Disciplines</p>
+        <h2 data-reveal="lines">Three disciplines</h2>
+        <p class="intro" data-reveal>I write the systems, build the shaders and design the numbers, usually on the same project.</p>
       </header>
-      <div class="disciplines">
+      <div class="disc-grid">
         {
-          disciplines.map((d) => (
-            <article class="discipline" data-reveal-row>
+          disciplines.map((d, i) => (
+            <article class="discipline corners" data-reveal-group data-tilt="4">
+              <span class="glare" aria-hidden="true" />
+              <p class="disc-idx" aria-hidden="true">{`0${i + 1}`}</p>
               <h3 data-reveal="lines">{d.title}</h3>
-              <p class="muted" data-reveal>{d.text}</p>
-              <ul class="facts" data-reveal>
-                {d.facts.map((f) => (
-                  <li>{f}</li>
+              <p class="muted disc-text" data-reveal>{d.text}</p>
+              <ul class="stats">
+                {d.stats.map((s) => (
+                  <li class="stat" data-reveal>
+                    <span class="stat-v" data-reveal="count">{s.value}</span>
+                    <span class="stat-l">{s.label}</span>
+                  </li>
                 ))}
               </ul>
               <p class="seen-in" data-reveal>
-                <span class="label">Seen in</span>
+                <span class="hud">Seen in</span>
                 {projectLinks(d.links).map((l) => (
-                  <a class="link" href={l.href}>
-                    {l.title}
-                  </a>
+                  <a class="link" href={l.href}>{l.title}</a>
                 ))}
               </p>
             </article>
@@ -99,125 +125,93 @@ const otherImages = new Map(
     </div>
   </section>
 
-  <section id="work" class="section">
-    <div class="wrap">
-      <header class="section-head grid">
-        <p class="label" data-reveal><span class="num">02</span>Selected work</p>
-        <h2 data-reveal="lines">Games and real-time projects</h2>
-      </header>
-      <div class="features">
-        {featured.map((p, i) => <FeatureRow project={p} index={i + 1} />)}
-      </div>
-      <div class="more">
-        <p class="label more-label" data-reveal>More projects</p>
-        <WorkIndex projects={more} start={featured.length + 1} />
-      </div>
-    </div>
-  </section>
-
   <section id="experience" class="section">
     <div class="wrap">
-      <header class="section-head grid">
-        <p class="label" data-reveal><span class="num">03</span>Experience</p>
-        <h2 data-reveal="lines">Studios, teams and clients</h2>
+      <header class="sec-head" data-reveal-group>
+        <p class="hud" data-reveal><span class="num">04</span>Experience</p>
+        <h2 data-reveal="lines">Studios and clients</h2>
       </header>
-      <ol class="xp">
-        {
-          experience.map((job) => (
-            <li class="xp-row grid" data-reveal-row>
-              <p class="xp-dates" data-reveal>
-                <span class="pip" aria-hidden="true" />
-                {job.dates}
-              </p>
-              <div class="xp-main">
-                <h3 data-reveal="lines">{job.role}</h3>
-                <p class="label xp-org" data-reveal>
-                  {job.org} · {job.mode}
-                </p>
-                <p class="xp-summary measure" data-reveal>
-                  {job.summary}
-                </p>
-                <p class="seen-in" data-reveal>
-                  {projectLinks(job.projects).map((l) => (
-                    <a class="link link-arrow" href={l.href}>
-                      {l.title}
-                    </a>
-                  ))}
-                </p>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
+      <div class="xp">
+        <div class="xp-line" aria-hidden="true"><i class="xp-fill"></i></div>
+        <ol class="xp-list">
+          {
+            experience.map((job) => (
+              <li class="xp-row" data-reveal-group>
+                <span class="xp-pip" aria-hidden="true" />
+                <p class="hud xp-dates" data-reveal>{job.dates}</p>
+                <div class="xp-card corners" data-reveal="pop">
+                  <h3>{job.role}</h3>
+                  <p class="hud xp-org">{job.org} · {job.mode}</p>
+                  <p class="xp-summary">{job.summary}</p>
+                  <p class="seen-in">
+                    {projectLinks(job.projects).map((l) => (
+                      <a class="link link-arrow" href={l.href}>{l.title}</a>
+                    ))}
+                  </p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
     </div>
   </section>
 
   <section id="skills" class="section">
     <div class="wrap">
-      <header class="section-head grid">
-        <p class="label" data-reveal><span class="num">04</span>Skills</p>
-        <h2 data-reveal="lines">Languages, engines and tools</h2>
+      <header class="sec-head" data-reveal-group>
+        <p class="hud" data-reveal><span class="num">05</span>Skills</p>
+        <h2 data-reveal="lines">Loadout</h2>
       </header>
-      <dl class="skills">
+      <div class="skills">
         {
           skills.map((g) => (
-            <div class="skill-row grid" data-reveal-row>
-              <dt data-reveal>{g.group}</dt>
-              <dd data-reveal>
-                {g.items.map((item, i) => (
-                  <>
-                    {i > 0 && (
-                      <span class="sep" aria-hidden="true">
-                        /
-                      </span>
-                    )}
-                    <span class="skill">{item}</span>
-                  </>
+            <div class="skill-row" data-reveal-group>
+              <h3 class="hud" data-reveal>{g.group}</h3>
+              <ul class="chips" data-reveal>
+                {g.items.map((item) => (
+                  <li class="chip">{item}</li>
                 ))}
-              </dd>
+              </ul>
             </div>
           ))
         }
-      </dl>
+      </div>
     </div>
   </section>
 
   <section class="section" aria-labelledby="other-title">
     <div class="wrap">
-      <header class="section-head grid">
-        <p class="label" data-reveal><span class="num">05</span>Other work</p>
-        <h2 id="other-title" data-reveal="lines">Rendering, tools and side projects</h2>
+      <header class="sec-head" data-reveal-group>
+        <p class="hud" data-reveal><span class="num">06</span>Other work</p>
+        <h2 id="other-title" data-reveal="lines">Side quests</h2>
       </header>
       <ul class="others">
         {
           otherWork.map((w) => (
-            <li class="other grid" data-reveal-row>
-              <div class="other-main">
-                <p class="label" data-reveal>
-                  {w.kind}
-                </p>
-                <h3 data-reveal="lines">{w.title}</h3>
-                <p class="muted measure" data-reveal>
-                  {w.text}
-                </p>
-                {w.link && (
-                  <a class="link link-arrow" href={w.link.url} rel="noopener" data-reveal>
-                    {w.link.label}
-                  </a>
-                )}
-              </div>
+            <li class="other corners" data-reveal-group>
               {w.image && (
                 <div class="other-media frame" data-reveal="media">
                   <Image
                     src={otherImages.get(w.image)!}
                     alt={`${w.title} render`}
                     widths={[400, 700, 1000]}
-                    sizes="(min-width: 900px) 30vw, calc(100vw - 48px)"
+                    sizes="(min-width: 900px) 30vw, 100vw"
                     format="webp"
                     loading="lazy"
                   />
                 </div>
               )}
+              <div class="other-body">
+                <p class="hud" data-reveal>{w.kind}</p>
+                <h3 data-reveal="lines">{w.title}</h3>
+                <p class="muted" data-reveal>{w.text}</p>
+                {w.link && (
+                  <a class="link link-arrow" href={w.link.url} rel="noopener" data-reveal>
+                    {w.link.label}
+                  </a>
+                )}
+              </div>
             </li>
           ))
         }
@@ -227,20 +221,18 @@ const otherImages = new Map(
 
   <section id="about" class="section">
     <div class="wrap">
-      <header class="section-head grid">
-        <p class="label" data-reveal><span class="num">06</span>About</p>
+      <header class="sec-head" data-reveal-group>
+        <p class="hud" data-reveal><span class="num">07</span>About</p>
         <h2 data-reveal="lines">How I work</h2>
       </header>
-      <div class="about grid">
-        <div class="about-text">
-          {profile.about.map((para, i) => <p class:list={['measure', { lead: i === 0 }]} data-reveal>{para}</p>)}
+      <div class="about">
+        <div class="about-text" data-reveal-group>
+          {profile.about.map((para, i) => <p class:list={['measure', { lead: i === 0, muted: i > 0 }]} data-reveal>{para}</p>)}
         </div>
-        <aside class="about-side" data-reveal>
-          <p class="label">Education</p>
+        <aside class="about-side corners" data-reveal="pop">
+          <p class="hud">Education</p>
           <p class="edu-degree">{education.degree}</p>
-          <p class="muted">
-            {education.school} · {education.dates} · CGPA {education.cgpa}
-          </p>
+          <p class="muted">{education.school} · {education.dates} · CGPA {education.cgpa}</p>
           <a class="btn" href={resumeHref} download>Download résumé</a>
         </aside>
       </div>
@@ -249,28 +241,106 @@ const otherImages = new Map(
 
   <section id="contact" class="section contact">
     <div class="wrap">
-      <header class="section-head grid">
-        <p class="label" data-reveal><span class="num">07</span>Contact</p>
-        <h2 data-reveal="lines">Write to me</h2>
-      </header>
-      <a class="contact-email link" href={`mailto:${profile.email}`} data-reveal>{profile.email}</a>
-      <div class="contact-row" data-reveal>
-        <ul class="contact-links">
-          {
-            profile.links.map((l) => (
-              <li>
-                <a class="link link-arrow" href={l.url} rel="noopener">
-                  {l.label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-        <p class="label">{profile.location}</p>
+      <p class="hud" data-reveal><span class="num">08</span>Contact · {profile.location}</p>
+      <h2 class="contact-title" data-reveal="lines">Get in touch</h2>
+      <a class="contact-email" href={`mailto:${profile.email}`} data-cursor="Write" data-reveal>{profile.email}</a>
+      <div class="btn-row contact-links" data-reveal>
+        {profile.links.map((l) => <a class="btn" href={l.url} rel="noopener" data-magnetic>{l.label}</a>)}
+        <a class="btn btn-primary" href={resumeHref} download data-magnetic>Download résumé</a>
       </div>
     </div>
   </section>
 </Base>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { SplitText } from 'gsap/SplitText';
+  import { motionOK, scene } from '../scripts/scene';
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+  const motion = motionOK();
+
+  // Role prism: three faces of a triangular prism, turning every few seconds.
+  const prism = document.querySelector<HTMLElement>('.prism-in');
+  if (prism && motion) {
+    const faces = [...prism.querySelectorAll<HTMLElement>('.face')];
+    const depth = () => prism.offsetHeight * 0.2887;
+    const place = () => faces.forEach((f, i) => (f.style.transform = `rotateX(${i * -120}deg) translateZ(${depth()}px)`));
+    place();
+    addEventListener('resize', place);
+    const tl = gsap.timeline({ repeat: -1, paused: true });
+    for (let i = 1; i <= faces.length; i++) tl.to(prism, { rotationX: i * 120, duration: 0.9, ease: 'expo.inOut' }, i * 2.6);
+    const start = () => tl.play();
+    if (document.documentElement.classList.contains('booting')) document.addEventListener('boot:done', start, { once: true });
+    else setTimeout(start, 900);
+    // Pause when the hero is off screen.
+    new IntersectionObserver(([e]) => (e.isIntersecting ? tl.play() : tl.pause())).observe(prism);
+  } else if (prism) {
+    prism.querySelectorAll<HTMLElement>('.face').forEach((f, i) => i > 0 && (f.hidden = true));
+  }
+
+  // Marquee band: drifts on its own, speeds up and skews with scroll velocity.
+  const tracks = [...document.querySelectorAll<HTMLElement>('.band-track')];
+  if (tracks.length && motion) {
+    const loops = tracks.map((t, i) =>
+      i === 0
+        ? gsap.to(t, { xPercent: -50, duration: 40, ease: 'none', repeat: -1 })
+        : gsap.fromTo(t, { xPercent: -50 }, { xPercent: 0, duration: 46, ease: 'none', repeat: -1 }),
+    );
+    const skew = gsap.quickTo('.band', 'skewY', { duration: 0.6, ease: 'power3.out' });
+    scene(() => {
+      ScrollTrigger.create({
+        trigger: '.band',
+        start: 'top bottom',
+        end: 'bottom top',
+        onUpdate: (self) => {
+          const v = self.getVelocity();
+          loops.forEach((l) => gsap.to(l, { timeScale: 1 + Math.min(Math.abs(v) / 250, 8), duration: 0.2, overwrite: true }));
+          skew(Math.max(-4, Math.min(4, v / -400)));
+        },
+        onLeave: () => skew(0),
+        onLeaveBack: () => skew(0),
+      });
+    });
+    setInterval(() => loops.forEach((l) => l.timeScale() > 1.05 && gsap.to(l, { timeScale: 1, duration: 1.2 })), 400);
+  }
+
+  // Experience: the line draws with scroll and lights each pip as it passes.
+  scene(() => {
+    if (!motion) return;
+    const list = document.querySelector<HTMLElement>('.xp-list');
+    const pips = [...document.querySelectorAll<HTMLElement>('.xp-pip')];
+    if (!list) return;
+    gsap.fromTo(
+      '.xp-fill',
+      { scaleY: 0 },
+      {
+        scaleY: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: list,
+          start: 'top 65%',
+          end: 'bottom 65%',
+          scrub: 0.4,
+          onUpdate: (self) => {
+            const y = self.progress * list.offsetHeight;
+            pips.forEach((p) => p.classList.toggle('is-lit', p.offsetTop <= y + 4));
+          },
+        },
+      },
+    );
+  });
+
+  // Contact email: the letters ripple on hover.
+  const email = document.querySelector<HTMLElement>('.contact-email');
+  if (email && motion) {
+    const split = SplitText.create(email, { type: 'chars', charsClass: 'ec' });
+    email.addEventListener('pointerenter', () =>
+      gsap.fromTo(split.chars, { yPercent: 0 }, { yPercent: -18, duration: 0.25, ease: 'power2.out', stagger: 0.015, yoyo: true, repeat: 1, overwrite: true }),
+    );
+  }
+</script>
 
 <style>
   /* ---------- Hero ---------- */
@@ -281,19 +351,19 @@ const otherImages = new Map(
     min-height: calc(100svh - var(--nav-h));
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding-top: 48px;
-    background: var(--ground);
+    justify-content: center;
+    padding-top: 32px;
   }
 
-  /* Keep the text side of the fog calm enough to read. */
   .hero::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background: linear-gradient(90deg, rgb(12 12 11 / 0.7), rgb(12 12 11 / 0.2) 60%, transparent);
+    background:
+      linear-gradient(90deg, rgb(8 8 10 / 0.75), rgb(8 8 10 / 0.1) 65%, transparent),
+      linear-gradient(to top, var(--ground), transparent 30%);
   }
 
   .hero-grid,
@@ -303,224 +373,454 @@ const otherImages = new Map(
   }
 
   .hero-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 20px;
+    row-gap: 24px;
     align-items: end;
-    row-gap: 40px;
   }
 
-  .hero-copy,
-  .hero-photo {
+  .hero-top,
+  .hero-name,
+  .hero-copy {
     grid-column: 1 / -1;
   }
 
-  .hero-label {
-    margin-bottom: 24px;
+  .hero-name {
+    font-size: var(--t-mega);
+    font-weight: 900;
+    font-stretch: 64%;
+    line-height: 0.84;
+    letter-spacing: -0.015em;
+    display: flex;
+    flex-direction: column;
   }
 
-  .hero-title {
-    font-size: clamp(2.9rem, 1.5rem + 4.6vw, 5.6rem);
-    line-height: 0.98;
-    letter-spacing: -0.022em;
-    max-width: 15ch;
-    margin-bottom: 32px;
+  @media (max-width: 899px) {
+    .hero-name {
+      font-size: min(21vw, 9rem);
+    }
   }
 
-  .hero-fact {
-    margin-bottom: 12px;
-    max-width: 36em;
+  .hn-1,
+  .hn-2 {
+    display: block;
+    will-change: transform;
   }
 
-  .hero-intro {
-    color: var(--ink-2);
-    max-width: 40em;
-    margin-bottom: 32px;
+  .hn-2 {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--ink);
+    padding-left: 0.6em;
   }
 
   .hero-photo {
-    margin: 0;
-    width: min(70%, 300px);
-    aspect-ratio: 4 / 5;
-    order: -1;
+    grid-column: 7 / -1;
+    grid-row: 1 / span 2;
+    justify-self: end;
+    width: min(48vw, 220px);
   }
 
-  .hero-photo img {
+  .hero-card {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 40px 100px -30px rgb(0 0 0 / 0.9);
+  }
+
+  .hero-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: scale 0.6s var(--ease);
+    transition: scale 0.8s var(--ease);
   }
 
-  .hero-photo:hover img {
-    scale: 1.03;
+  .hero-card:hover img {
+    scale: 1.04;
   }
 
-  /* A specular streak crosses the photo on hover (paired with the blade-gleam sound). */
   .glint {
     position: absolute;
     inset: -20%;
-    background: linear-gradient(105deg, transparent 42%, rgb(255 244 222 / 0.22) 50%, transparent 58%);
+    z-index: 2;
+    background: linear-gradient(105deg, transparent 42%, rgb(255 244 222 / 0.3) 50%, transparent 58%);
     translate: -70% 0;
     pointer-events: none;
     mix-blend-mode: screen;
   }
 
-  .hero-photo:hover .glint {
+  .hero-card:hover .glint {
     translate: 70% 0;
     transition: translate 0.9s var(--ease-travel);
   }
 
-  @media (min-width: 900px) {
-    .hero {
-      padding-top: 72px;
-    }
+  .card-tag {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 9px;
+    background: rgb(8 8 10 / 0.7);
+    color: var(--ink);
+    font-size: 0.625rem;
+  }
 
-    .hero-copy {
-      grid-column: 1 / 9;
-    }
+  .card-tag i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
 
-    .hero-photo {
-      order: 0;
-      grid-column: 9 / 13;
-      width: 100%;
-      max-width: 380px;
-      justify-self: end;
-    }
+  .hero-role {
+    margin: 0 0 18px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 72%;
+    text-transform: uppercase;
+    font-size: clamp(1.8rem, 1rem + 2.6vw, 3.2rem);
+    line-height: 1;
+    color: var(--accent);
+  }
+
+  .prism {
+    position: relative;
+    display: inline-block;
+    perspective: 700px;
+    vertical-align: top;
+  }
+
+  .prism-size {
+    visibility: hidden;
+    display: block;
+    height: 1.05em;
+  }
+
+  .prism-in {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    white-space: nowrap;
+    backface-visibility: hidden;
+  }
+
+  .hero-fact {
+    max-width: 34em;
+    margin-bottom: 10px;
+  }
+
+  .hero-intro {
+    color: var(--ink-2);
+    max-width: 42em;
+    margin-bottom: 28px;
   }
 
   .hero-specs {
     display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px 24px;
-    margin-top: 56px;
-    margin-bottom: 0;
-    padding-block: 20px 56px;
+    margin: 40px auto 0;
+    padding-block: 18px 32px;
     border-top: 1px solid var(--line);
   }
 
   .hero-specs dd {
-    margin: 4px 0 0;
+    margin: 6px 0 0;
     font-size: var(--t-small);
   }
 
-  @media (min-width: 720px) {
-    .hero-specs {
-      grid-template-columns: repeat(3, 1fr);
-    }
+  .scroll-cue {
+    display: none;
   }
 
-  /* ---------- Disciplines ---------- */
-  .disciplines {
-    display: grid;
-    gap: 48px;
+  .cue-bar {
+    display: block;
+    width: 64px;
+    height: 2px;
+    margin-top: 12px;
+    background: var(--line-strong);
+    overflow: hidden;
+  }
+
+  .cue-bar i {
+    display: block;
+    width: 40%;
+    height: 100%;
+    background: var(--accent);
+    animation: cue 1.8s var(--ease-travel) infinite;
+  }
+
+  @keyframes cue {
+    from {
+      translate: -100% 0;
+    }
+    to {
+      translate: 260% 0;
+    }
   }
 
   @media (min-width: 900px) {
-    .disciplines {
+    .hero-name {
+      grid-column: 1 / 10;
+      grid-row: 2;
+    }
+
+    .hero-photo {
+      grid-column: 9 / -1;
+      grid-row: 2 / span 2;
+      width: 100%;
+      max-width: 360px;
+      align-self: center;
+    }
+
+    .hero-copy {
+      grid-column: 1 / 9;
+      grid-row: 3;
+    }
+
+    .hero-specs {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .scroll-cue {
+      display: block;
+      justify-self: end;
+      text-align: right;
+    }
+
+    .cue-bar {
+      margin-left: auto;
+    }
+  }
+
+  /* ---------- Marquee band ---------- */
+  .band {
+    margin-top: var(--sec);
+    padding-block: 18px;
+    border-block: 1px solid var(--line);
+    overflow: hidden;
+    background: var(--ground-alt);
+  }
+
+  .band-row {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .band-track {
+    display: inline-flex;
+    will-change: transform;
+  }
+
+  .band-track span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding-right: 0.5em;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-stretch: 62%;
+    text-transform: uppercase;
+    font-size: clamp(3rem, 1.5rem + 5vw, 7rem);
+    line-height: 1;
+  }
+
+  .band-track i {
+    font-style: normal;
+    color: var(--accent);
+    font-size: 0.4em;
+  }
+
+  .band-rev span {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--ink-3);
+  }
+
+  /* ---------- Disciplines ---------- */
+  .disc-grid {
+    display: grid;
+    gap: 20px;
+  }
+
+  @media (min-width: 1000px) {
+    .disc-grid {
       grid-template-columns: repeat(3, 1fr);
-      gap: 0;
-    }
-
-    .discipline {
-      padding-inline: 24px;
-      border-left: 1px solid var(--line);
-    }
-
-    .discipline:first-child {
-      padding-left: 0;
-      border-left: 0;
     }
   }
 
   .discipline {
+    position: relative;
     display: flex;
     flex-direction: column;
+    padding: 28px 26px 26px;
+    background: linear-gradient(180deg, var(--ground-alt), var(--ground));
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .discipline:hover {
+    border-color: rgb(245 165 36 / 0.35);
+  }
+
+  .disc-idx {
+    position: absolute;
+    right: 14px;
+    top: -14px;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-stretch: 62%;
+    font-size: 9rem;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(240 237 231 / 0.09);
+    pointer-events: none;
   }
 
   .discipline h3 {
     font-size: var(--t-h3);
     margin-bottom: 16px;
+    max-width: 8ch;
   }
 
-  .facts {
-    list-style: none;
-    margin: 8px 0 24px;
+  .disc-text {
+    font-size: var(--t-small);
+    margin-bottom: 24px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 16px;
+    row-gap: 2px;
+    margin: 0 0 24px;
     padding: 0;
+    list-style: none;
   }
 
-  .facts li {
+  .stat {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: baseline;
     padding: 12px 0;
     border-top: 1px solid var(--line);
-    font-size: var(--t-small);
+  }
+
+  .stat-v {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 70%;
+    font-size: 2.1rem;
+    line-height: 1;
+    color: var(--accent);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-l {
+    font-size: 0.875rem;
+    color: var(--ink-2);
+    line-height: 1.4;
   }
 
   .seen-in {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 6px 18px;
+    gap: 6px 16px;
     margin: auto 0 0;
     font-size: var(--t-small);
   }
 
-  .seen-in .label {
-    margin-right: 2px;
-  }
-
-  /* ---------- Work ---------- */
-  .more {
-    margin-top: 72px;
-  }
-
-  .more-label {
-    margin-bottom: 16px;
-  }
-
   /* ---------- Experience ---------- */
   .xp {
-    list-style: none;
+    position: relative;
+  }
+
+  .xp-line {
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 5px;
+    width: 1px;
+    background: var(--line-strong);
+  }
+
+  .xp-fill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--accent);
+    transform-origin: 50% 0;
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .xp-list {
     margin: 0;
     padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 24px;
   }
 
   .xp-row {
-    border-top: 1px solid var(--line);
-    padding-block: 28px 36px;
-    row-gap: 12px;
+    position: relative;
+    display: grid;
+    gap: 10px;
+    padding-left: 36px;
   }
 
-  .xp-dates,
-  .xp-main {
-    grid-column: 1 / -1;
+  .xp-pip {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 11px;
+    height: 11px;
+    background: var(--ground);
+    border: 1px solid var(--ink-3);
+    rotate: 45deg;
+    transition:
+      background-color 0.25s,
+      border-color 0.25s,
+      box-shadow 0.25s;
+  }
+
+  .xp-pip.is-lit,
+  :global(html:not(.fx)) .xp-pip {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 14px var(--accent);
   }
 
   .xp-dates {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0;
-    font-size: var(--t-small);
-    color: var(--ink-2);
-    font-variant-numeric: tabular-nums;
+    color: var(--ink);
   }
 
-  /* The pixel lights up as the row arrives (fx.ts adds .is-lit with the blip sound). */
-  .pip {
-    width: 7px;
-    height: 7px;
-    border: 1px solid var(--ink-3);
-    flex: none;
-    transition:
-      background-color 0.2s var(--ease),
-      border-color 0.2s var(--ease);
+  .xp-card {
+    padding: 22px 24px;
+    background: var(--ground-alt);
+    border: 1px solid var(--line);
+    transition: border-color 0.3s;
   }
 
-  .xp-row.is-lit .pip,
-  html:not(.fx) .pip {
-    background: var(--accent);
-    border-color: var(--accent);
+  .xp-card:hover {
+    border-color: var(--line-strong);
   }
 
-  .xp-main h3 {
-    font-size: var(--t-h4);
-    margin-bottom: 6px;
+  .xp-card h3 {
+    font-size: var(--t-h3);
+    margin-bottom: 8px;
   }
 
   .xp-org {
@@ -529,204 +829,205 @@ const otherImages = new Map(
 
   .xp-summary {
     color: var(--ink-2);
+    max-width: 70ch;
     margin-bottom: 14px;
   }
 
   @media (min-width: 900px) {
-    .xp-dates {
-      grid-column: 1 / 4;
-      align-self: start;
-      padding-top: 0.45em;
+    .xp-line {
+      left: 205px;
     }
 
-    .xp-main {
-      grid-column: 4 / 12;
+    .xp-row {
+      grid-template-columns: 170px 1fr;
+      gap: 70px;
+      padding-left: 0;
+    }
+
+    .xp-pip {
+      left: 200px;
+      top: 24px;
+    }
+
+    .xp-dates {
+      text-align: right;
+      padding-top: 20px;
     }
   }
 
   /* ---------- Skills ---------- */
   .skills {
-    margin: 0;
+    display: grid;
+    gap: 0;
   }
 
   .skill-row {
+    display: grid;
+    gap: 14px;
+    padding: 20px 0;
     border-top: 1px solid var(--line);
-    padding-block: 20px;
-    row-gap: 8px;
   }
 
-  .skill-row dt,
-  .skill-row dd {
-    grid-column: 1 / -1;
-  }
-
-  .skill-row dt {
-    font-size: var(--t-small);
+  .skill-row h3 {
+    font-family: var(--font-mono);
+    font-stretch: 100%;
     font-weight: 500;
-    color: var(--ink-2);
-  }
-
-  .skill-row dd {
-    margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    line-height: 1.7;
-  }
-
-  .sep {
-    color: var(--ink-3);
-    margin-inline: 0.55em;
-  }
-
-  .skill {
-    white-space: nowrap;
-  }
-
-  @media (max-width: 559px) {
-    .skill {
-      white-space: normal;
-    }
+    line-height: 1.4;
   }
 
   @media (min-width: 900px) {
-    .skill-row dt {
-      grid-column: 1 / 4;
+    .skill-row {
+      grid-template-columns: 240px 1fr;
+      align-items: baseline;
     }
+  }
 
-    .skill-row dd {
-      grid-column: 4 / 13;
-    }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chip {
+    padding: 7px 12px;
+    border: 1px solid var(--line);
+    background: var(--ground-alt);
+    font-size: 0.875rem;
+    line-height: 1.3;
+    transition:
+      border-color 0.2s,
+      color 0.2s,
+      translate 0.2s var(--ease),
+      background-color 0.2s;
+  }
+
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+    translate: 0 -2px;
   }
 
   /* ---------- Other work ---------- */
   .others {
-    list-style: none;
+    display: grid;
+    gap: 20px;
     margin: 0;
     padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 900px) {
+    .others {
+      grid-template-columns: 1.4fr 1fr 1fr;
+    }
   }
 
   .other {
-    border-top: 1px solid var(--line);
-    padding-block: 28px 36px;
-    row-gap: 24px;
-  }
-
-  .other-main,
-  .other-media {
-    grid-column: 1 / -1;
-  }
-
-  .other h3 {
-    font-size: var(--t-h4);
-    margin: 8px 0 12px;
+    display: flex;
+    flex-direction: column;
+    background: var(--ground-alt);
+    border: 1px solid var(--line);
   }
 
   .other-media {
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 16 / 9;
   }
 
   .other-media img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: scale 0.6s var(--ease);
+    transition: scale 0.8s var(--ease);
   }
 
-  .other-media:hover img {
-    scale: 1.03;
+  .other:hover .other-media img {
+    scale: 1.05;
   }
 
-  @media (min-width: 900px) {
-    .other-main {
-      grid-column: 4 / 10;
-    }
+  .other-body {
+    padding: 22px 24px 24px;
+  }
 
-    .other-media {
-      grid-column: 10 / 13;
-    }
+  .other h3 {
+    font-size: var(--t-h3);
+    margin: 10px 0 12px;
+  }
+
+  .other .muted {
+    font-size: var(--t-small);
   }
 
   /* ---------- About ---------- */
   .about {
-    row-gap: 48px;
-  }
-
-  .about-text,
-  .about-side {
-    grid-column: 1 / -1;
-  }
-
-  .about-text .lead {
-    margin-bottom: 1.2em;
-  }
-
-  .about-text p:not(.lead) {
-    color: var(--ink-2);
-  }
-
-  .about-side {
-    border-top: 1px solid var(--line);
-    padding-top: 20px;
-  }
-
-  .about-side .label {
-    margin-bottom: 8px;
-  }
-
-  .edu-degree {
-    font-family: var(--font-display);
-    font-size: var(--t-h4);
-    line-height: 1.15;
-    margin-bottom: 8px;
-  }
-
-  .about-side .btn {
-    margin-top: 16px;
+    display: grid;
+    gap: 32px;
   }
 
   @media (min-width: 900px) {
-    .about-text {
-      grid-column: 4 / 10;
+    .about {
+      grid-template-columns: 1.6fr 1fr;
+      gap: 64px;
+      align-items: start;
     }
+  }
 
-    .about-side {
-      grid-column: 10 / 13;
-    }
+  .about-side {
+    padding: 26px;
+    background: var(--ground-alt);
+    border: 1px solid var(--line);
+  }
+
+  .edu-degree {
+    margin: 12px 0 8px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 72%;
+    text-transform: uppercase;
+    font-size: 1.7rem;
+    line-height: 1;
+  }
+
+  .about-side .btn {
+    margin-top: 12px;
   }
 
   /* ---------- Contact ---------- */
+  .contact {
+    padding-bottom: 24px;
+  }
+
+  .contact-title {
+    font-size: var(--t-mega);
+    font-weight: 900;
+    font-stretch: 62%;
+    line-height: 0.85;
+    margin: 20px 0 28px;
+  }
+
   .contact-email {
     display: inline-block;
     font-family: var(--font-display);
-    font-size: clamp(2rem, 1rem + 4.6vw, 5.2rem);
-    line-height: 1.05;
-    letter-spacing: -0.02em;
+    font-weight: 700;
+    font-stretch: 80%;
+    font-size: clamp(1.6rem, 0.8rem + 3.4vw, 4rem);
+    line-height: 1.1;
+    color: var(--accent);
+    text-decoration: none;
     overflow-wrap: anywhere;
-    background-size: 100% 1px;
-    margin-bottom: 40px;
+    border-bottom: 2px solid rgb(245 165 36 / 0.35);
+    margin-bottom: 36px;
+    transition: border-color 0.3s;
   }
 
   .contact-email:hover {
-    color: var(--accent);
+    border-color: var(--accent);
   }
 
-  .contact-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 16px 32px;
-    padding-top: 20px;
-    border-top: 1px solid var(--line);
-  }
-
-  .contact-links {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 32px;
+  .contact-email :global(.ec) {
+    display: inline-block;
   }
 </style>

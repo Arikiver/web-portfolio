@@ -1,4 +1,7 @@
 ---
+// Screenshot coverflow: the current shot large, neighbours angled away in 3D. Drag/swipe, trackpad,
+// arrow keys, clicking a side shot, or the thumbnail rail all move it; clicking the centre shot (or
+// Fullscreen) opens the lightbox, which stays in sync. Without JS it is a plain swipeable strip.
 import { Image, getImage } from 'astro:assets';
 import { image } from '../lib/images';
 
@@ -10,150 +13,439 @@ const { items } = Astro.props;
 const shots = await Promise.all(
   items.map(async (item) => {
     const src = await image(item.file);
-    const full = await getImage({ src, width: Math.min(src.width, 1600), format: 'webp' });
-    return { ...item, src, full: full.src };
+    const full = await getImage({ src, width: Math.min(src.width, 1920), format: 'webp' });
+    const thumb = await getImage({ src, width: 240, format: 'webp' });
+    return { ...item, src, full: full.src, thumb: thumb.src };
   }),
 );
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<ul class="gallery">
-  {
-    shots.map((shot, i) => (
-      <li>
-        <button type="button" class="thumb" data-full={shot.full} data-alt={shot.alt} data-index={i} aria-label={`Enlarge: ${shot.alt}`}>
+<div class="cf" data-reveal="pop" data-sfx-silent>
+  <div class="cf-stage" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Screenshots: use the arrow keys to browse" data-cursor="Drag">
+    {
+      shots.map((s, i) => (
+        <button type="button" class="cf-item" data-i={i} data-full={s.full} data-alt={s.alt} aria-label={`Screenshot ${i + 1} of ${shots.length}: ${s.alt}`} tabindex="-1">
           <Image
-            src={shot.src}
-            alt={shot.alt}
-            widths={[400, 700].filter((w) => w <= shot.src.width)}
-            sizes="(min-width: 1184px) 368px, (min-width: 720px) calc(33vw - 32px), calc(100vw - 32px)"
+            src={s.src}
+            alt=""
+            widths={[640, 1100, 1600].filter((w) => w <= s.src.width)}
+            sizes="(min-width: 1100px) 900px, 86vw"
             format="webp"
-            loading="lazy"
+            loading={i < 3 ? 'eager' : 'lazy'}
+            draggable="false"
           />
+          <span class="cf-dim" aria-hidden="true" />
         </button>
-      </li>
-    ))
-  }
-</ul>
+      ))
+    }
+  </div>
+
+  <div class="cf-bar">
+    <button type="button" class="btn btn-sm cf-nav" data-step="-1" aria-label="Previous screenshot">←</button>
+    <p class="cf-meta" aria-live="polite">
+      <span class="hud cf-count"><span class="cf-cur">01</span> / {pad(shots.length)}</span>
+      <span class="cf-cap">{shots[0].alt}</span>
+    </p>
+    <button type="button" class="btn btn-sm cf-nav" data-step="1" aria-label="Next screenshot">→</button>
+    <button type="button" class="btn btn-sm cf-full">Fullscreen</button>
+  </div>
+
+  <div class="cf-rail">
+    {
+      shots.map((s, i) => (
+        <button type="button" class:list={['cf-thumb', { 'is-active': i === 0 }]} data-i={i} aria-label={`Show screenshot ${i + 1}`}>
+          <img src={s.thumb} alt="" loading="lazy" width="120" height="68" />
+        </button>
+      ))
+    }
+  </div>
+  <div class="cf-progress" aria-hidden="true"><i></i></div>
+</div>
 
 <dialog class="lightbox" aria-label="Screenshot viewer" data-sfx-silent>
   <img src="" alt="" />
   <div class="controls">
-    <button type="button" class="btn" data-step="-1" aria-label="Previous screenshot">←</button>
-    <span class="count" aria-live="polite"></span>
-    <button type="button" class="btn" data-step="1" aria-label="Next screenshot">→</button>
-    <button type="button" class="btn close" aria-label="Close">Close ✕</button>
+    <button type="button" class="btn btn-sm" data-step="-1" aria-label="Previous screenshot">←</button>
+    <span class="hud count" aria-live="polite"></span>
+    <span class="lb-cap"></span>
+    <button type="button" class="btn btn-sm" data-step="1" aria-label="Next screenshot">→</button>
+    <button type="button" class="btn btn-sm close" aria-label="Close">Close ✕</button>
   </div>
 </dialog>
 
 <script>
+  import { gsap } from 'gsap';
+  import { motionOK } from '../scripts/scene';
   import { play } from '../scripts/sfx';
 
+  const cf = document.querySelector<HTMLElement>('.cf');
   const dialog = document.querySelector<HTMLDialogElement>('dialog.lightbox');
-  const thumbs = [...document.querySelectorAll<HTMLButtonElement>('.gallery .thumb')];
-  if (dialog && thumbs.length) {
+
+  if (cf && dialog) {
+    const stage = cf.querySelector<HTMLElement>('.cf-stage')!;
+    const items = [...cf.querySelectorAll<HTMLButtonElement>('.cf-item')];
+    const dims = items.map((it) => it.querySelector<HTMLElement>('.cf-dim')!);
+    const thumbs = [...cf.querySelectorAll<HTMLButtonElement>('.cf-thumb')];
+    const rail = cf.querySelector<HTMLElement>('.cf-rail')!;
+    const curEl = cf.querySelector<HTMLElement>('.cf-cur')!;
+    const capEl = cf.querySelector<HTMLElement>('.cf-cap')!;
+    const bar = cf.querySelector<HTMLElement>('.cf-progress i')!;
+    const n = items.length;
+    const pad = (k: number) => String(k).padStart(2, '0');
+    const dur = motionOK() ? 1 : 0;
+
+    cf.classList.add('cf-on');
+    const state = { pos: 0 };
+    let active = 0;
+    let W = items[0].offsetWidth;
+    addEventListener('resize', () => {
+      W = items[0].offsetWidth;
+      render();
+    });
+
+    function render() {
+      items.forEach((it, i) => {
+        const d = i - state.pos;
+        const ad = Math.abs(d);
+        const s = Math.sign(d);
+        const near = Math.min(ad, 1);
+        const far = Math.max(0, ad - 1);
+        const x = s * (near * W * 0.64 + far * W * 0.18);
+        const z = -near * 360 - far * 160;
+        const ry = -s * near * 40;
+        it.style.transform = `translate3d(calc(-50% + ${x}px), 0, ${z}px) rotateY(${ry}deg)`;
+        it.style.opacity = String(ad > 3.6 ? 0 : 1 - Math.max(0, ad - 2.6));
+        it.style.zIndex = String(1000 - Math.round(ad * 100));
+        it.style.visibility = ad > 3.7 ? 'hidden' : '';
+        dims[i].style.opacity = String(near * 0.55 + far * 0.12);
+      });
+      bar.style.transform = `scaleX(${n > 1 ? state.pos / (n - 1) : 1})`;
+    }
+
+    function select(i: number) {
+      if (i === active) return;
+      active = i;
+      curEl.textContent = pad(i + 1);
+      capEl.textContent = items[i].dataset.alt ?? '';
+      thumbs.forEach((t, k) => t.classList.toggle('is-active', k === i));
+      const t = thumbs[i];
+      rail.scrollTo({ left: t.offsetLeft - rail.clientWidth / 2 + t.offsetWidth / 2, behavior: dur ? 'smooth' : 'auto' });
+      play('step');
+    }
+
+    function goTo(i: number) {
+      const k = Math.max(0, Math.min(n - 1, i));
+      select(k);
+      gsap.to(state, { pos: k, duration: 0.8 * dur, ease: 'expo.out', overwrite: true, onUpdate: render });
+    }
+
+    // Drag / swipe.
+    let drag: { x: number; pos: number; t: number; vx: number; lastX: number } | null = null;
+    let dragged = false;
+    stage.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      gsap.killTweensOf(state);
+      drag = { x: e.clientX, pos: state.pos, t: performance.now(), vx: 0, lastX: e.clientX };
+      dragged = false;
+    });
+    addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      if (Math.abs(dx) > 5) dragged = true;
+      if (!dragged) return;
+      const now = performance.now();
+      drag.vx = (e.clientX - drag.lastX) / Math.max(now - drag.t, 1);
+      drag.t = now;
+      drag.lastX = e.clientX;
+      state.pos = Math.max(-0.4, Math.min(n - 0.6, drag.pos - dx / (W * 0.6)));
+      render();
+      const near = Math.round(Math.max(0, Math.min(n - 1, state.pos)));
+      if (near !== active) select(near);
+    });
+    addEventListener('pointerup', () => {
+      if (!drag) return;
+      const fling = dragged ? -drag.vx * 3 : 0;
+      drag = null;
+      if (dragged) goTo(Math.round(state.pos + fling));
+    });
+    stage.addEventListener('dragstart', (e) => e.preventDefault());
+
+    // Clicks: centre opens the lightbox, a side shot comes to the centre.
+    items.forEach((it, i) =>
+      it.addEventListener('click', () => {
+        if (dragged) return;
+        if (i === active) openBox(i);
+        else goTo(i);
+      }),
+    );
+    thumbs.forEach((t, i) => t.addEventListener('click', () => goTo(i)));
+    cf.querySelectorAll<HTMLButtonElement>('.cf-nav').forEach((b) => b.addEventListener('click', () => goTo(active + Number(b.dataset.step))));
+    cf.querySelector('.cf-full')!.addEventListener('click', () => openBox(active));
+
+    // Keyboard and trackpad.
+    stage.addEventListener('keydown', (e) => {
+      const map: Record<string, number> = { ArrowLeft: active - 1, ArrowRight: active + 1, Home: 0, End: n - 1 };
+      if (e.key in map) {
+        e.preventDefault();
+        goTo(map[e.key]);
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openBox(active);
+      }
+    });
+    let wheelAcc = 0;
+    let wheelLock = 0;
+    stage.addEventListener(
+      'wheel',
+      (e) => {
+        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // vertical scroll stays with the page
+        e.preventDefault();
+        wheelAcc += e.deltaX;
+        const now = performance.now();
+        if (Math.abs(wheelAcc) > 40 && now > wheelLock) {
+          goTo(active + Math.sign(wheelAcc));
+          wheelAcc = 0;
+          wheelLock = now + 220;
+        }
+      },
+      { passive: false },
+    );
+
+    // Lightbox, kept in sync with the coverflow.
     const img = dialog.querySelector('img')!;
     const count = dialog.querySelector('.count')!;
-    let current = 0;
+    const cap = dialog.querySelector('.lb-cap')!;
     const show = (i: number) => {
-      current = (i + thumbs.length) % thumbs.length;
-      const next = thumbs[current];
+      const k = (i + n) % n;
       img.classList.add('is-loading');
       img.onload = () => img.classList.remove('is-loading');
-      img.src = next.dataset.full!;
-      img.alt = next.dataset.alt!;
+      img.src = items[k].dataset.full!;
+      img.alt = items[k].dataset.alt!;
       if (img.complete) img.classList.remove('is-loading');
-      count.textContent = `${current + 1} / ${thumbs.length}`;
+      count.textContent = `${pad(k + 1)} / ${pad(n)}`;
+      cap.textContent = items[k].dataset.alt ?? '';
+      goTo(k);
     };
-    thumbs.forEach((t, i) =>
-      t.addEventListener('click', () => {
-        show(i);
-        dialog.showModal();
-        play('open');
-      }),
-    );
-    dialog.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
-      b.addEventListener('click', () => {
-        show(current + Number(b.dataset.step));
-        play('step');
-      }),
-    );
+    function openBox(i: number) {
+      show(i);
+      dialog!.showModal();
+      play('open');
+    }
+    dialog.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) => b.addEventListener('click', () => show(active + Number(b.dataset.step))));
     dialog.querySelector('.close')!.addEventListener('click', () => dialog.close());
-    // Click on the backdrop closes.
-    dialog.addEventListener('click', (e) => {
-      if (e.target === dialog) dialog.close();
-    });
+    dialog.addEventListener('click', (e) => e.target === dialog && dialog.close());
     dialog.addEventListener('keydown', (e) => {
-      const step = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0;
-      if (step) {
-        show(current + step);
-        play('step');
-      }
+      if (e.key === 'ArrowLeft') show(active - 1);
+      if (e.key === 'ArrowRight') show(active + 1);
     });
     dialog.addEventListener('close', () => {
       play('close');
-      thumbs[current].focus();
+      stage.focus({ preventScroll: true });
     });
+
+    render();
   }
 </script>
 
 <style>
-  .gallery {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-    gap: 0.75rem;
+  /* No-JS fallback: a swipeable strip. */
+  .cf-stage {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    outline: none;
   }
 
-  .thumb {
-    display: block;
-    width: 100%;
-    padding: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background: var(--surface-2);
-    cursor: zoom-in;
-    transition: border-color 0.2s ease, transform 0.2s ease;
-  }
-
-  .thumb:hover {
-    border-color: var(--line-strong);
-    transform: translateY(-2px);
-  }
-
-  .thumb img {
-    width: 100%;
+  .cf-item {
+    position: relative;
+    flex: 0 0 min(86%, 900px);
     aspect-ratio: 16 / 9;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    background: #000;
+    overflow: hidden;
+    cursor: pointer;
+    scroll-snap-align: center;
+  }
+
+  .cf-item img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.4s ease;
-    filter: saturate(0.85) brightness(0.9);
+    pointer-events: none;
+    user-select: none;
   }
 
-  .thumb:hover img,
-  .thumb:focus-visible img {
-    transform: scale(1.03);
-    filter: none;
+  .cf-dim {
+    position: absolute;
+    inset: 0;
+    background: #050506;
+    opacity: 0;
+    pointer-events: none;
   }
 
+  /* 3D coverflow. */
+  .cf-on .cf-stage {
+    display: block;
+    position: relative;
+    overflow: visible;
+    perspective: 1600px;
+    perspective-origin: 50% 50%;
+    touch-action: pan-y;
+    cursor: grab;
+    user-select: none;
+    padding-bottom: calc(min(86%, 900px) * 9 / 16);
+    height: 0;
+  }
+
+  .cf-on .cf-stage:active {
+    cursor: grabbing;
+  }
+
+  .cf-on .cf-stage:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 12px;
+  }
+
+  .cf-on .cf-item {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: min(86%, 900px);
+    will-change: transform;
+    box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.9);
+    transition: border-color 0.3s;
+  }
+
+  .cf-on .cf-item:hover {
+    border-color: var(--accent);
+  }
+
+  .cf {
+    position: relative;
+    min-width: 0;
+  }
+
+  .cf-bar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .cf-full {
+    display: none;
+  }
+
+  @media (min-width: 720px) {
+    .cf-bar {
+      grid-template-columns: auto 1fr auto auto;
+    }
+
+    .cf-full {
+      display: inline-flex;
+    }
+  }
+
+  .cf-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .cf-count {
+    color: var(--ink);
+  }
+
+  .cf-cur {
+    color: var(--accent);
+  }
+
+  .cf-cap {
+    font-size: 0.875rem;
+    color: var(--ink-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cf-rail {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    padding-bottom: 6px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+
+  .cf-thumb {
+    flex: 0 0 auto;
+    width: 104px;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+    border: 1px solid var(--line);
+    background: #000;
+    opacity: 0.45;
+    cursor: pointer;
+    transition:
+      opacity 0.25s,
+      border-color 0.25s,
+      translate 0.25s var(--ease);
+  }
+
+  .cf-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cf-thumb:hover {
+    opacity: 0.85;
+    translate: 0 -2px;
+  }
+
+  .cf-thumb.is-active {
+    opacity: 1;
+    border-color: var(--accent);
+  }
+
+  .cf-progress {
+    height: 2px;
+    margin-top: 10px;
+    background: var(--line);
+  }
+
+  .cf-progress i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform-origin: 0 50%;
+  }
+
+  /* Lightbox */
   .lightbox {
-    width: min(1400px, calc(100vw - 2 * var(--gutter)));
+    width: min(1600px, calc(100vw - 2 * var(--gut)));
     max-width: none;
     max-height: calc(100dvh - 2rem);
     padding: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--bg);
-    color: var(--text);
+    border: 1px solid var(--line-strong);
+    background: var(--ground);
+    color: var(--ink);
     overflow: hidden;
     opacity: 0;
     scale: 0.94;
     transition:
       opacity 0.3s ease,
-      scale 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-      overlay 0.4s allow-discrete,
-      display 0.4s allow-discrete;
+      scale 0.45s var(--ease),
+      overlay 0.45s allow-discrete,
+      display 0.45s allow-discrete;
   }
 
   .lightbox[open] {
@@ -170,23 +462,19 @@ const shots = await Promise.all(
 
   .lightbox::backdrop {
     background: rgb(0 0 0 / 0);
-    backdrop-filter: blur(0);
     transition:
       background-color 0.3s ease,
-      backdrop-filter 0.3s ease,
-      overlay 0.4s allow-discrete,
-      display 0.4s allow-discrete;
+      overlay 0.45s allow-discrete,
+      display 0.45s allow-discrete;
   }
 
   .lightbox[open]::backdrop {
-    background: rgb(0 0 0 / 0.85);
-    backdrop-filter: blur(6px);
+    background: rgb(0 0 0 / 0.9);
   }
 
   @starting-style {
     .lightbox[open]::backdrop {
       background: rgb(0 0 0 / 0);
-      backdrop-filter: blur(0);
     }
   }
 
@@ -205,18 +493,22 @@ const shots = await Promise.all(
   .controls {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem;
+    gap: 10px;
+    padding: 12px;
   }
 
   .count {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--muted);
-    padding-inline: 0.5rem;
+    color: var(--ink);
+    padding-inline: 6px;
   }
 
-  .close {
-    margin-left: auto;
+  .lb-cap {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.875rem;
+    color: var(--ink-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>
