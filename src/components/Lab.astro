@@ -1,0 +1,951 @@
+---
+// The lab: everything outside the main projects (engine mods, tools, jam games, shaders, Blender,
+// pixel art), from the portfolio Drive and GitHub. A filterable bento grid of tilt cards; a card
+// opens a 3D viewer that plays the Drive video in place and steps through the visible items.
+// Without JS every card is a plain link to its video / repo / folder.
+import { getImage } from 'astro:assets';
+import { driveArchive, lab, labCategoryLabel, type LabCategory } from '../data/portfolio';
+import { image, isGif } from '../lib/images';
+import assistSenseLogo from '../../images/lab/assistsense-logo.svg?raw';
+
+const logos = { assistsense: assistSenseLogo };
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const candle = await image('lab/pixel/candle-strip.png');
+
+const items = await Promise.all(
+  lab.map(async (item) => {
+    const stills = await Promise.all(
+      (item.images ?? []).map(async (file) => {
+        const meta = await image(file);
+        const [card, full] = await Promise.all([
+          getImage({ src: meta, width: Math.min(meta.width, item.wide ? 1200 : 820), format: 'webp' }),
+          getImage({ src: meta, width: Math.min(meta.width, 1800), format: 'webp' }),
+        ]);
+        return { card: card.src, full: full.src, w: meta.width, h: meta.height };
+      }),
+    );
+    const sprites = await Promise.all(
+      (item.sprites ?? []).map(async (s) => {
+        const meta = await image(s.file);
+        return { src: meta.src, alt: s.alt, w: meta.width, h: meta.height, gif: isGif(s.file) };
+      }),
+    );
+    return { ...item, stills, spriteImgs: sprites };
+  }),
+);
+
+const filters: { id: 'all' | LabCategory; label: string; n: number }[] = [
+  { id: 'all', label: 'All', n: lab.length },
+  ...(Object.keys(labCategoryLabel) as LabCategory[])
+    .map((c) => ({ id: c, label: labCategoryLabel[c], n: lab.filter((l) => l.category === c).length }))
+    .filter((f) => f.n > 0),
+];
+
+// What the viewer needs, keyed by card index.
+const viewerData = items.map((it) => ({
+  title: it.title,
+  meta: [it.kind, it.year].filter(Boolean).join(' · '),
+  category: labCategoryLabel[it.category],
+  text: it.text,
+  points: it.points ?? [],
+  stack: it.stack ?? [],
+  links: it.links,
+  video: it.video ?? null,
+  stills: it.stills.map((s) => ({ src: s.full, w: s.w, h: s.h })),
+  sprites: it.spriteImgs,
+  logo: it.logo ? { svg: logos[it.logo.svg], bg: it.logo.bg } : null,
+}));
+---
+
+<section id="lab" class="section lab" aria-labelledby="lab-title">
+  <div class="wrap">
+    <header class="sec-head lab-head" data-reveal-group>
+      <p class="hud" data-reveal><span class="num">06</span>Lab</p>
+      <h2 id="lab-title" data-reveal="lines">Side quests</h2>
+      <p class="intro" data-reveal>
+        Engine mods, tools, jam games, shaders, Blender renders and pixel art. Open any card to watch it right here.
+      </p>
+      <div class="filters" role="group" aria-label="Filter lab work by type" data-reveal>
+        {
+          filters.map((f, i) => (
+            <button type="button" class="filter" data-f={f.id} aria-pressed={i === 0 ? 'true' : 'false'}>
+              {f.label}
+              <span class="filter-n">{pad(f.n)}</span>
+            </button>
+          ))
+        }
+      </div>
+    </header>
+
+    <ul class="lab-grid">
+      {
+        items.map((it, i) => (
+          <li class:list={['lab-wrap', { 'is-wide': it.wide }]} data-cat={it.category} data-reveal-group>
+            <div class="lab-pop" data-reveal="pop">
+              <a
+                class="lab-card corners"
+                href={it.links[0].url}
+                target="_blank"
+                rel="noopener"
+                data-lab={i}
+                data-tilt="6"
+                data-cursor={it.video ? 'Play' : 'View'}
+                aria-haspopup="dialog"
+                data-sfx-silent
+              >
+                <div class="lab-media frame">
+                  {it.logo ? (
+                    <div class="lab-logo" style={`background:${it.logo.bg}`} set:html={logos[it.logo.svg]} />
+                  ) : it.spriteImgs.length ? (
+                    <div class="lab-shelf" style={`--candle: url(${candle.src})`}>
+                      {it.spriteImgs.slice(0, 4).map((s) => (
+                        <img src={s.src} alt="" width={s.w} height={s.h} loading="lazy" decoding="async" />
+                      ))}
+                      <span class="candle" aria-hidden="true" />
+                    </div>
+                  ) : (
+                    <img src={it.stills[0].card} alt="" width={it.stills[0].w} height={it.stills[0].h} loading="lazy" decoding="async" />
+                  )}
+                  {it.video && (
+                    <span class="lab-play hud" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="12" height="12">
+                        <path d="M7 4.5v15l12.5-7.5z" fill="currentColor" />
+                      </svg>
+                      {it.video.length}
+                    </span>
+                  )}
+                </div>
+                <span class="glare" aria-hidden="true" />
+                <div class="lab-body">
+                  <p class="hud lab-meta">
+                    <span class="num">{pad(i + 1)}</span>
+                    {it.kind}
+                    {it.year && <span class="lab-year">{it.year}</span>}
+                  </p>
+                  <h3>{it.title}</h3>
+                  <p class="lab-text">{it.text}</p>
+                  <span class="lab-cta" aria-hidden="true">{it.video ? 'Watch' : 'View'} →</span>
+                </div>
+              </a>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="lab-foot" data-reveal>
+      <a class="btn" href={driveArchive} target="_blank" rel="noopener">Browse the full Drive archive ↗</a>
+    </p>
+  </div>
+</section>
+
+<dialog class="lab-viewer" aria-labelledby="lv-title" data-sfx-silent>
+  <div class="lv-panel corners">
+    <div class="lv-stage-wrap">
+      <div class="lv-stage frame"></div>
+      <div class="lv-thumbs" role="group" aria-label="Media"></div>
+    </div>
+    <div class="lv-info">
+      <p class="hud lv-meta"></p>
+      <h3 id="lv-title"></h3>
+      <p class="lv-text"></p>
+      <ul class="lv-points"></ul>
+      <ul class="lv-stack"></ul>
+      <div class="lv-links"></div>
+      <div class="lv-nav">
+        <button type="button" class="btn btn-sm" data-step="-1" aria-label="Previous item">←</button>
+        <span class="hud lv-count" aria-live="polite"></span>
+        <button type="button" class="btn btn-sm" data-step="1" aria-label="Next item">→</button>
+      </div>
+    </div>
+    <button type="button" class="btn btn-sm lv-close" aria-label="Close">✕</button>
+  </div>
+</dialog>
+
+<script type="application/json" id="lab-data" set:html={JSON.stringify(viewerData)} />
+
+<script>
+  import { gsap } from 'gsap';
+  import { Flip } from 'gsap/Flip';
+  import { motionOK } from '../scripts/scene';
+  import { play } from '../scripts/sfx';
+
+  gsap.registerPlugin(Flip);
+
+  type Data = {
+    title: string;
+    meta: string;
+    category: string;
+    text: string;
+    points: string[];
+    stack: string[];
+    links: { label: string; url: string }[];
+    video: { id: string; length: string } | null;
+    stills: { src: string; w: number; h: number }[];
+    sprites: { src: string; alt: string; w: number; h: number; gif: boolean }[];
+    logo: { svg: string; bg: string } | null;
+  };
+
+  const section = document.querySelector<HTMLElement>('#lab');
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.lab-viewer');
+  const dataEl = document.getElementById('lab-data');
+
+  if (section && dialog && dataEl) {
+    const data: Data[] = JSON.parse(dataEl.textContent ?? '[]');
+    const wraps = [...section.querySelectorAll<HTMLElement>('.lab-wrap')];
+    const cards = [...section.querySelectorAll<HTMLAnchorElement>('.lab-card')];
+    const buttons = [...section.querySelectorAll<HTMLButtonElement>('.filter')];
+    const motion = () => motionOK();
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    /* ---------- Filters (Flip reflow, as in the archive) ---------- */
+    buttons.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const f = btn.dataset.f!;
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+        const state = Flip.getState(wraps);
+        wraps.forEach((w) => {
+          w.hidden = !(f === 'all' || w.dataset.cat === f);
+          w.querySelector<HTMLElement>('[data-reveal]')?.classList.add('is-in');
+        });
+        if (!motion()) return;
+        Flip.from(state, {
+          duration: 0.7,
+          ease: 'expo.inOut',
+          absolute: true,
+          stagger: 0.02,
+          onEnter: (els) => gsap.fromTo(els, { opacity: 0, scale: 0.85, rotationX: -25 }, { opacity: 1, scale: 1, rotationX: 0, duration: 0.6, ease: 'expo.out', delay: 0.25 }),
+          onLeave: (els) => gsap.to(els, { opacity: 0, scale: 0.85, duration: 0.35, ease: 'power2.in' }),
+        });
+      }),
+    );
+
+    /* ---------- Viewer ---------- */
+    const panel = dialog.querySelector<HTMLElement>('.lv-panel')!;
+    const stage = dialog.querySelector<HTMLElement>('.lv-stage')!;
+    const thumbs = dialog.querySelector<HTMLElement>('.lv-thumbs')!;
+    const metaEl = dialog.querySelector<HTMLElement>('.lv-meta')!;
+    const titleEl = dialog.querySelector<HTMLElement>('#lv-title')!;
+    const textEl = dialog.querySelector<HTMLElement>('.lv-text')!;
+    const pointsEl = dialog.querySelector<HTMLElement>('.lv-points')!;
+    const stackEl = dialog.querySelector<HTMLElement>('.lv-stack')!;
+    const linksEl = dialog.querySelector<HTMLElement>('.lv-links')!;
+    const countEl = dialog.querySelector<HTMLElement>('.lv-count')!;
+    let current = 0;
+    let busy = false;
+
+    const visible = () => cards.map((_, i) => i).filter((i) => !wraps[i].hidden);
+
+    const el = <K extends keyof HTMLElementTagNameMap>(tag: K, props: Partial<HTMLElementTagNameMap[K]> = {}, cls?: string) => {
+      const node = Object.assign(document.createElement(tag), props);
+      if (cls) node.className = cls;
+      return node;
+    };
+
+    function showVideo(d: Data) {
+      const poster = d.stills[0];
+      const box = el('div', {}, 'lv-video');
+      if (poster) box.append(el('img', { src: poster.src, alt: '' }, 'lv-poster'));
+      const iframe = el('iframe', {
+        src: `https://drive.google.com/file/d/${d.video!.id}/preview`,
+        title: `${d.title} video`,
+        allow: 'autoplay; fullscreen',
+        allowFullscreen: true,
+        referrerPolicy: 'strict-origin-when-cross-origin',
+      });
+      box.append(iframe);
+      stage.replaceChildren(box);
+    }
+
+    function showStill(d: Data, k: number) {
+      const s = d.stills[k];
+      const img = el('img', { src: s.src, alt: `${d.title}, still ${k + 1}`, width: s.w, height: s.h }, 'lv-still');
+      stage.replaceChildren(img);
+    }
+
+    function showSprites(d: Data) {
+      const wall = el('div', {}, 'lv-sprites');
+      d.sprites.forEach((s) => {
+        const fig = el('figure', {}, 'lv-sprite');
+        fig.append(el('img', { src: s.src, alt: s.alt, width: s.w, height: s.h }), el('figcaption', { textContent: s.alt }));
+        wall.append(fig);
+      });
+      const candle = section!.querySelector<HTMLElement>('.lab-shelf');
+      if (candle) {
+        const fig = el('figure', {}, 'lv-sprite');
+        const c = el('span', {}, 'candle');
+        c.setAttribute('style', candle.getAttribute('style') ?? '');
+        fig.append(c, el('figcaption', { textContent: 'Candle loop, 8 frames' }));
+        wall.append(fig);
+      }
+      stage.replaceChildren(wall);
+    }
+
+    function showLogo(d: Data) {
+      const box = el('div', {}, 'lv-logo');
+      box.style.background = d.logo!.bg;
+      box.innerHTML = d.logo!.svg;
+      stage.replaceChildren(box);
+    }
+
+    function render(i: number) {
+      current = i;
+      const d = data[i];
+      stage.classList.toggle('is-sprites', !d.video && !d.stills.length && d.sprites.length > 0);
+      // Media: the video first when there is one, then stills; thumbs switch between them.
+      const media: { label: string; show: () => void; thumb?: string }[] = [];
+      if (d.video) media.push({ label: `Video ${d.video.length}`, show: () => showVideo(d), thumb: d.stills[0]?.src });
+      d.stills.forEach((s, k) => media.push({ label: `Still ${k + 1}`, show: () => showStill(d, k), thumb: s.src }));
+      if (d.sprites.length) media.push({ label: 'Sprites', show: () => showSprites(d) });
+      if (d.logo) media.push({ label: 'Logo', show: () => showLogo(d) });
+      media[0]?.show();
+
+      thumbs.replaceChildren();
+      thumbs.hidden = media.length < 2;
+      media.forEach((m, k) => {
+        const b = el('button', { type: 'button' }, 'lv-thumb');
+        b.setAttribute('aria-label', m.label);
+        b.setAttribute('aria-pressed', String(k === 0));
+        if (m.thumb) b.append(el('img', { src: m.thumb, alt: '' }));
+        b.append(el('span', { textContent: k === 0 && d.video ? `▶ ${d.video.length}` : m.label }, 'hud'));
+        b.addEventListener('click', () => {
+          thumbs.querySelectorAll('button').forEach((t) => t.setAttribute('aria-pressed', String(t === b)));
+          m.show();
+          play('step');
+        });
+        thumbs.append(b);
+      });
+
+      metaEl.textContent = `${d.category} · ${d.meta}`;
+      titleEl.textContent = d.title;
+      textEl.textContent = d.text;
+      pointsEl.replaceChildren(...d.points.map((p) => el('li', { textContent: p })));
+      pointsEl.hidden = !d.points.length;
+      stackEl.replaceChildren(...d.stack.map((s) => el('li', { textContent: s }, 'hud-tag')));
+      stackEl.hidden = !d.stack.length;
+      linksEl.replaceChildren(
+        ...d.links.map((l, k) => {
+          const a = el('a', { href: l.url, target: '_blank', rel: 'noopener', textContent: `${l.label} ↗` }, k === 0 ? 'btn btn-primary btn-sm' : 'btn btn-sm');
+          return a;
+        }),
+      );
+      const vis = visible();
+      countEl.textContent = `${pad(vis.indexOf(i) + 1)} / ${pad(vis.length)}`;
+    }
+
+    function open(i: number) {
+      render(i);
+      dialog!.showModal();
+      // Keep focus in this document (not the video iframe) so arrow keys step between items.
+      dialog!.querySelector<HTMLElement>('.lv-close')!.focus({ preventScroll: true });
+      play('open');
+      if (motion()) {
+        gsap.fromTo(
+          panel,
+          { opacity: 0, y: 60, rotationX: 14, scale: 0.9, transformPerspective: 1400, transformOrigin: '50% 0%' },
+          { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: 0.75, ease: 'expo.out', clearProps: 'transform,opacity' },
+        );
+      }
+    }
+
+    function step(dir: number) {
+      if (busy) return;
+      const vis = visible();
+      const at = vis.indexOf(current);
+      const next = vis[(at + dir + vis.length) % vis.length];
+      if (next === undefined || next === current) return;
+      play('step');
+      if (!motion()) return render(next);
+      busy = true;
+      gsap
+        .timeline({ onComplete: () => void (busy = false) })
+        .to(panel, { rotationY: -dir * 28, x: -dir * 70, opacity: 0, transformPerspective: 1400, duration: 0.22, ease: 'power2.in' })
+        .add(() => render(next))
+        .fromTo(panel, { rotationY: dir * 28, x: dir * 70, opacity: 0 }, { rotationY: 0, x: 0, opacity: 1, duration: 0.6, ease: 'expo.out', clearProps: 'transform,opacity' });
+    }
+
+    function close() {
+      if (!dialog!.open) return;
+      const done = () => {
+        dialog!.close();
+        stage.replaceChildren(); // stops the video
+      };
+      if (!motion()) return done();
+      gsap.to(panel, { opacity: 0, y: 40, rotationX: -10, scale: 0.94, transformPerspective: 1400, duration: 0.28, ease: 'power2.in', onComplete: done });
+    }
+
+    cards.forEach((card, i) =>
+      card.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // let new-tab clicks through
+        e.preventDefault();
+        open(i);
+      }),
+    );
+    dialog.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) => b.addEventListener('click', () => step(Number(b.dataset.step))));
+    dialog.querySelector('.lv-close')!.addEventListener('click', close);
+    dialog.addEventListener('click', (e) => e.target === dialog && close());
+    dialog.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      close();
+    });
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') step(-1);
+      if (e.key === 'ArrowRight') step(1);
+    });
+    dialog.addEventListener('close', () => {
+      play('close');
+      cards[current]?.focus({ preventScroll: true });
+    });
+  }
+</script>
+
+<style>
+  .lab-head {
+    display: grid;
+    gap: 18px;
+  }
+
+  .lab-head .filters {
+    grid-column: 1 / -1;
+  }
+
+  .lab-grid {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+    grid-auto-flow: dense;
+  }
+
+  .lab-wrap,
+  .lab-pop {
+    display: flex;
+    min-width: 0;
+  }
+
+  .lab-pop {
+    flex: 1;
+  }
+
+  .lab-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--ground-alt);
+    border: 1px solid var(--line);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color 0.3s var(--ease),
+      transform 0.5s var(--ease);
+  }
+
+  .lab-card:hover,
+  .lab-card:focus-visible {
+    border-color: var(--line-strong);
+  }
+
+  @media (min-width: 900px) {
+    .is-wide {
+      grid-column: span 2;
+    }
+
+    .is-wide .lab-card {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+    }
+
+    .is-wide .lab-media {
+      aspect-ratio: auto;
+      height: 100%;
+      min-height: 240px;
+    }
+  }
+
+  .lab-media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .lab-media > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition:
+      scale 0.9s var(--ease),
+      filter 0.4s ease;
+  }
+
+  .lab-card:hover .lab-media > img {
+    scale: 1.06;
+    filter: brightness(1.08);
+  }
+
+  .lab-play {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 10px;
+    background: rgb(8 8 10 / 0.78);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    backdrop-filter: blur(6px);
+    transition:
+      background-color 0.25s,
+      color 0.25s,
+      border-color 0.25s;
+  }
+
+  .lab-card:hover .lab-play {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  /* AssistSense: the white-and-purple mark needs black behind it. */
+  .lab-logo {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 12%;
+  }
+
+  .lab-logo :global(svg),
+  .lv-logo :global(svg) {
+    width: 100%;
+    height: auto;
+  }
+
+  .lab-logo :global(svg) {
+    max-width: 320px;
+    transition: scale 0.9s var(--ease);
+  }
+
+  .lab-card:hover .lab-logo :global(svg) {
+    scale: 1.05;
+  }
+
+  /* Pixel art: a lit shelf of sprites, unsmoothed, plus the candle loop. */
+  .lab-shelf {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2%;
+    padding: 20px 14px 30px;
+    background:
+      radial-gradient(60% 55% at 50% 100%, rgb(245 165 36 / 0.16), transparent 70%),
+      linear-gradient(#0c0b10, #15121a);
+  }
+
+  .lab-shelf::after {
+    content: '';
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    bottom: 28px;
+    height: 2px;
+    background: var(--line-strong);
+  }
+
+  .lab-shelf img {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 92%;
+    width: auto;
+    object-fit: contain;
+    image-rendering: pixelated;
+    transition: translate 0.5s var(--ease);
+  }
+
+  .lab-shelf img:nth-child(2) {
+    height: 70%;
+  }
+
+  .lab-card:hover .lab-shelf img {
+    translate: 0 -6px;
+  }
+
+  .lab-card:hover .lab-shelf img:nth-child(even) {
+    translate: 0 -10px;
+  }
+
+  :global(.candle) {
+    position: relative;
+    flex: none;
+    width: 52px;
+    aspect-ratio: 1;
+    background: var(--candle) 0 0 / 800% 100% no-repeat;
+    image-rendering: pixelated;
+    animation: candle 0.9s steps(7) infinite;
+  }
+
+  .lab-shelf .candle {
+    width: clamp(44px, 12%, 72px);
+    margin-bottom: -4px;
+  }
+
+  @keyframes candle {
+    to {
+      background-position: 100% 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.candle) {
+      animation: none;
+    }
+  }
+
+  .lab-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 20px 20px;
+    min-width: 0;
+  }
+
+  .lab-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    margin: 0;
+  }
+
+  .lab-year {
+    margin-left: auto;
+    color: var(--ink-3);
+  }
+
+  .lab-body h3 {
+    margin: 0;
+    font-size: var(--t-h4);
+    line-height: 1.05;
+  }
+
+  .lab-text {
+    margin: 0;
+    font-size: var(--t-small);
+    color: var(--ink-2);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .is-wide .lab-text {
+    -webkit-line-clamp: 5;
+  }
+
+  .lab-cta {
+    margin-top: auto;
+    padding-top: 4px;
+    font: 500 0.75rem/1 var(--font-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    transition: translate 0.3s var(--ease);
+  }
+
+  .lab-card:hover .lab-cta {
+    translate: 6px 0;
+  }
+
+  .lab-foot {
+    margin: 36px 0 0;
+  }
+
+  /* ---------- Viewer ---------- */
+  .lab-viewer {
+    width: min(1440px, calc(100vw - 2 * var(--gut)));
+    max-width: none;
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    overflow: visible;
+  }
+
+  .lab-viewer::backdrop {
+    background: rgb(4 4 6 / 0.88);
+    backdrop-filter: blur(6px);
+  }
+
+  .lv-panel {
+    position: relative;
+    display: grid;
+    max-height: calc(100dvh - 2rem);
+    overflow: auto;
+    overscroll-behavior: contain;
+    background: var(--ground);
+    border: 1px solid var(--line-strong);
+  }
+
+  @media (min-width: 960px) {
+    .lv-panel {
+      grid-template-columns: minmax(0, 1fr) 380px;
+      overflow: hidden;
+    }
+
+    .lv-info {
+      overflow: auto;
+      max-height: calc(100dvh - 2rem - 2px);
+    }
+  }
+
+  @media (max-width: 959px) {
+    .lv-stage.is-sprites {
+      aspect-ratio: 3 / 4;
+    }
+  }
+
+  .lv-stage-wrap {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: #000;
+  }
+
+  .lv-stage {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .lv-stage > :global(*) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lv-stage :global(.lv-still) {
+    object-fit: contain;
+  }
+
+  .lv-stage :global(.lv-video iframe),
+  .lv-stage :global(.lv-poster) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .lv-stage :global(.lv-poster) {
+    object-fit: cover;
+    filter: blur(14px) brightness(0.5);
+    scale: 1.1;
+  }
+
+  .lv-stage :global(.lv-logo) {
+    display: grid;
+    place-items: center;
+    padding: 10%;
+  }
+
+  .lv-stage :global(.lv-logo svg) {
+    max-width: 560px;
+  }
+
+  .lv-stage :global(.lv-sprites) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    align-content: start;
+    gap: 12px;
+    padding: 16px;
+    overflow: auto;
+    background: linear-gradient(#0c0b10, #15121a);
+  }
+
+  .lv-stage :global(.lv-sprite) {
+    margin: 0;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 0.02);
+  }
+
+  .lv-stage :global(.lv-sprite img),
+  .lv-stage :global(.lv-sprite .candle) {
+    width: 100%;
+    height: 120px;
+    object-fit: contain;
+    image-rendering: pixelated;
+  }
+
+  .lv-stage :global(.lv-sprite .candle) {
+    width: 120px;
+    justify-self: center;
+  }
+
+  .lv-stage :global(.lv-sprite figcaption) {
+    font-size: 0.75rem;
+    color: var(--ink-2);
+    text-align: center;
+  }
+
+  .lv-thumbs {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    overflow-x: auto;
+    border-top: 1px solid var(--line);
+  }
+
+  .lv-thumbs[hidden] {
+    display: none;
+  }
+
+  .lv-thumbs :global(.lv-thumb) {
+    position: relative;
+    flex: none;
+    width: 132px;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    background: var(--ground-raise);
+    color: var(--ink);
+    cursor: pointer;
+    opacity: 0.6;
+    transition:
+      opacity 0.2s,
+      border-color 0.2s;
+  }
+
+  .lv-thumbs :global(.lv-thumb:hover),
+  .lv-thumbs :global(.lv-thumb[aria-pressed='true']) {
+    opacity: 1;
+    border-color: var(--accent);
+  }
+
+  .lv-thumbs :global(.lv-thumb img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lv-thumbs :global(.lv-thumb span) {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    padding: 3px 6px;
+    background: rgb(8 8 10 / 0.8);
+    font-size: 0.625rem;
+  }
+
+  .lv-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 28px 26px 22px;
+    border-left: 1px solid var(--line);
+    min-width: 0;
+  }
+
+  .lv-meta {
+    margin: 0;
+    padding-right: 48px;
+  }
+
+  #lv-title {
+    margin: 0;
+    font-size: var(--t-h3);
+    line-height: 0.95;
+  }
+
+  .lv-text {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: var(--t-small);
+  }
+
+  .lv-points {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0 0 0 18px;
+    font-size: var(--t-small);
+    color: var(--ink-2);
+  }
+
+  .lv-points[hidden],
+  .lv-stack[hidden] {
+    display: none;
+  }
+
+  .lv-points :global(li::marker) {
+    color: var(--accent);
+  }
+
+  .lv-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .lv-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .lv-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  .lv-count {
+    flex: 1;
+    text-align: center;
+    color: var(--ink);
+  }
+
+  .lv-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+  }
+
+  @media (max-width: 959px) {
+    .lv-info {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+      padding: 22px 18px 18px;
+    }
+
+    .lv-close {
+      top: 8px;
+      right: 8px;
+    }
+  }
+</style>

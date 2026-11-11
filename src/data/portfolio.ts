@@ -231,6 +231,7 @@ export const projects: Project[] = [
     links: [
       { label: 'Download on itch.io (Windows, 553 MB)', url: 'https://arikiver.itch.io/chalo-yaar' },
       { label: 'Watch on YouTube', url: 'https://www.youtube.com/watch?v=oYaKnmNOppA' },
+      { label: 'Full showcase (Google Drive)', url: driveView('1KkieP9slHRFRl7YmbWSE84LF88rfoGQb') },
     ],
   },
   {
@@ -371,6 +372,8 @@ export const projects: Project[] = [
     links: [
       { label: 'Download on itch.io (Android APK, 130 MB)', url: 'https://arikiver.itch.io/slenderar' },
       { label: 'Watch on YouTube', url: 'https://www.youtube.com/watch?v=1bffKKCimHk' },
+      { label: 'Playtest footage (Google Drive)', url: driveView('1RoG6BoumUp7bktaa1O9LrWjW650XPstF') },
+      { label: 'Full playthrough (Google Drive)', url: driveView('1K9-HDN53aUhRCyGS1xclat-_x72OZvib') },
     ],
     note: 'Play in an open space.',
   },
@@ -588,7 +591,10 @@ export const experience = [
 
 export const skills = [
   { group: 'Languages', items: ['C#', 'Luau/Lua', 'C/C++', 'HLSL', 'GML', 'Python', 'JavaScript', 'SQL'] },
-  { group: 'Engines', items: ['Unity 3D/2D (URP)', 'Roblox Studio', 'GameMaker Studio'] },
+  {
+    group: 'Engines',
+    items: ['Unity 3D/2D (URP)', 'Roblox Studio', 'Source 2 (Half-Life: Alyx modding)', 'GameMaker Studio', 'Proprietary in-house engines', 'Custom engine architecture'],
+  },
   {
     group: 'Gameplay and systems',
     items: ['Behaviour and state architecture', 'Animation systems and state machines', 'Character controllers', 'Physics', 'AI pathfinding', 'Server-authoritative multiplayer (Netcode for GameObjects, Roblox)', 'Data-driven content pipelines', 'Custom editor tooling'],
@@ -611,22 +617,314 @@ export const skills = [
   },
 ];
 
-export const otherWork = [
+/* ---------- Lab: everything else from the portfolio Drive, the AssistSense repo and side work ---------- */
+
+export type LabCategory = 'engines' | 'games' | 'tech-art' | 'blender' | 'pixel';
+
+export const labCategoryLabel: Record<LabCategory, string> = {
+  engines: 'Engines & tools',
+  games: 'Games & prototypes',
+  'tech-art': 'Shaders & motion',
+  blender: 'Blender',
+  pixel: 'Pixel art',
+};
+
+export type LabItem = {
+  id: string;
+  title: string;
+  /** Short medium / context line. */
+  kind: string;
+  category: LabCategory;
+  year?: string;
+  text: string;
+  points?: string[];
+  stack?: string[];
+  /** Stills from /images; the first is the card image. */
+  images?: string[];
+  /** Pixel-art sprites from /images, shown unsmoothed. */
+  sprites?: { file: string; alt: string }[];
+  /** Brand mark shown whole on a solid background instead of a still. */
+  logo?: { svg: 'assistsense'; bg: string };
+  /** Google Drive video played in the viewer. */
+  video?: { id: string; length: string };
+  links: Link[];
+  /** Spans two grid columns on wide screens. */
+  wide?: boolean;
+};
+
+const driveFolder = (id: string) => `https://drive.google.com/drive/folders/${id}`;
+
+/** The whole portfolio folder on Google Drive. */
+export const driveArchive = driveFolder('1IPBCjdRn0tulM7xojXfIyYjYkTnx51yU');
+
+export const lab: LabItem[] = [
   {
-    title: 'Himeji Castle',
-    kind: 'Blender environment',
-    text: 'A creative interpretation of Himeji Castle in front of Mount Fuji, with particle emitters and wind physics animating sakura petals, and camera work for a bokeh effect.',
-    image: 'Himeji castle.png',
-    link: { label: 'Render and video', url: 'https://drive.google.com/drive/folders/10Iq7DFO_q4Xh09AojgfRaRQKPMe-KS5c' },
+    id: 'alyx-mod',
+    title: 'Half-Life: Alyx mod',
+    kind: 'Source 2 · Hammer',
+    category: 'engines',
+    text: 'Mod work for Half-Life: Alyx in Valve’s Source 2 tools: spaces built in the Hammer editor and playtested in-engine. Beyond Unity and Roblox I have worked in proprietary in-house engines and know how a custom engine is architected and built.',
+    images: ['lab/source-alyx.jpg', 'lab/source-alyx-2.jpg'],
+    video: { id: '1r2Xh1ESMqrQNh5n0zQi5U7X1YyX2YyKy', length: '1:13' },
+    stack: ['Source 2', 'Hammer', 'Half-Life: Alyx Workshop Tools'],
+    links: [{ label: 'Watch on Google Drive', url: driveView('1r2Xh1ESMqrQNh5n0zQi5U7X1YyX2YyKy') }],
+    wide: true,
   },
   {
+    id: 'feasts-and-fables',
+    title: 'Feasts & Fables',
+    kind: 'Pixel-art cooking RPG',
+    category: 'games',
+    year: '2025',
+    text: 'A tavern-and-dungeon game: head down into an isometric pixel-art dungeon to fight its creatures and gather ingredients, then cook from the recipe book to fill the orders of the guests waiting at the tavern.',
+    images: ['lab/feasts-and-fables.jpg', 'lab/feasts-and-fables-2.jpg'],
+    video: { id: '1k-QQBjAf_nswZ4Cp7wf_dIIeLQxfQDah', length: '2:23' },
+    links: [
+      { label: 'Watch on Google Drive', url: driveView('1k-QQBjAf_nswZ4Cp7wf_dIIeLQxfQDah') },
+      { label: 'Project folder', url: driveFolder('18_Kw4aAqh5xBZuftXrvesmMJJigZCWT2') },
+    ],
+    wide: true,
+  },
+  {
+    id: 'assistsense',
     title: 'AssistSense',
     kind: 'Python desktop automation',
-    text: 'Macro engine with timed input recording and IF/ELIF/ELSE playback, a wake-word voice listener, multi-modal triggers and a PyQt6 interface. Built in a two-person team.',
+    category: 'engines',
+    year: '2025',
+    text: 'A PC automation manager that runs macros from hand gestures, gaze detection and voice commands. Built in a two-person team.',
+    points: [
+      'Macro engine with timed input recording and IF/ELIF/ELSE playback; positions are stored normalised, so a macro replays on any screen resolution.',
+      'Hand-gesture and gaze tracking from the webcam with MediaPipe and OpenCV.',
+      'Wake-word voice listener with offline speech recognition (Vosk) and a multi-modal trigger dispatcher.',
+      'Custom PyQt6 interface.',
+    ],
+    logo: { svg: 'assistsense', bg: '#000' },
+    stack: ['Python', 'PyQt6', 'MediaPipe', 'OpenCV', 'Vosk'],
+    links: [{ label: 'Source on GitHub', url: 'https://github.com/NavySaw23/AssistSense' }],
   },
   {
+    id: 'questify',
     title: 'Questify',
     kind: 'Gamified task manager',
-    text: 'A C# task manager integrating a GraphQL API and GitHub activity tracking to verify real user productivity.',
+    category: 'games',
+    year: '2024',
+    text: 'A C# task manager that verifies real productivity through a GraphQL API and GitHub activity tracking. Tasks carry a difficulty and pay out points when completed, inside a pixel-art world with turn-based battles and treasure to find.',
+    images: ['lab/questify.jpg', 'lab/questify-2.jpg'],
+    video: { id: '1na1UvksidDMB4rjn3ypSMUGCrZfxCgoC', length: '2:29' },
+    stack: ['C#', 'GraphQL'],
+    links: [
+      { label: 'Watch the demo', url: driveView('1na1UvksidDMB4rjn3ypSMUGCrZfxCgoC') },
+      { label: 'Project folder', url: driveFolder('18tPgMMLOqlX9nFiKS_qoykYIJajOnydn') },
+    ],
+  },
+  {
+    id: 'water-shader',
+    title: 'Stylised water',
+    kind: 'Shader programming',
+    category: 'tech-art',
+    text: 'A water shader demo: depth-tinted transparency over the sand, animated shoreline foam and sun glints on the surface.',
+    images: ['lab/water-shader.jpg', 'lab/water-shader-2.jpg'],
+    video: { id: '1wLZJBbWDxyc11s9tCwr85KceozpofH-U', length: '0:36' },
+    stack: ['Unity', 'Shaders'],
+    links: [{ label: 'Watch on Google Drive', url: driveView('1wLZJBbWDxyc11s9tCwr85KceozpofH-U') }],
+  },
+  {
+    id: 'pixel-art',
+    title: 'Pixel art',
+    kind: 'Sprites and scenes',
+    category: 'pixel',
+    year: '2025',
+    text: 'Characters, creatures and scenes: folklore ghosts such as the pontianak and krasue, a knight, a cyber-centaur, a bus-window title scene and an eight-frame candle loop.',
+    sprites: [
+      { file: 'lab/pixel/knight.png', alt: 'Armoured knight' },
+      { file: 'lab/pixel/krasue-01.png', alt: 'Krasue, a floating folklore ghost' },
+      { file: 'lab/pixel/cybercentaur.png', alt: 'Cyber-centaur with twin pistols' },
+      { file: 'lab/pixel/ghost.png', alt: 'Long-tongued ghost' },
+      { file: 'lab/pixel/pontianak.gif', alt: 'Pontianak ghost, animated' },
+      { file: 'lab/pixel/abraham1.png', alt: 'Caped warrior' },
+      { file: 'lab/pixel/paparazzi.png', alt: 'Shadowy figure in a trench coat' },
+      { file: 'lab/pixel/bustitlescene.png', alt: 'Title scene: a passenger at a bus window' },
+      { file: 'lab/pixel/foregroundsilhouette.png', alt: 'Silhouetted village skyline' },
+    ],
+    stack: ['Pixel art', 'Sprite animation'],
+    links: [{ label: 'Pixel art folder', url: driveFolder('1V_FXm4vllIXooeOWwsRxcV9KpmwunOzI') }],
+    wide: true,
+  },
+  {
+    id: 'ggj-911',
+    title: '911',
+    kind: 'Global Game Jam',
+    category: 'games',
+    text: 'A hand-drawn, sketchbook-style 2D runner made at Global Game Jam.',
+    images: ['lab/ggj-911.jpg'],
+    video: { id: '1V4sXVNiqRM3_T5bDQdBF9RPnUzBfn4XI', length: '0:35' },
+    links: [{ label: 'Watch gameplay', url: driveView('1V4sXVNiqRM3_T5bDQdBF9RPnUzBfn4XI') }],
+  },
+  {
+    id: 'himeji',
+    title: 'Himeji Castle',
+    kind: 'Blender environment',
+    category: 'blender',
+    year: '2024',
+    text: 'A creative interpretation of Himeji Castle in front of Mount Fuji, with particle emitters and wind physics animating sakura petals, and camera work for a bokeh effect.',
+    images: ['Himeji castle.png', 'lab/himeji-viewport.jpg'],
+    video: { id: '1VuFisoCUSwrHld3dpTSCOmUxqKBrg9N8', length: '0:56' },
+    stack: ['Blender', 'Particles', 'Physics'],
+    links: [
+      { label: 'Watch the fly-through', url: driveView('1VuFisoCUSwrHld3dpTSCOmUxqKBrg9N8') },
+      { label: 'Render and video folder', url: driveFolder('10Iq7DFO_q4Xh09AojgfRaRQKPMe-KS5c') },
+    ],
+    wide: true,
+  },
+  {
+    id: 'fishnet',
+    title: 'FishNet multiplayer',
+    kind: 'Unity networking prototype',
+    category: 'engines',
+    year: '2026',
+    text: 'A turn-based 2D multiplayer prototype on the FishNet networking library: host and join flow and synchronised turns, tested side by side across two clients.',
+    images: ['lab/fishnet-multiplayer.jpg'],
+    video: { id: '1Xn2Lv8Dsb2IEgg6Cudd_PVsVaAVwHB61', length: '1:09' },
+    stack: ['Unity', 'C#', 'FishNet'],
+    links: [{ label: 'Watch on Google Drive', url: driveView('1Xn2Lv8Dsb2IEgg6Cudd_PVsVaAVwHB61') }],
+  },
+  {
+    id: 'color-theory',
+    title: 'Colour theory, animated',
+    kind: '2D animation',
+    category: 'tech-art',
+    year: '2023',
+    text: 'A hand-drawn explainer that makes the basics of colour theory easier to understand: hue, tint, tone and shade, colour harmonies and Gestalt principles. Animated in FlipaClip, effects and final render in After Effects, stop-motion visuals and logos in Photoshop; every asset is hand-made.',
+    images: ['lab/color-theory.jpg'],
+    video: { id: '1QVK3pNVDA8it543__k_aoz4806m8hlbe', length: '2:48' },
+    stack: ['FlipaClip', 'After Effects', 'Photoshop'],
+    links: [
+      { label: 'Watch on Google Drive', url: driveView('1QVK3pNVDA8it543__k_aoz4806m8hlbe') },
+      { label: 'Project folder', url: driveFolder('1XEg-Su3FEzQszAqrw76JL-g0Cz369WhL') },
+    ],
+  },
+  {
+    id: 'ball-battle',
+    title: 'Ball Battle',
+    kind: 'Unity assignment',
+    category: 'games',
+    year: '2026',
+    text: 'A cat-versus-dog arena battler with health bars, hit effects and camera shake, plus a full walkthrough of building it.',
+    images: ['lab/ball-battle.jpg'],
+    video: { id: '1u25v0pAVhK8jDcvS1dI91NJOznY7vFGP', length: '0:15' },
+    stack: ['Unity', 'C#'],
+    links: [
+      { label: 'Watch gameplay', url: driveView('1u25v0pAVhK8jDcvS1dI91NJOznY7vFGP') },
+      { label: 'Build walkthrough', url: driveView('1_5vkcT3bcMOmHLpOT5sKRn9OQr-Bj5wb') },
+    ],
+  },
+  {
+    id: 'roll-a-ball',
+    title: 'Gyro Roll-a-Ball',
+    kind: 'Unity · Android',
+    category: 'games',
+    year: '2024',
+    text: 'A roll-a-ball game for Android steered by tilting the phone, made to learn Android integration, a custom gyroscope input system and a following camera.',
+    images: ['lab/roll-a-ball.jpg'],
+    video: { id: '17abmqzt7i_tntL7lzwbzm1Ijrw7UJay-', length: '0:24' },
+    stack: ['Unity', 'C#', 'Android'],
+    links: [{ label: 'Watch gameplay', url: driveView('17abmqzt7i_tntL7lzwbzm1Ijrw7UJay-') }],
+  },
+  {
+    id: 'semester-showreel',
+    title: '4th-semester showreel',
+    kind: 'Unity coursework',
+    category: 'games',
+    year: '2024',
+    text: 'A semester of coursework in one reel: the gyro roll-a-ball, a candle-lit survival game with randomised runs where the light going out ends the run, and a mobile vertical shooter built to learn sprite editing in Unity.',
+    images: ['lab/semester-showreel.jpg'],
+    video: { id: '1LGQj7piE7zXXaiLqGli4FWIv8PyT1cHV', length: '3:50' },
+    stack: ['Unity', 'C#', 'Android'],
+    links: [{ label: 'Watch the showreel', url: driveView('1LGQj7piE7zXXaiLqGli4FWIv8PyT1cHV') }],
+  },
+  {
+    id: 'bmw',
+    title: 'BMW M3 E30',
+    kind: 'Blender render',
+    category: 'blender',
+    year: '2025',
+    text: 'A studio render of the classic E30 M3.',
+    images: ['lab/bmw-m3-e30.jpg'],
+    stack: ['Blender'],
+    links: [{ label: 'Full-size render', url: driveView('1oSQ0Z-gzYD8jjgFVnuh7QMbCwfuIur5o') }],
+  },
+  {
+    id: 'ocean',
+    title: 'Night ocean',
+    kind: 'Blender animation',
+    category: 'blender',
+    year: '2025',
+    text: 'A stormy night-time ocean: heavy swells and a lone buoy light glinting across the waves.',
+    images: ['lab/ocean-render.jpg'],
+    video: { id: '1nK13NViWE02FmuHESZejh6Vk5ZcTREHw', length: '0:13' },
+    stack: ['Blender'],
+    links: [{ label: 'Watch on Google Drive', url: driveView('1nK13NViWE02FmuHESZejh6Vk5ZcTREHw') }],
+  },
+  {
+    id: 'desert',
+    title: 'Desert storm',
+    kind: 'Blender animation',
+    category: 'blender',
+    year: '2025',
+    text: 'A short animated shot: a lone figure on a red desert under a giant moon, then a towering fire storm.',
+    images: ['lab/desert-render.jpg'],
+    video: { id: '1bHN4ZXP_idfI3KuzpJXAHNWXwTXZp9l9', length: '0:03' },
+    stack: ['Blender'],
+    links: [{ label: 'Watch on Google Drive', url: driveView('1bHN4ZXP_idfI3KuzpJXAHNWXwTXZp9l9') }],
+  },
+  {
+    id: 'furniture',
+    title: 'Furniture interiors',
+    kind: 'Blender renders',
+    category: 'blender',
+    year: '2025',
+    text: 'Two modelled and lit interiors: an isometric bedroom diorama and a warm evening lounge.',
+    images: ['lab/furniture-room.jpg', 'lab/furniture-lounge.jpg'],
+    stack: ['Blender'],
+    links: [{ label: 'Renders folder', url: driveFolder('1pzD5rexm3tAqXkBd9DBmAti0Ec9IEj9N') }],
+  },
+  {
+    id: 'iphone',
+    title: 'iPhone launch spot',
+    kind: 'Blender animation',
+    category: 'blender',
+    year: '2024',
+    text: 'A product-launch style animation: phones turning and separating against a clean studio backdrop.',
+    images: ['lab/iphone-render.jpg'],
+    video: { id: '11ow3Dr4mWPbO00GevBonArhSqiwcYZ2l', length: '0:16' },
+    stack: ['Blender'],
+    links: [{ label: 'Watch on Google Drive', url: driveView('11ow3Dr4mWPbO00GevBonArhSqiwcYZ2l') }],
+  },
+  {
+    id: 'donut',
+    title: 'The donut',
+    kind: 'Blender render and animation',
+    category: 'blender',
+    year: '2025',
+    text: 'The Blender rite of passage, taken to a lit studio render and a short animation.',
+    images: ['lab/donut-render.jpg'],
+    video: { id: '1MN7EHLerymDmw9zkEh3NIgdXBSnZJOJj', length: '0:09' },
+    stack: ['Blender'],
+    links: [
+      { label: 'Watch the animation', url: driveView('1MN7EHLerymDmw9zkEh3NIgdXBSnZJOJj') },
+      { label: 'Renders folder', url: driveFolder('12pU2bT_2g0RkDXC55yMljCP1GX2dmqVX') },
+    ],
+  },
+  {
+    id: 'bow',
+    title: 'Bow and arrow',
+    kind: 'Blender animation',
+    category: 'blender',
+    year: '2025',
+    text: 'A short bow-and-arrow animation.',
+    images: ['lab/bow-and-arrow.jpg'],
+    video: { id: '1JoZkk2TBcAi_qUcSKUFzy7tccNxD1dQw', length: '0:01' },
+    stack: ['Blender'],
+    links: [{ label: 'Watch on Google Drive', url: driveView('1JoZkk2TBcAi_qUcSKUFzy7tccNxD1dQw') }],
   },
 ];

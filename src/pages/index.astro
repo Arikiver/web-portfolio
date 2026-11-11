@@ -4,7 +4,8 @@ import Base from '../layouts/Base.astro';
 import HeroShader from '../components/HeroShader.astro';
 import FeaturedRing from '../components/FeaturedRing.astro';
 import ProjectGrid from '../components/ProjectGrid.astro';
-import { disciplines, education, experience, otherWork, profile, projects, skills } from '../data/portfolio';
+import Lab from '../components/Lab.astro';
+import { disciplines, education, experience, profile, projects, skills } from '../data/portfolio';
 import { image } from '../lib/images';
 import { url } from '../lib/url';
 
@@ -18,12 +19,9 @@ const projectLinks = (slugs: string[]) =>
   });
 const resumeHref = url(`/${profile.resume}`);
 const portrait = await image(profile.photo);
-const otherImages = new Map(
-  await Promise.all(otherWork.flatMap((w) => (w.image ? [image(w.image).then((m) => [w.image, m] as const)] : []))),
-);
 const [first, last] = profile.name.split(' ');
 const roles = ['Game developer', 'Technical artist', 'Game designer'];
-const band = ['Unity', 'Roblox', 'HLSL', 'Luau', 'C#', 'Shader Graph', 'Blender', 'Netcode', 'URP', 'Aseprite', 'WebGL', 'GameMaker'];
+const band = ['Unity', 'Roblox', 'Source 2', 'HLSL', 'Luau', 'C#', 'Shader Graph', 'Blender', 'Netcode', 'URP', 'Aseprite', 'WebGL', 'GameMaker', 'Python'];
 ---
 
 <Base title={`${profile.name} — ${profile.title}`} description={`${profile.fact} ${profile.intro}`}>
@@ -33,8 +31,8 @@ const band = ['Unity', 'Roblox', 'HLSL', 'Luau', 'C#', 'Shader Graph', 'Blender'
       <p class="hud hero-top" data-hero><span class="num">P1</span>{profile.location} · Portfolio {new Date().getFullYear()}</p>
 
       <h1 id="hero-title" class="hero-name">
-        <span class="hn-1"><span data-hero="chars">{first}</span></span>
-        <span class="hn-2"><span data-hero="chars">{last}</span></span>
+        <span class="hn-1"><span data-hero="rise">{first}</span></span>
+        <span class="hn-2"><span data-hero="rise">{last}</span></span>
       </h1>
 
       <div class="hero-photo">
@@ -74,7 +72,7 @@ const band = ['Unity', 'Roblox', 'HLSL', 'Luau', 'C#', 'Shader Graph', 'Blender'
     </div>
     <dl class="wrap hero-specs" data-hero>
       <div><dt class="hud">Disciplines</dt><dd>Development · Technical art · Design</dd></div>
-      <div><dt class="hud">Engines</dt><dd>Unity · Roblox · GameMaker</dd></div>
+      <div><dt class="hud">Engines</dt><dd>Unity · Roblox · Source 2 · GameMaker</dd></div>
       <div><dt class="hud">Shipping</dt><dd>Mobile · WebGL · AR · Roblox</dd></div>
       <div class="scroll-cue"><dt class="hud">Scroll</dt><dd><span class="cue-bar"><i></i></span></dd></div>
     </dl>
@@ -180,44 +178,7 @@ const band = ['Unity', 'Roblox', 'HLSL', 'Luau', 'C#', 'Shader Graph', 'Blender'
     </div>
   </section>
 
-  <section class="section" aria-labelledby="other-title">
-    <div class="wrap">
-      <header class="sec-head" data-reveal-group>
-        <p class="hud" data-reveal><span class="num">06</span>Other work</p>
-        <h2 id="other-title" data-reveal="lines">Side quests</h2>
-      </header>
-      <ul class="others">
-        {
-          otherWork.map((w) => (
-            <li class="other corners" data-reveal-group>
-              {w.image && (
-                <div class="other-media frame" data-reveal="media">
-                  <Image
-                    src={otherImages.get(w.image)!}
-                    alt={`${w.title} render`}
-                    widths={[400, 700, 1000]}
-                    sizes="(min-width: 900px) 30vw, 100vw"
-                    format="webp"
-                    loading="lazy"
-                  />
-                </div>
-              )}
-              <div class="other-body">
-                <p class="hud" data-reveal>{w.kind}</p>
-                <h3 data-reveal="lines">{w.title}</h3>
-                <p class="muted" data-reveal>{w.text}</p>
-                {w.link && (
-                  <a class="link link-arrow" href={w.link.url} rel="noopener" data-reveal>
-                    {w.link.label}
-                  </a>
-                )}
-              </div>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-  </section>
+  <Lab />
 
   <section id="about" class="section">
     <div class="wrap">
@@ -412,6 +373,31 @@ const band = ['Unity', 'Roblox', 'HLSL', 'Luau', 'C#', 'Shader Graph', 'Blender'
     color: transparent;
     -webkit-text-stroke: 1.5px var(--ink);
     padding-left: 0.6em;
+  }
+
+  /* Once the surname has risen, a single band of light passes through its outline. */
+  @property --sweep {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: -40%;
+  }
+
+  .hn-2 :global(.is-swept) {
+    background: linear-gradient(
+      100deg,
+      transparent calc(var(--sweep) - 16%),
+      color-mix(in oklab, var(--accent) 80%, white) var(--sweep),
+      transparent calc(var(--sweep) + 16%)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: name-sweep 1.4s cubic-bezier(0.35, 0.1, 0.25, 1) both;
+  }
+
+  @keyframes name-sweep {
+    to {
+      --sweep: 140%;
+    }
   }
 
   .hero-photo {
@@ -909,56 +895,6 @@ const band = ['Unity', 'Roblox', 'HLSL', 'Luau', 'C#', 'Shader Graph', 'Blender'
     color: var(--accent);
     background: var(--accent-dim);
     translate: 0 -2px;
-  }
-
-  /* ---------- Other work ---------- */
-  .others {
-    display: grid;
-    gap: 20px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  @media (min-width: 900px) {
-    .others {
-      grid-template-columns: 1.4fr 1fr 1fr;
-    }
-  }
-
-  .other {
-    display: flex;
-    flex-direction: column;
-    background: var(--ground-alt);
-    border: 1px solid var(--line);
-  }
-
-  .other-media {
-    aspect-ratio: 16 / 9;
-  }
-
-  .other-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: scale 0.8s var(--ease);
-  }
-
-  .other:hover .other-media img {
-    scale: 1.05;
-  }
-
-  .other-body {
-    padding: 22px 24px 24px;
-  }
-
-  .other h3 {
-    font-size: var(--t-h3);
-    margin: 10px 0 12px;
-  }
-
-  .other .muted {
-    font-size: var(--t-small);
   }
 
   /* ---------- About ---------- */

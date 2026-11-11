@@ -294,6 +294,7 @@ a {
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
+  max-width: 100%;
   cursor: pointer;
   clip-path: polygon(var(--chamfer) 0, 100% 0, 100% calc(100% - var(--chamfer)), calc(100% - var(--chamfer)) 100%, 0 100%, 0 var(--chamfer));
   transition: translate 0.2s var(--ease);
@@ -436,6 +437,10 @@ a {
   opacity: 0;
 }
 
+[data-hero='rise'] {
+  display: block;
+}
+
 .rl-line-mask,
 .rl-char-mask {
   padding-bottom: 0.1em;
@@ -564,4 +569,57 @@ body::after {
 
 .reticle.labelled .reticle-label {
   opacity: 1;
+}
+
+/* ---------- Filter chips (archive, lab) ---------- */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink-2);
+  font: 500 0.75rem/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    background-color 0.2s;
+}
+
+.filter:hover {
+  color: var(--ink);
+  border-color: var(--ink-2);
+}
+
+.filter[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.filter-n {
+  font-size: 0.625rem;
+  opacity: 0.7;
+}
+
+/* Long labels (download sizes, Drive links) wrap on narrow screens instead of running off the edge. */
+@media (max-width: 559px) {
+  .btn {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.35;
+    padding-block: 10px;
+  }
 }
