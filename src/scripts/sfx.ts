@@ -414,7 +414,7 @@ const HOVER: Route[] = [
   ['.cf-item, .cf-thumb, .thumb', 'shutterHover'],
   ['.facade', 'videoHover'],
   ['.ring-card, .rl-card', 'cardHover'],
-  ['.pcard', 'cardSmallHover'],
+  ['.pcard, .lab-card', 'cardSmallHover'],
   ['.next-card', 'pageHover'],
   ['.back', 'backHover'],
   ['.brand', 'coinHover'],
@@ -423,7 +423,7 @@ const HOVER: Route[] = [
   ['.btn-primary', 'btnPrimaryHover'],
   ['.btn, .crt-exit, .fx-toggle, summary, button', 'btnHover'],
   ['.nav-desktop a, .nav-mobile a, .footer-links a, .toc a', 'navHover'],
-  ['.discipline, .stat, .other', 'glassHover'],
+  ['.discipline, .stat', 'glassHover'],
   ['a[href]', 'linkHover'],
 ];
 

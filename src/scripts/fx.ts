@@ -1,4 +1,4 @@
-// Page-wide motion on GSAP: reveals (3D character flips, line masks, media wipes, counters), card
+// Page-wide motion on GSAP: reveals (masked title rises, line masks, media wipes, counters), card
 // tilt + glare, magnetic buttons, a HUD reticle that trails the pointer, and the hero's scroll scene.
 // Progressive: without JS or with reduced motion everything is simply visible (html.fx is only set
 // when motion is allowed; see Base.astro). Each reveal carries its sound (sfx.ts).
@@ -29,21 +29,24 @@ function countUp(el: HTMLElement, delay: number) {
 
 export function reveal(el: HTMLElement, delay = 0, kind = el.dataset.reveal ?? el.dataset.hero ?? '') {
   el.classList.add('is-in');
-  if (kind === 'chars') {
-    const split = SplitText.create(el, { type: 'chars,words', charsClass: 'rl-char' });
+  if (kind === 'rise') {
+    // Display titles: each line rises out of its own mask; outlined text then gets one light sweep
+    // (CSS, keyed off .is-swept).
+    const split = SplitText.create(el, { type: 'lines', mask: 'lines', linesClass: 'rl-line' });
     gsap.set(el, { opacity: 1 });
-    return gsap.from(split.chars, {
-      rotationX: -100,
-      yPercent: 40,
-      opacity: 0,
-      transformPerspective: 600,
-      transformOrigin: '50% 100% -30px',
-      duration: 1.2,
-      ease: 'expo.out',
-      stagger: 0.035,
+    const tl = gsap.timeline({
       delay,
-      onComplete: () => split.revert(),
+      onComplete: () => {
+        split.revert();
+        el.classList.add('is-swept');
+      },
     });
+    tl.fromTo(split.lines, { yPercent: 104 }, { yPercent: 0, duration: 1.3, ease: 'expo.out', stagger: 0.1 }, 0);
+    // Single-word lines (the hero name) can also settle their tracking without re-wrapping.
+    if (el.closest('.hero-name')) {
+      tl.fromTo(el, { letterSpacing: '0.07em' }, { letterSpacing: '-0.015em', duration: 1.6, ease: 'expo.out', clearProps: 'letterSpacing' }, 0);
+    }
+    return tl;
   }
   if (kind === 'lines') {
     const split = SplitText.create(el, { type: 'lines', mask: 'lines', linesClass: 'rl-line' });
@@ -81,7 +84,7 @@ export function reveal(el: HTMLElement, delay = 0, kind = el.dataset.reveal ?? e
 
 const GROUP_SOUNDS: [selector: string, sound: Sound, offset: number][] = [
   ['.xp-row', 'revealDot', 0.25],
-  ['.pcard-wrap, .discipline, .other, .cf, .p-point', 'revealTile', 0.05],
+  ['.pcard-wrap, .lab-wrap, .discipline, .cf, .p-point', 'revealTile', 0.05],
   ['.sec-head, .skill-row, .p-sec', 'revealText', 0],
 ];
 
@@ -127,7 +130,7 @@ function playHeroIntro() {
   items.forEach((el) => {
     const kind = el.dataset.hero ?? '';
     reveal(el, t, kind);
-    t += kind === 'chars' ? 0.25 : 0.08;
+    t += kind === 'rise' ? 0.16 : 0.08;
   });
   document.dispatchEvent(new Event('hero:in'));
 }
