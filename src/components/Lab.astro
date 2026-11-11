@@ -426,6 +426,11 @@ const viewerData = items.map((it) => ({
     min-width: 0;
   }
 
+  /* display:flex above would otherwise beat the hidden attribute used by the filters. */
+  .lab-wrap[hidden] {
+    display: none;
+  }
+
   .lab-pop {
     flex: 1;
   }
