@@ -14,6 +14,6 @@
 // counting yourself (?me=0 undoes it).
 
 export const analytics = {
-  clarity: '',
+  clarity: 'zcn48sc0un',
   goatcounter: '',
 };
